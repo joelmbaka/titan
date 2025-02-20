@@ -12,8 +12,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: Neo4jAdapter(session),
     providers: [
         GitHubProvider({
-            clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
+            clientId: process.env.GITHUB_ID!,
+            clientSecret: process.env.GITHUB_SECRET!,
         }),
     ],
     session: {
@@ -23,7 +23,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async redirect({ url, baseUrl }) {
-            return baseUrl
-        }
-    }
+            return url.startsWith(baseUrl) ? url : baseUrl;
+        },
+    },
+    cookies: {
+        pkceCodeVerifier: {
+            name: "next-auth.pkce.code_verifier",
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+            },
+        },
+    },
 });
