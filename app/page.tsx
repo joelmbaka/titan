@@ -12,8 +12,7 @@ export default function Home() {
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground">
           This project demonstrates integrating Neo4j Adapter with Next.js 15, 
-          featuring GitHub authentication and user data storage in Neo4j. 
-          Implements database mutation strategy for user email and name in the graph database.
+          featuring Auth.js authentication and session management on the database. 
         </p>
       </div>
       
