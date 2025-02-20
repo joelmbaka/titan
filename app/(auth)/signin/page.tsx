@@ -1,6 +1,5 @@
-import { auth, signIn } from "@/auth";
+import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
 
 export default async function SignIn() {
 
