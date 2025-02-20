@@ -3,12 +3,6 @@ import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 
 export default async function SignIn() {
-    const session = await auth();
-
-    // Redirect authenticated users to the profile page
-    if (session) {
-        redirect("/profile");
-    }
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
