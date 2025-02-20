@@ -23,7 +23,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async redirect({ url, baseUrl }) {
-            return url.startsWith(baseUrl) ? url : baseUrl;
+            // Redirect to /profile after successful sign-in
+            if (url.startsWith(baseUrl)) return url;
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            return baseUrl;
         },
     },
 });
