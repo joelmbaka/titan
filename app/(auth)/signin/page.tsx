@@ -10,7 +10,7 @@ export default async function SignIn() {
             <form
                 action={async () => {
                     "use server"
-                    await signIn("github", { redirectTo: "/profile" });
+                    await signIn("github", { redirect: true, callbackUrl: "/profile" });
                 }}
             >
                 <Button type="submit">Sign In with GitHub</Button>
