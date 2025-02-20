@@ -22,7 +22,10 @@ const handler = startServerAndCreateNextHandler(apolloServer, {
   context: async () => {
     const session = await auth();
     return { 
-      session: session?.user?.id ? { user: { id: session.user.id } } : undefined 
+      session: session?.user?.id ? {
+        user: { id: session.user.id },
+        expires: session.expires
+      } : undefined 
     };
   },
 });

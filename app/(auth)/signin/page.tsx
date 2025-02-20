@@ -1,7 +1,15 @@
-import { signIn } from "@/auth";
+import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
+import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function SignIn() {
+    const session = await auth();
+
+    // Redirect authenticated users to the profile page
+    if (session) {
+        redirect("/profile");
+    }
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
@@ -9,7 +17,7 @@ export default async function SignIn() {
             <form
                 action={async () => {
                     "use server"
-                    await signIn("github", { redirect: true, callbackUrl: "/profile" });
+                    await signIn("github", { redirectTo: "/profile" });
                 }}
             >
                 <Button type="submit">Sign In with GitHub</Button>

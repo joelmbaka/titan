@@ -8,12 +8,23 @@ const session = driver.session();
 console.log("GitHub Client ID:", process.env.GITHUB_ID);
 console.log("GitHub Client Secret:", process.env.GITHUB_SECRET);
 
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string;
+      email?: string;
+      image?: string;
+    };
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: Neo4jAdapter(session),
     providers: [
         GitHubProvider({
-            clientId: process.env.GITHUB_ID!,
-            clientSecret: process.env.GITHUB_SECRET!,
+            clientId: process.env.GITHUB_ID,
+            clientSecret: process.env.GITHUB_SECRET,
         }),
     ],
     session: {
@@ -23,10 +34,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     callbacks: {
         async redirect({ url, baseUrl }) {
-            // Redirect to /profile after successful sign-in
-            if (url.startsWith(baseUrl)) return url;
-            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            // If the provided URL is relative, append it to the baseUrl.
+            if (url.startsWith("/")) {
+                return `${baseUrl}${url}`;
+            }
+            // If the URL is absolute and matches our origin, allow it.
+            else if (new URL(url).origin === baseUrl) {
+                return url;
+            }
+            // Otherwise, fall back to the baseUrl.
             return baseUrl;
-        },
-    },
+        }
+    }
 });

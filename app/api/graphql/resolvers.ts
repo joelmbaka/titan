@@ -1,8 +1,9 @@
+import { Session } from "next-auth"
 import driver from "@/lib/neo4j"
 
 export const resolvers = {
   Query: {
-    me: async (parent: unknown, args: unknown, context: { session?: { user: { id: string } } }) => {
+    me: async (parent: unknown, args: unknown, context: { session?: Session }) => {
       if (!context.session?.user) {
         throw new Error("Not authenticated");
       }
