@@ -19,9 +19,9 @@ export default function Home() {
 
         <div className="flex gap-6 justify-center mb-24">
           <form action={githubSignIn}>
-            <Button size="xl">Get Started Free</Button>
+            <Button size="lg">Get Started Free</Button>
           </form>
-          <Button variant="outline" size="xl">
+          <Button variant="outline" size="lg">
             Watch Demo
           </Button>
         </div>
@@ -37,7 +37,7 @@ export default function Home() {
           
           <Card className="p-8 hover:border-primary transition-colors">
             <h3 className="text-xl font-semibold mb-4">📈 Marketing Team</h3>
-            <p className="text-base text-muted-foreground">
+            <p className="text-base text-muted-foreground">p
               AI-managed ad campaigns and social media scheduling
             </p>
           </Card>
