@@ -16,6 +16,11 @@ declare module "next-auth" {
   }
 }
 
+// Ensure this file is only used on the server
+if (typeof window !== "undefined") {
+  throw new Error("Neo4j adapter should only be used on the server side");
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: Neo4jAdapter(session),
     providers: [

@@ -2,48 +2,107 @@
 
 import { Button } from "@/components/ui/button";
 import { githubSignIn } from "@/lib/actions";
+import { Card } from "@/components/ui/card";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="container mx-auto text-center">
-        <h1 className="text-4xl font-bold">Welcome to the GRAND stack</h1>
-        <h3 className="mt-4">
-          This project is a simple example of how to use Neo4j Adapter with
-          Next.js 15. It uses GitHub authentication and stores the user&apos;s data in
-          Neo4j. Uses strategy: database mutate the user email and name in the
-          database graph.
-        </h3>
-      </div>
-      <form action={githubSignIn}>
-        <Button className="mt-4" >
-          Sign In with GitHub
-        </Button>
-      </form>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="container mx-auto text-center py-32">
+        <h1 className="text-6xl font-bold mb-8">
+          Automate Your Entire Online Business with AI Agents
+        </h1>
+        <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto">
+          Deploy specialized AI team members to handle content creation, marketing, sales, 
+          and operations while you focus on growth.
+        </p>
 
-      <Button
-        variant="outline"
-        onClick={() =>
-          navigator.clipboard.writeText("git clone https://github.com/joelmbaka/neo4j-tunnel.git")
-        }
-        className="flex items-center gap-2 mt-4"
-      >
-        <span>git clone https://github.com/joelmbaka/neo4j-tunnel.git</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-        </svg>
+        <div className="flex gap-6 justify-center mb-24">
+          <form action={githubSignIn}>
+            <Button size="xl">Get Started Free</Button>
+          </form>
+          <Button variant="outline" size="xl">
+            Watch Demo
+          </Button>
+        </div>
+
+        {/* AI Agent Grid */}
+        <div className="grid grid-cols-3 gap-8 mb-32">
+          <Card className="p-8 hover:border-primary transition-colors">
+            <h3 className="text-xl font-semibold mb-4">🤖 Content Team</h3>
+            <p className="text-base text-muted-foreground">
+              Automated blog writing, social media posts, and product descriptions
+            </p>
+          </Card>
+          
+          <Card className="p-8 hover:border-primary transition-colors">
+            <h3 className="text-xl font-semibold mb-4">📈 Marketing Team</h3>
+            <p className="text-base text-muted-foreground">
+              AI-managed ad campaigns and social media scheduling
+            </p>
+          </Card>
+          
+          <Card className="p-8 hover:border-primary transition-colors">
+            <h3 className="text-xl font-semibold mb-4">💼 Operations Team</h3>
+            <p className="text-base text-muted-foreground">
+              Inventory management, HR automation, and financial oversight
+            </p>
+          </Card>
+        </div>
+
+        {/* Dashboard Preview */}
+        <div className="relative rounded-2xl bg-muted/50 p-8">
+          <div className="absolute inset-0 bg-grid-small-[#9091A1]/10" />
+          <div className="relative rounded-lg overflow-hidden border">
+            <div className="bg-background p-8">
+              <div className="flex gap-8 mb-8">
+                <div className="h-64 w-full bg-muted rounded-lg" />
+                <div className="h-64 w-full bg-muted rounded-lg" />
+              </div>
+              <div className="h-48 w-full bg-muted rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Section */}
+      <section className="container mx-auto py-32">
+        <h2 className="text-4xl font-bold text-center mb-24">
+          Everything You Need to Run Your Online Business
+        </h2>
         
-      </Button>
+        <div className="grid grid-cols-2 gap-12 max-w-7xl mx-auto">
+          <div className="space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="p-4 rounded-xl bg-primary/10">
+                <span className="text-2xl">📝</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold">Automated Content Creation</h3>
+                <p className="text-lg text-muted-foreground">
+                  Generate SEO-optimized product descriptions, blog posts, 
+                  and marketing copy in your brand voice
+                </p>
+              </div>
+            </div>
+            {/* Add more features in same pattern */}
+          </div>
+          
+          <div className="bg-muted/50 rounded-2xl p-8 h-full">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between p-6 bg-background rounded-xl">
+                <span className="text-lg">AI Agents Active</span>
+                <span className="font-mono text-xl text-primary">12/12</span>
+              </div>
+              <div className="flex items-center justify-between p-6 bg-background rounded-xl">
+                <span className="text-lg">Current Tasks</span>
+                <span className="font-mono text-xl text-primary">48</span>
+              </div>
+              {/* Add more status items */}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
