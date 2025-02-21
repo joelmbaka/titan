@@ -5,9 +5,6 @@ import driver from "@/lib/neo4j";
 
 const session = driver.session();
 
-console.log("GitHub Client ID:", process.env.GITHUB_ID);
-console.log("GitHub Client Secret:", process.env.GITHUB_SECRET);
-
 declare module "next-auth" {
   interface Session {
     user: {
