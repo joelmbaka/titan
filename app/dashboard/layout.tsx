@@ -4,18 +4,15 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Providers } from "@/lib/providers";
 import { StoreProvider } from "@/context/store-context";
 
-export default async function DashboardLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
-
   return (
     <Providers>
       <StoreProvider>
-        <SidebarProvider defaultOpen={true}>
+        <SidebarProvider>
           <div className="flex min-h-screen">
             <AppSidebar />
             <main className="flex-1 pl-[250px]">

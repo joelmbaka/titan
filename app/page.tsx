@@ -1,10 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { githubSignIn } from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { AddStoreModal } from "@/components/add-store-modal";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 
 export default function Home() {
+  const router = useRouter();
+  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -18,9 +23,12 @@ export default function Home() {
         </p>
 
         <div className="flex gap-6 justify-center mb-24">
-          <form action={githubSignIn}>
-            <Button size="lg">Get Started Free</Button>
-          </form>
+          <Button 
+            size="lg" 
+            onClick={() => setShowAddStoreModal(true)}
+          >
+            Get Started Free
+          </Button>
           <Button variant="outline" size="lg">
             Watch Demo
           </Button>
@@ -103,6 +111,31 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <AddStoreModal
+        open={showAddStoreModal}
+        onClose={() => setShowAddStoreModal(false)}
+        onAdd={async (name, category, subdomain) => {
+          try {
+            const response = await fetch('/api/stores', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name, category, subdomain }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              router.push(`/dashboard/${data.storeId}`);
+            } else {
+              throw new Error('Failed to create store');
+            }
+          } catch (error) {
+            console.error('Error creating store:', error);
+          }
+        }}
+      />
     </div>
   );
 }

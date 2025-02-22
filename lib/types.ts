@@ -1,9 +1,64 @@
+export interface StoreMetrics {
+  sales: number;
+  visitors: number;
+  conversion: number;
+}
+
+export interface Store {
+  id: string;
+  name: string;
+  icon?: string;
+  metrics: {
+    sales: number;
+    visitors: number;
+    conversion: number;
+  };
+  industry: NAICSCategory;
+  subdomain: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Industry {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateStoreInput {
+  name: string;
+  industry: string;
+  subdomain: string;
+  ownerId?: string;
+}
+
+export interface UpdateStoreInput {
+  name?: string;
+  industry?: NAICSCategory;
+  subdomain?: string;
+  metrics?: Partial<StoreMetrics>;
+}
+
+export interface CreateIndustryInput {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateIndustryInput {
+  name?: string;
+  description?: string;
+}
+
 type User = {
   id: string;
   name: string;
   email: string;
   image: string;
   emailVerified: Date;
+  roles: string[];
 };
 
 type Session = {
@@ -12,6 +67,7 @@ type Session = {
   expires: Date;
   sessionToken: string;
   accessToken: string;
+  user: User;
 };
 
 type Account = {
@@ -45,6 +101,7 @@ type BusinessProfile = {
   image: string;
   createdAt: Date;
   updatedAt: Date;
+  ownerId: string;
 };
 
 type BusinessProfileImage = {
@@ -55,5 +112,11 @@ type BusinessProfileImage = {
   updatedAt: Date;
 };
 
-
 export type { User, Session, Account, VerificationToken, BusinessProfile, BusinessProfileImage };
+
+export enum NAICSCategory {
+  CROP_PRODUCTION = "CROP_PRODUCTION",
+  ANIMAL_PRODUCTION = "ANIMAL_PRODUCTION",
+  FORESTRY_LOGGING = "FORESTRY_LOGGING",
+  // ... rest of the categories
+}

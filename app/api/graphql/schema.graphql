@@ -15,10 +15,79 @@ input UpdateUserInput {
 type Query {
   me: User
   hello: String
+  stores: [Store!]!
+  store(id: ID!): Store
+  industries: [Industry!]!
+  industry(id: ID!): Industry
 }
 
 type Mutation {
   updateUser(input: UpdateUserInput!): User
   deleteUser: Boolean
   dummy: String
+  createStore(input: CreateStoreInput!): Store!
+  updateStore(id: ID!, input: UpdateStoreInput!): Store!
+  deleteStore(id: ID!): Boolean!
+  createIndustry(input: CreateIndustryInput!): Industry!
+  updateIndustry(id: ID!, input: UpdateIndustryInput!): Industry!
+}
+
+type Store {
+  id: ID!
+  name: String!
+  industry: NAICSCategory!
+  subdomain: String!
+  ownerId: String!
+  metrics: StoreMetrics!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Industry {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type StoreMetrics {
+  sales: Int!
+  visitors: Int!
+  conversion: Float!
+}
+
+input CreateStoreInput {
+  name: String!
+  industry: NAICSCategory!
+  subdomain: String!
+}
+
+input UpdateStoreInput {
+  name: String
+  industry: NAICSCategory
+  subdomain: String
+  metrics: StoreMetricsInput
+}
+
+input StoreMetricsInput {
+  sales: Int
+  visitors: Int
+  conversion: Float
+}
+
+input CreateIndustryInput {
+  name: NAICSCategory!
+  description: String
+}
+
+input UpdateIndustryInput {
+  name: NAICSCategory
+  description: String
+}
+
+enum NAICSCategory {
+  CROP_PRODUCTION
+  ANIMAL_PRODUCTION
+  FORESTRY_LOGGING
 }

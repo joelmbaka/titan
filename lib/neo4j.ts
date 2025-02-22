@@ -48,10 +48,11 @@ const driver = neo4j.driver(
   config.options
 );
 
-export default driver;
-
+// Ensure the driver is closed when the process exits
 process.on('exit', () => {
   driver.close().catch((error) => {
     console.error('Error closing Neo4j driver:', error);
   });
-}); 
+});
+
+export default driver; 

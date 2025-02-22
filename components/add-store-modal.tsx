@@ -1,39 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { NAICSCategory } from "@/lib/types";
+import { useMutation } from "@apollo/client";
+import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
+import { StoreContext } from "@/context/store-context";
+
+interface AddStoreModalProps {
+  open: boolean;
+  onClose: () => void;
+  onStoreAdded?: () => void;
+}
 
 export function AddStoreModal({ 
   open,
   onClose,
-  onAdd
-}: {
-  open: boolean;
-  onClose: () => void;
-  onAdd: (name: string, category: string, subdomain: string) => void;
-}) {
+  onStoreAdded,
+}: AddStoreModalProps) {
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [industry, setIndustry] = useState<NAICSCategory | "">("");
   const [subdomain, setSubdomain] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const router = useRouter();
+  const [createStore] = useMutation(CREATE_STORE_MUTATION);
+  const { addStore } = useContext(StoreContext);
+  const [createdStore, setCreatedStore] = useState<{
+    name: string;
+    industry: string;
+    subdomain: string;
+  } | null>(null);
 
-  const handleAdd = () => {
-    if (name.trim() && category.trim() && subdomain.trim() && termsAccepted) {
-      onAdd(name, category, subdomain);
-      onClose();
+  const handleAdd = async () => {
+    if (name.trim() && industry && subdomain.trim() && termsAccepted) {
+      setIsLoading(true);
+      try {
+        const { data } = await createStore({
+          variables: {
+            input: {
+              name,
+              industry,
+              subdomain
+            }
+          }
+        });
+
+        if (data?.createStore) {
+          addStore(data.createStore);
+          setCreatedStore(data.createStore);
+          setShowSuccess(true);
+          toast.success("Store created successfully!");
+          if (onStoreAdded) {
+            onStoreAdded();
+          }
+        }
+      } catch (error) {
+        console.error('Error creating store:', error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to create store. Please try again."
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleSubdomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
       .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '') // Only allow alphanumeric and hyphens
-      .replace(/-+/g, '-') // Remove multiple hyphens
-      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
     setSubdomain(value);
   };
 
@@ -41,76 +93,123 @@ export function AddStoreModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Store</DialogTitle>
+          <DialogTitle>
+            {showSuccess ? "Store Created!" : "Add New Store"}
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          {/* Store Name */}
-          <div>
-            <Label htmlFor="store-name">Store Name</Label>
-            <Input
-              id="store-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter store name"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Store Category */}
-          <div>
-            <Label htmlFor="store-category">Category</Label>
-            <Input
-              id="store-category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Enter store category"
-              className="mt-1"
-            />
-          </div>
-
-          {/* Subdomain */}
-          <div>
-            <Label htmlFor="store-subdomain">Subdomain</Label>
-            <div className="flex items-center mt-1">
-              <Input
-                id="store-subdomain"
-                value={subdomain}
-                onChange={handleSubdomainChange}
-                placeholder="your-store"
-                className="rounded-r-none"
-              />
-              <div className="px-3 py-2 border border-l-0 rounded-r-md bg-muted text-muted-foreground">
-                .joelmbaka.site
-              </div>
+        
+        {showSuccess ? (
+          <div className="text-center space-y-4">
+            <p className="text-lg font-semibold">🎉 Store Created Successfully!</p>
+            <div className="text-left space-y-2">
+              <p><span className="font-medium">Name:</span> {createdStore?.name}</p>
+              <p><span className="font-medium">Industry:</span> {createdStore?.industry.replace(/_/g, ' ')}</p>
+              <p><span className="font-medium">Subdomain:</span> {createdStore?.subdomain}.joelmbaka.site</p>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your store will be accessible at: {subdomain ? 
-              `https://${subdomain}.joelmbaka.site` : 
-              'Enter a subdomain'}
-            </p>
+            <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setName("");
+                  setIndustry("");
+                  setSubdomain("");
+                  setTermsAccepted(false);
+                  setShowSuccess(false);
+                }}
+              >
+                Create Another
+              </Button>
+              <Button
+                onClick={() => {
+                  onClose();
+                  router.push('/dashboard');
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            </div>
           </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Store Name */}
+            <div>
+              <Label htmlFor="store-name">Store Name</Label>
+              <Input
+                id="store-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter store name"
+                className="mt-1"
+              />
+            </div>
 
-          {/* Terms and Conditions */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              checked={termsAccepted}
-              onCheckedChange={(checked) => setTermsAccepted(checked === true)}
-            />
-            <Label htmlFor="terms">
-              I agree to the terms and conditions
-            </Label>
+            {/* Industry */}
+            <div>
+              <Label>Industry</Label>
+              <Select
+                value={industry}
+                onValueChange={(value: NAICSCategory) => setIndustry(value)}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="Select industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(NAICSCategory).map((industryValue) => (
+                    <SelectItem 
+                      key={industryValue} 
+                      value={industryValue}
+                    >
+                      {industryValue.replace(/_/g, ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Subdomain */}
+            <div>
+              <Label htmlFor="store-subdomain">Subdomain</Label>
+              <div className="flex items-center mt-1">
+                <Input
+                  id="store-subdomain"
+                  value={subdomain}
+                  onChange={handleSubdomainChange}
+                  placeholder="your-store"
+                  className="rounded-r-none"
+                />
+                <div className="px-3 py-2 border border-l-0 rounded-r-md bg-muted text-muted-foreground">
+                  .joelmbaka.site
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Your store will be accessible at: {subdomain ? 
+                `https://${subdomain}.joelmbaka.site` : 
+                'Enter a subdomain'}
+              </p>
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => setTermsAccepted(checked === true)}
+              />
+              <Label htmlFor="terms">
+                I agree to the terms and conditions
+              </Label>
+            </div>
+
+            {/* Add Button */}
+            <Button 
+              onClick={handleAdd} 
+              className="w-full"
+              disabled={!name || !industry || !subdomain || !termsAccepted || isLoading}
+            >
+              {isLoading ? "Creating Store..." : "Add Store"}
+            </Button>
           </div>
-
-          {/* Add Button */}
-          <Button 
-            onClick={handleAdd} 
-            className="w-full"
-            disabled={!name || !category || !subdomain || !termsAccepted}
-          >
-            Add Store
-          </Button>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );

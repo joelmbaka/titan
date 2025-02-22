@@ -28,16 +28,19 @@ import { useState, useContext } from "react";
 import { StoreContext } from "@/context/store-context";
 import { stores } from "@/data/stores";
 import { AddStoreModal } from "@/components/add-store-modal";
+import { useMutation } from "@apollo/client";
+import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
 
 export function AppSidebar() {
   const { currentStore, setCurrentStore, addStore } = useContext(StoreContext);
   const [isManagementOpen, setIsManagementOpen] = useState(true);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(true);
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
+  const [createStore] = useMutation(CREATE_STORE_MUTATION);
 
   return (
     <>
-      <Sidebar className="w-[250px] border-r bg-background">
+      <Sidebar className="w-[250px] border-r bg-background sticky top-0 h-screen max-md:hidden">
         <SidebarHeader className="px-4 py-6">
           <div className="flex flex-col gap-4">
             <Link href="/" className="hover:opacity-75 transition-opacity">
@@ -184,20 +187,6 @@ export function AppSidebar() {
       <AddStoreModal
         open={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
-        onAdd={(name, category, subdomain) => {
-          const newStore = {
-            id: `store-${Date.now()}`,
-            name,
-            category,
-            subdomain,
-            metrics: {
-              sales: 0,
-              visitors: 0,
-              conversion: 0
-            }
-          };
-          addStore(newStore);
-        }}
       />
     </>
   );

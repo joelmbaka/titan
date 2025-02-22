@@ -1,10 +1,11 @@
+import getServerSession from "next-auth";
+import { NextRequest } from "next/server";
 import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { auth } from "@/auth";
 import { resolvers } from "./resolvers";
-import { NextRequest } from "next/server";
 
 // Read the schema file
 const typeDefs = readFileSync(join(process.cwd(), "app/api/graphql/schema.graphql"), {
@@ -17,24 +18,14 @@ const apolloServer = new ApolloServer({
   resolvers,
 });
 
-// Create the Next.js API route handler
 const handler = startServerAndCreateNextHandler(apolloServer, {
   context: async () => {
     const session = await auth();
     return { 
-      session: session?.user?.id ? {
-        user: { id: session.user.id },
-        expires: session.expires
-      } : undefined 
+      session: session || undefined
     };
   },
 });
 
-// Export GET and POST so that the endpoint works for both methods
-export async function GET(request: NextRequest) {
-  return handler(request);
-}
+export { handler as GET, handler as POST };
 
-export async function POST(request: NextRequest) {
-  return handler(request);
-}

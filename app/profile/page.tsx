@@ -6,7 +6,6 @@ import { gql } from "@apollo/client";
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react"; // Import the pencil icon
 import { signOut } from "next-auth/react"; // Import signOut from next-auth/react
-import Image from "next/image";
 
 // Define the GraphQL mutation for updating the user
 const UPDATE_USER_MUTATION = gql`
@@ -73,12 +72,11 @@ export default function Profile() {
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <h1 className="text-2xl font-bold">Profile</h1>
       {user?.image && (
-        <Image
+        <img
           src={user.image}
           alt="Profile Avatar"
-          width={96}
-          height={96}
           className="w-24 h-24 rounded-full"
+          referrerPolicy="no-referrer"
         />
       )}
       <p className="text-muted-foreground">
