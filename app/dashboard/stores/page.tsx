@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { StoreCard } from '@/components/store-card';
 import { useState, useEffect } from 'react';
 import { AddStoreModal } from '@/components/add-store-modal';
-import { GET_USER_STORES_QUERY } from '@/lib/graphql/queries';
+import { GET_STORES_QUERY } from '@/lib/graphql/queries';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -22,7 +22,7 @@ export default function StoresPage() {
     }
   }, [status, router]);
 
-  const { loading, error, data, refetch } = useQuery(GET_USER_STORES_QUERY, {
+  const { loading, error, data, refetch } = useQuery(GET_STORES_QUERY, {
     skip: status !== "authenticated"
   });
 

@@ -1,18 +1,16 @@
-export interface StoreMetrics {
-  sales: number;
-  visitors: number;
-  conversion: number;
-}
+export type StoreMetrics = {
+  products: number;
+  orders: number;
+  revenue: number;
+  visitors?: number;
+  conversion?: number;
+};
 
 export interface Store {
   id: string;
   name: string;
   icon?: string;
-  metrics: {
-    sales: number;
-    visitors: number;
-    conversion: number;
-  };
+  metrics: StoreMetrics;
   industry: NAICSCategory;
   subdomain: string;
   ownerId: string;
@@ -119,4 +117,30 @@ export enum NAICSCategory {
   ANIMAL_PRODUCTION = "ANIMAL_PRODUCTION",
   FORESTRY_LOGGING = "FORESTRY_LOGGING",
   // ... rest of the categories
+}
+
+export type ProductType = {
+  id: string
+  name: string
+  description: string
+  price: number
+  sku: string
+  category: string
+  storeId: string
+  createdAt: string
+  updatedAt: string
+  inventory?: number
+  status?: 'draft' | 'active' | 'archived'
+  images?: string[]
+}
+
+export interface CreateProductInput {
+  name: string
+  description: string
+  price: number
+  sku: string
+  category: string
+  storeId: string
+  inventory?: number
+  status?: 'draft' | 'active' | 'archived'
 }

@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/ui/header";
 import { SessionProvider } from "next-auth/react";
 import ApolloProviderWrapper from "@/components/apollo-provider";
+import { StoreProvider } from "@/context/store-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +31,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
-          <SessionProvider>
-            <ApolloProviderWrapper>
-              <Header />
-              <main>{children}</main>
-            </ApolloProviderWrapper>
-          </SessionProvider>
+          <StoreProvider>
+            <SessionProvider>
+              <ApolloProviderWrapper>
+                <Header />
+                <main>{children}</main>
+              </ApolloProviderWrapper>
+            </SessionProvider>
+          </StoreProvider>
         </Providers>
       </body>
     </html>

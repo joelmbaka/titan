@@ -15,7 +15,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto text-center py-32">
         <h1 className="text-6xl font-bold mb-8">
-          Automate Your Entire Online Business with AI Agents
+          Automate Your Entire Business with AI Agents
         </h1>
         <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto">
           Deploy specialized AI team members to handle content creation, marketing, sales, 
@@ -115,7 +115,7 @@ export default function Home() {
       <AddStoreModal
         open={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
-        onAdd={async (name, category, subdomain) => {
+        onAdd={async (name: string, category: string, subdomain: string) => {
           try {
             const response = await fetch('/api/stores', {
               method: 'POST',

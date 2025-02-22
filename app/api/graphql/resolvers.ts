@@ -1,6 +1,5 @@
 import { Session } from "next-auth"
 import driver from "@/lib/neo4j"
-import { CreateStoreInput } from "@/lib/types"
 
 export const resolvers = {
   Store: {
@@ -11,18 +10,23 @@ export const resolvers = {
     },
   },
   Query: {
-    stores: async (_: unknown, __: unknown, context: { session?: Session }) => {
-      if (!context.session?.user) {
+    stores: async (
+      _: unknown,
+      __: unknown,
+      context: { session?: Session }
+    ) => {
+      console.log('Resolver context user ID:', context.session?.user?.id);
+      if (!context.session?.user?.id) {
         throw new Error("Not authenticated");
       }
-
+      
       const session = driver.session();
       try {
         const result = await session.run(
-          `MATCH (s:Store {ownerId: $ownerId})
-           RETURN s`,
+          `MATCH (u:User {id: $ownerId})-[:OWNS]->(s:Store) RETURN s`,
           { ownerId: context.session.user.id }
         );
+        console.log('Found stores:', result.records.length);
         return result.records.map(record => {
           const store = record.get('s').properties;
           return {
@@ -36,6 +40,9 @@ export const resolvers = {
             }
           };
         });
+      } catch (error) {
+        console.error('Stores query error:', error);
+        throw error;
       } finally {
         await session.close();
       }
@@ -118,7 +125,32 @@ export const resolvers = {
       } finally {
         await session.close();
       }
-    }
+    },
+    products: async (_: unknown, { storeId }: { storeId: string }, context: { session?: Session }) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.run(
+          `MATCH (p:Product {storeId: $storeId})
+           RETURN p ORDER BY p.createdAt DESC`,
+          { storeId }
+        );
+
+        return result.records.map(record => {
+          const product = record.get('p').properties;
+          return {
+            ...product,
+            createdAt: product.createdAt.toString(),
+            updatedAt: product.updatedAt.toString()
+          };
+        });
+      } finally {
+        await session.close();
+      }
+    },
   },
   Mutation: {
     createStore: async (_: unknown, { input }: { input: any }, context: { session?: Session }) => {

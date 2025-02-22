@@ -19,6 +19,7 @@ type Query {
   store(id: ID!): Store
   industries: [Industry!]!
   industry(id: ID!): Industry
+  products(storeId: ID!): [Product!]!
 }
 
 type Mutation {
@@ -90,4 +91,24 @@ enum NAICSCategory {
   CROP_PRODUCTION
   ANIMAL_PRODUCTION
   FORESTRY_LOGGING
+}
+
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  sku: String!
+  category: String!
+  storeId: String!
+  inventory: Int
+  status: ProductStatus!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
 }

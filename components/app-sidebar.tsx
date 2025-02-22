@@ -24,12 +24,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { StoreContext } from "@/context/store-context";
-import { stores } from "@/data/stores";
 import { AddStoreModal } from "@/components/add-store-modal";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
+import { GET_STORES_QUERY } from "@/lib/graphql/queries";
+import { useSession } from "next-auth/react";
+import { LoadingSpinner } from "@/components/loading-spinner";
+import { Store } from "@/lib/types";
 
 export function AppSidebar() {
   const { currentStore, setCurrentStore, addStore } = useContext(StoreContext);
@@ -37,6 +40,38 @@ export function AppSidebar() {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(true);
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
   const [createStore] = useMutation(CREATE_STORE_MUTATION);
+  const { data: session } = useSession();
+  console.log('Session:', session?.user?.id);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      console.log('No user session, skipping stores query');
+    }
+  }, [session]);
+
+  const { loading, error, data, refetch } = useQuery(GET_STORES_QUERY, {
+    skip: !session?.user?.id,
+    fetchPolicy: "cache-and-network",
+    onCompleted: (data) => {
+      console.log("Stores data received:", data);
+      if (data?.stores?.length) {
+        setCurrentStore(data.stores[0]);
+      }
+    },
+    onError: (error) => {
+      console.error("Error fetching stores:", error);
+    }
+  });
+
+  if (loading) {
+    return <div>Loading stores...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading stores: {error.message}</div>;
+  }
+
+  const stores = data?.stores || [];
 
   return (
     <>
@@ -54,25 +89,26 @@ export function AppSidebar() {
             <div className="mt-4">
               <label className="text-sm font-medium mb-2 block">Current Store</label>
               <select
-                value={currentStore.id}
+                value={currentStore?.id || ""}
                 onChange={(e) => {
                   if (e.target.value === "add-new") {
                     setShowAddStoreModal(true);
                   } else {
-                    const store = stores.find(s => s.id === e.target.value);
-                    if (store) setCurrentStore(store);
+                    setCurrentStore(stores.find((s: Store) => s.id === e.target.value));
                   }
                 }}
                 className="w-full p-2 border rounded-md bg-background"
               >
-                {stores.map(store => (
-                  <option key={store.id} value={store.id}>
-                    {store.icon} {store.name}
-                  </option>
-                ))}
-                <option value="add-new" className="text-primary font-medium">
-                  + Add New Store
-                </option>
+                {loading ? (
+                  <option disabled>Loading stores...</option>
+                ) : stores.length > 0 ? (
+                  stores.map((store: any) => (
+                    <option key={store.id} value={store.id}>{store.name}</option>
+                  ))
+                ) : (
+                  <option disabled>No stores found</option>
+                )}
+                <option value="add-new">+ Add New Store</option>
               </select>
             </div>
           </div>
@@ -84,17 +120,49 @@ export function AppSidebar() {
             <div className="px-4 py-2">
               <h3 className="font-medium mb-2">Store Metrics</h3>
               <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span>Sales</span>
-                  <span className="font-medium">{currentStore.metrics.sales}</span>
+                <div className="flex justify-between hover:bg-accent p-1 rounded">
+                  <Link 
+                    href={`/dashboard/stores/${currentStore?.id}/products`} 
+                    className="flex-1 flex justify-between"
+                  >
+                    Products
+                    <span className="font-medium">
+                      {currentStore?.metrics?.products || 0}
+                    </span>
+                  </Link>
                 </div>
-                <div className="flex justify-between">
-                  <span>Visitors</span>
-                  <span className="font-medium">{currentStore.metrics.visitors}</span>
+                <div className="flex justify-between hover:bg-accent p-1 rounded">
+                  <Link 
+                    href={`/dashboard/stores/${currentStore?.id}/orders`} 
+                    className="flex-1 flex justify-between"
+                  >
+                    Orders
+                    <span className="font-medium">
+                      {currentStore?.metrics?.orders || 0}
+                    </span>
+                  </Link>
                 </div>
-                <div className="flex justify-between">
-                  <span>Conversion</span>
-                  <span className="font-medium">{currentStore.metrics.conversion}%</span>
+                <div className="flex justify-between hover:bg-accent p-1 rounded">
+                  <Link 
+                    href={`/dashboard/stores/${currentStore?.id}/revenue`} 
+                    className="flex-1 flex justify-between"
+                  >
+                    Revenue
+                    <span className="font-medium">
+                      ${(currentStore?.metrics?.revenue || 0).toLocaleString()}
+                    </span>
+                  </Link>
+                </div>
+                <div className="flex justify-between hover:bg-accent p-1 rounded">
+                  <Link 
+                    href={`/dashboard/stores/${currentStore?.id}/web-analytics`} 
+                    className="flex-1 flex justify-between"
+                  >
+                    Web Analytics
+                    <span className="font-medium">
+                      {currentStore?.metrics?.visitors || 0}
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -187,6 +255,12 @@ export function AppSidebar() {
       <AddStoreModal
         open={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
+        onStoreAdded={() => {
+          refetch();
+          if (data?.stores?.length) {
+            setCurrentStore(data.stores[data.stores.length - 1]);
+          }
+        }}
       />
     </>
   );

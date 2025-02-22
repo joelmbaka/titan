@@ -11,14 +11,7 @@ export default async function Dashboard() {
       <p className="text-muted-foreground">
         You are signed in as {session?.user?.email}.
       </p>
-      <form
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}
-      >
-        <Button type="submit">Sign Out</Button>
-      </form>
+      
     </div>
   );
 }
