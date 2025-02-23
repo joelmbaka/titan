@@ -238,6 +238,16 @@ export function AppSidebar() {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
+
+          {/* Blog Section */}
+          <SidebarGroup className="mt-2 border-t pt-2">
+            <SidebarMenu>
+              <SidebarMenuItem href={`/dashboard/stores/${currentStore?.id}/blog`}>
+                <FileText className="mr-2 h-4 w-4" />
+                Blog
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter className="p-4 border-t">

@@ -20,6 +20,8 @@ type Query {
   industries: [Industry!]!
   industry(id: ID!): Industry
   products(storeId: ID!): [Product!]!
+  blogPosts(storeId: ID!): [BlogPost!]!
+  blogPost(id: ID!): BlogPost
 }
 
 type Mutation {
@@ -32,6 +34,9 @@ type Mutation {
   createIndustry(input: CreateIndustryInput!): Industry!
   updateIndustry(id: ID!, input: UpdateIndustryInput!): Industry!
   createProduct(input: CreateProductInput!): Product!
+  createBlogPost(input: CreateBlogPostInput!): BlogPost!
+  updateBlogPost(id: ID!, input: UpdateBlogPostInput!): BlogPost!
+  deleteBlogPost(id: ID!): Boolean!
 }
 
 type Store {
@@ -122,4 +127,42 @@ input CreateProductInput {
   storeId: String!
   inventory: Int
   status: ProductStatus
+}
+
+type BlogPost {
+  id: ID!
+  title: String!
+  content: String!
+  metaDescription: String!
+  tags: [String!]!
+  category: String!
+  storeId: String!
+  status: BlogPostStatus!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+input CreateBlogPostInput {
+  title: String!
+  content: String!
+  metaDescription: String!
+  tags: [String!]!
+  category: String!
+  storeId: String!
+  status: BlogPostStatus
+}
+
+input UpdateBlogPostInput {
+  title: String
+  content: String
+  metaDescription: String
+  tags: [String!]
+  category: String
+  status: BlogPostStatus
 }

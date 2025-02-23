@@ -15,6 +15,7 @@ import { LoadingSpinner } from "@/components/loading-spinner"
 export default function ProductsPage() {
   const [showAddProductModal, setShowAddProductModal] = useState(false)
   const params = useParams()
+  if (!params) throw new Error("Params is null")
   const storeId = params.storeId as string
 
   const { loading, error, data, refetch } = useQuery(GET_PRODUCTS_QUERY, {

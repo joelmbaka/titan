@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -78,14 +77,14 @@ export function AddStoreModal({
           addStore(data.createStore);
           setCreatedStore(data.createStore);
           setShowSuccess(true);
-          toast.success("Store created successfully!");
+          console.log("Store created successfully");
           if (onStoreAdded) {
             onStoreAdded();
           }
         }
       } catch (error) {
         console.error('Error creating store:', error);
-        toast.error(
+        console.log(
           error instanceof Error ? error.message : "Failed to create store. Please try again."
         );
       } finally {

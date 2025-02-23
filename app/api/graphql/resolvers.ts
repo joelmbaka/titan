@@ -18,6 +18,25 @@ interface CreateProductInput {
   status?: string;
 }
 
+interface CreateBlogPostInput {
+  title: string
+  content: string
+  metaDescription: string
+  tags: string[]
+  category: string
+  storeId: string
+  status?: string
+}
+
+interface UpdateBlogPostInput {
+  title?: string
+  content?: string
+  metaDescription?: string
+  tags?: string[]
+  category?: string
+  status?: string
+}
+
 export const resolvers = {
   Store: {
     metrics: (store: any) => store.metrics || {
@@ -168,6 +187,54 @@ export const resolvers = {
         await session.close();
       }
     },
+    blogPosts: async (_: unknown, { storeId }: { storeId: string }, context: { session?: Session }) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.run(
+          `MATCH (b:BlogPost {storeId: $storeId})
+           RETURN b ORDER BY b.createdAt DESC`,
+          { storeId }
+        );
+
+        return result.records.map(record => {
+          const blogPost = record.get('b').properties;
+          return {
+            ...blogPost,
+            createdAt: blogPost.createdAt.toString(),
+            updatedAt: blogPost.updatedAt.toString()
+          };
+        });
+      } finally {
+        await session.close();
+      }
+    },
+    blogPost: async (_: unknown, { id }: { id: string }, context: { session?: Session }) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.run(
+          `MATCH (b:BlogPost {id: $id})
+           RETURN b`,
+          { id }
+        );
+        const blogPost = result.records[0]?.get('b').properties;
+        if (!blogPost) throw new Error("Blog post not found");
+        return {
+          ...blogPost,
+          createdAt: blogPost.createdAt.toString(),
+          updatedAt: blogPost.updatedAt.toString()
+        };
+      } finally {
+        await session.close();
+      }
+    }
   },
   Mutation: {
     createStore: async (
@@ -418,6 +485,108 @@ export const resolvers = {
         await session.close();
       }
     },
+    createBlogPost: async (
+      _: unknown, 
+      { input }: { input: CreateBlogPostInput }, 
+      context: { session?: Session }
+    ) => {
+      if (!context.session?.user) {
+        throw new Error('Authentication required');
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.executeWrite(tx =>
+          tx.run(
+            `MATCH (s:Store {id: $storeId})
+             CREATE (b:BlogPost {
+               id: apoc.create.uuid(),
+               title: $title,
+               content: $content,
+               metaDescription: $metaDescription,
+               tags: $tags,
+               category: $category,
+               storeId: $storeId,
+               status: $status,
+               createdAt: datetime(),
+               updatedAt: datetime()
+             })
+             CREATE (s)-[:HAS_BLOG_POST]->(b)
+             RETURN b`,
+            {
+              ...input,
+              status: input.status || 'DRAFT'
+            }
+          )
+        );
+
+        const blogPost = result.records[0].get('b').properties;
+        return {
+          ...blogPost,
+          createdAt: blogPost.createdAt.toString(),
+          updatedAt: blogPost.updatedAt.toString()
+        };
+      } catch (error) {
+        console.error('Error creating blog post:', error);
+        throw new Error('Failed to create blog post');
+      } finally {
+        await session.close();
+      }
+    },
+    updateBlogPost: async (
+      _: unknown, 
+      { id, input }: { id: string, input: UpdateBlogPostInput }, 
+      context: { session?: Session }
+    ) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const setClauses = Object.keys(input)
+          .map(key => `b.${key} = $${key}`)
+          .join(', ');
+
+        const result = await session.run(
+          `MATCH (b:BlogPost {id: $id})
+           SET ${setClauses}, b.updatedAt = datetime()
+           RETURN b`,
+          { id, ...input }
+        );
+        const blogPost = result.records[0]?.get('b').properties;
+        if (!blogPost) throw new Error("Blog post not found");
+        return {
+          ...blogPost,
+          createdAt: blogPost.createdAt.toString(),
+          updatedAt: blogPost.updatedAt.toString()
+        };
+      } finally {
+        await session.close();
+      }
+    },
+    deleteBlogPost: async (
+      _: unknown, 
+      { id }: { id: string }, 
+      context: { session?: Session }
+    ) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.run(
+          `MATCH (b:BlogPost {id: $id})
+           DETACH DELETE b
+           RETURN count(b) > 0 as deleted`,
+          { id }
+        );
+        return result.records[0].get('deleted');
+      } finally {
+        await session.close();
+      }
+    }
   },
 };
 
