@@ -1,10 +1,8 @@
-export type StoreMetrics = {
-  products: number;
-  orders: number;
-  revenue: number;
-  visitors?: number;
-  conversion?: number;
-};
+export interface StoreMetrics {
+  sales: number;
+  visitors: number;
+  conversion: number;
+}
 
 export interface Store {
   id: string;
@@ -16,6 +14,7 @@ export interface Store {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  category?: string;
 }
 
 export interface Industry {

@@ -23,6 +23,7 @@ interface AddStoreModalProps {
   open: boolean;
   onClose: () => void;
   onStoreAdded?: () => void;
+  onAdd?: (name: string, category: string, subdomain: string) => Promise<void>;
 }
 
 // Add the mutation directly in the component

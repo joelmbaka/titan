@@ -12,7 +12,7 @@ export function StoreHeader({ store }: StoreHeaderProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{store.name}</h1>
-          <p className="text-muted-foreground">{store.category}</p>
+          <p className="text-muted-foreground">{store.category || "No category"}</p>
         </div>
         <Button variant="outline">
           <Settings className="mr-2 h-4 w-4" />

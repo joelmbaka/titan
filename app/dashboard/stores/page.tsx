@@ -10,6 +10,7 @@ import { GET_STORES_QUERY } from '@/lib/graphql/queries';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { Store } from "@/lib/types";
 
 export default function StoresPage() {
   const { status } = useSession();

@@ -1,6 +1,6 @@
 import { Session } from "next-auth"
 import driver from "@/lib/neo4j"
-import { UpdateStoreInput, Industry, CreateIndustryInput } from "@/lib/types"
+import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types"
 
 interface CreateStoreInput {
   name: string;
@@ -294,9 +294,13 @@ export const resolvers = {
           createdAt: store.createdAt.toString(),
           updatedAt: store.updatedAt.toString()
         };
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error creating store:', error);
-        throw new Error(`Failed to create store: ${error.message}`);
+        if (error instanceof Error) {
+          throw new Error(`Failed to create store: ${error.message}`);
+        } else {
+          throw new Error('Failed to create store: Unknown error');
+        }
       } finally {
         await session.close();
       }

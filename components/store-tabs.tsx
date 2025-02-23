@@ -2,12 +2,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Overview } from '@/components/store/overview';
 import { Analytics } from '@/components/store/analytics';
 import { Settings } from '@/components/store/settings';
+import { useContext } from 'react';
+import { StoreContext } from '@/context/store-context';
 
-interface StoreTabsProps {
-  storeId: string;
-}
+export function StoreTabs() {
+  const { currentStore } = useContext(StoreContext);
+  const storeId = currentStore?.id;
 
-export function StoreTabs({ storeId }: StoreTabsProps) {
   return (
     <Tabs defaultValue="overview" className="flex-1">
       <TabsList className="px-6">
@@ -17,13 +18,13 @@ export function StoreTabs({ storeId }: StoreTabsProps) {
       </TabsList>
       
       <TabsContent value="overview" className="p-6">
-        <Overview storeId={storeId} />
+        {storeId && <Overview />}
       </TabsContent>
       <TabsContent value="analytics" className="p-6">
-        <Analytics storeId={storeId} />
+        {storeId && <Analytics />}
       </TabsContent>
       <TabsContent value="settings" className="p-6">
-        <Settings storeId={storeId} />
+        {storeId && <Settings />}
       </TabsContent>
     </Tabs>
   );
