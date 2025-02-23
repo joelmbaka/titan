@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 export default function StoresPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
 
@@ -50,7 +50,7 @@ export default function StoresPage() {
         </div>
       ) : data?.stores?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.stores.map((store: any) => (
+          {data.stores.map((store: Store) => (
             <StoreCard key={store.id} store={store} />
           ))}
         </div>

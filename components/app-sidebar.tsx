@@ -17,37 +17,23 @@ import {
   Mail, 
   FileText, 
   BarChart,
-  ChevronDown,
   LayoutDashboard,
   Megaphone,
   LineChart
 } from "lucide-react";
 import Link from "next/link";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { StoreContext } from "@/context/store-context";
 import { AddStoreModal } from "@/components/add-store-modal";
-import { useMutation, useQuery } from "@apollo/client";
-import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
+import { useQuery } from "@apollo/client";
 import { GET_STORES_QUERY } from "@/lib/graphql/queries";
 import { useSession } from "next-auth/react";
-import { LoadingSpinner } from "@/components/loading-spinner";
 import { Store } from "@/lib/types";
 
 export function AppSidebar() {
-  const { currentStore, setCurrentStore, addStore } = useContext(StoreContext);
-  const [isManagementOpen, setIsManagementOpen] = useState(true);
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(true);
+  const { currentStore, setCurrentStore } = useContext(StoreContext);
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
-  const [createStore] = useMutation(CREATE_STORE_MUTATION);
   const { data: session } = useSession();
-  console.log('Session:', session?.user?.id);
-
-  useEffect(() => {
-    if (!session?.user?.id) {
-      console.log('No user session, skipping stores query');
-    }
-  }, [session]);
 
   const { loading, error, data, refetch } = useQuery(GET_STORES_QUERY, {
     skip: !session?.user?.id,
@@ -102,7 +88,7 @@ export function AppSidebar() {
                 {loading ? (
                   <option disabled>Loading stores...</option>
                 ) : stores.length > 0 ? (
-                  stores.map((store: any) => (
+                  stores.map((store: Store) => (
                     <option key={store.id} value={store.id}>{store.name}</option>
                   ))
                 ) : (
@@ -242,9 +228,11 @@ export function AppSidebar() {
           {/* Blog Section */}
           <SidebarGroup className="mt-2 border-t pt-2">
             <SidebarMenu>
-              <SidebarMenuItem href={`/dashboard/stores/${currentStore?.id}/blog`}>
-                <FileText className="mr-2 h-4 w-4" />
-                Blog
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/blog`} className="flex items-center">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Blog
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
@@ -265,8 +253,8 @@ export function AppSidebar() {
       <AddStoreModal
         open={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
-        onStoreAdded={() => {
-          refetch();
+        onStoreAdded={async () => {
+          await refetch();
           if (data?.stores?.length) {
             setCurrentStore(data.stores[data.stores.length - 1]);
           }

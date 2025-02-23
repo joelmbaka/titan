@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Remove env: {} configuration completely
-  // Add other necessary config options
+  images: {
+    domains: ['avatars.githubusercontent.com'],
+  },
 };
 
 export default nextConfig;

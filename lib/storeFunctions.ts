@@ -1,4 +1,4 @@
-import { Store, CreateStoreInput, UpdateStoreInput, CreateIndustryInput, UpdateIndustryInput } from '@/lib/types';
+import { Store, CreateStoreInput, UpdateStoreInput, CreateIndustryInput, UpdateIndustryInput, Industry } from '@/lib/types';
 import { gql } from "@apollo/client";
 import client from "@/lib/apollo-client";
 
@@ -14,25 +14,23 @@ export async function createStore(input: CreateStoreInput): Promise<Store> {
         metrics {
           sales
           visitors
-          conversion
         }
-        createdAt
-        updatedAt
       }
     }
   `;
 
-  const { data, errors } = await client.mutate({
-    mutation: CREATE_STORE_MUTATION,
-    variables: { input },
-  });
+  try {
+    const { data, errors } = await client.mutate({
+      mutation: CREATE_STORE_MUTATION,
+      variables: { input },
+    });
 
-  if (errors) {
-    console.error("Error creating store:", errors);
-    throw new Error("Failed to create store");
+    if (errors) throw new Error(errors[0].message);
+    return data.createStore;
+  } catch (error) {
+    console.error("Error creating store:", error);
+    throw new Error("Failed to create store. Please try again.");
   }
-
-  return data.createStore;
 }
 
 export async function updateStore(id: string, input: UpdateStoreInput): Promise<Store> {
@@ -88,7 +86,7 @@ export async function deleteStore(id: string): Promise<boolean> {
 }
 
 // Category functions
-export async function createIndustry(input: CreateIndustryInput): Promise<any> {
+export async function createIndustry(input: CreateIndustryInput): Promise<Industry> {
   const response = await fetch('/api/graphql', {
     method: 'POST',
     headers: {
@@ -114,7 +112,7 @@ export async function createIndustry(input: CreateIndustryInput): Promise<any> {
   return data.createIndustry;
 }
 
-export async function updateIndustry(id: string, input: UpdateIndustryInput): Promise<any> {
+export async function updateIndustry(id: string, input: UpdateIndustryInput): Promise<Industry> {
   const response = await fetch('/api/graphql', {
     method: 'POST',
     headers: {

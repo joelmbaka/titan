@@ -6,6 +6,8 @@ import { gql } from "@apollo/client";
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react"; // Import the pencil icon
 import { signOut } from "next-auth/react"; // Import signOut from next-auth/react
+import Image from 'next/image';
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Define the GraphQL mutation for updating the user
 const UPDATE_USER_MUTATION = gql`
@@ -63,8 +65,8 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div className="p-6 text-red-500">Error loading user: {error.message}</div>;
 
   const user = data?.me;
 
@@ -72,11 +74,12 @@ export default function Profile() {
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <h1 className="text-2xl font-bold">Profile</h1>
       {user?.image && (
-        <img
+        <Image
           src={user.image}
           alt="Profile Avatar"
           className="w-24 h-24 rounded-full"
-          referrerPolicy="no-referrer"
+          width={96}
+          height={96}
         />
       )}
       <p className="text-muted-foreground">

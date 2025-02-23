@@ -1,5 +1,6 @@
 import { Session } from "next-auth"
 import driver from "@/lib/neo4j"
+import { UpdateStoreInput, Industry, CreateIndustryInput } from "@/lib/types"
 
 interface CreateStoreInput {
   name: string;
@@ -37,9 +38,22 @@ interface UpdateBlogPostInput {
   status?: string
 }
 
+interface Store {
+  metrics?: {
+    sales: number;
+    visitors: number;
+    conversion: number;
+  };
+}
+
+interface UpdateIndustryInput {
+  name: string;
+  description: string;
+}
+
 export const resolvers = {
   Store: {
-    metrics: (store: any) => store.metrics || {
+    metrics: (store: Store) => store.metrics || {
       sales: 0,
       visitors: 0,
       conversion: 0
@@ -243,27 +257,37 @@ export const resolvers = {
       context: { session?: Session }
     ) => {
       if (!context.session?.user) {
-        throw new Error('Authentication required');
+        console.error('Authentication failed - no session user');
+        throw new Error("Not authenticated");
       }
+
+      console.log('CreateStore Input:', input);
+      console.log('User Session:', context.session?.user);
+      console.log('User ID:', context.session.user.id);
 
       const session = driver.session();
       try {
-        const result = await session.executeWrite(tx =>
-          tx.run(
-            `CREATE (s:Store {
-              id: apoc.create.uuid(),
-              name: $name,
-              industry: $industry,
-              subdomain: $subdomain,
-              createdAt: datetime(),
-              updatedAt: datetime()
-            })
-            RETURN s`,
-            input
-          )
+        console.log('Executing Neo4j query...');
+        const result = await session.run(
+          `MATCH (u:User {id: $ownerId})
+           CREATE (s:Store {
+             id: apoc.create.uuid(),
+             name: $name,
+             industry: $industry,
+             subdomain: $subdomain,
+             createdAt: datetime(),
+             updatedAt: datetime()
+           })
+           CREATE (u)-[:OWNS]->(s)
+           RETURN s`,
+          {
+            ownerId: context.session.user.id,
+            ...input
+          }
         );
 
-        const store = result.records[0].get('s').properties;
+        console.log('Neo4j query result:', result.records[0]?.get('s').properties);
+        const store = result.records[0]?.get('s').properties;
         return {
           ...store,
           metrics: { sales: 0, visitors: 0, conversion: 0 }, // Initialize metrics
@@ -272,12 +296,12 @@ export const resolvers = {
         };
       } catch (error) {
         console.error('Error creating store:', error);
-        throw new Error('Failed to create store');
+        throw new Error(`Failed to create store: ${error.message}`);
       } finally {
         await session.close();
       }
     },
-    updateStore: async (_: unknown, { id, input }: { id: string, input: any }, context: { session?: Session }) => {
+    updateStore: async (_: unknown, { id, input }: { id: string, input: UpdateStoreInput }, context: { session?: Session }) => {
       if (!context.session?.user) {
         throw new Error("Not authenticated");
       }
@@ -379,7 +403,7 @@ export const resolvers = {
       }
     },
     dummy: () => "dummy",
-    createIndustry: async (_: unknown, { input }: { input: any }, context: { session?: Session }) => {
+    createIndustry: async (_: unknown, { input }: { input: CreateIndustryInput }, context: { session?: Session }) => {
       if (!context.session?.user) {
         throw new Error("Not authenticated");
       }
@@ -404,7 +428,7 @@ export const resolvers = {
         await session.close();
       }
     },
-    updateIndustry: async (_: unknown, { id, input }: { id: string, input: any }, context: { session?: Session }) => {
+    updateIndustry: async (_: unknown, { id, input }: { id: string, input: UpdateIndustryInput }, context: { session?: Session }) => {
       if (!context.session?.user) {
         throw new Error("Not authenticated");
       }

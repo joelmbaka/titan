@@ -8,6 +8,7 @@ import { githubSignIn, userSignOut } from "@/lib/actions";
 import { useSession } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 export default function Header() {
   const pathname = usePathname();
@@ -34,11 +35,12 @@ export default function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger>
                 {session.user?.image && (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt="User Avatar"
                     className="h-8 w-8 rounded-full cursor-pointer"
-                    referrerPolicy="no-referrer"
+                    width={32}
+                    height={32}
                   />
                 )}
               </DropdownMenuTrigger>

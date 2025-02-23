@@ -63,30 +63,35 @@ export function AddStoreModal({
     if (name.trim() && industry && subdomain.trim() && termsAccepted) {
       setIsLoading(true);
       try {
-        const { data } = await createStore({
+        const { data, errors } = await createStore({
           variables: {
             input: {
               name,
               industry,
-              subdomain
-            }
-          }
+              subdomain,
+            },
+          },
         });
 
+        if (errors) {
+          console.error('GraphQL Errors:', errors);
+          alert(`Error: ${errors[0].message}`);
+          return;
+        }
+
         if (data?.createStore) {
+          console.log('Created store data:', data.createStore);
           addStore(data.createStore);
           setCreatedStore(data.createStore);
           setShowSuccess(true);
-          console.log("Store created successfully");
+          
           if (onStoreAdded) {
-            onStoreAdded();
+            await onStoreAdded();
           }
         }
       } catch (error) {
-        console.error('Error creating store:', error);
-        console.log(
-          error instanceof Error ? error.message : "Failed to create store. Please try again."
-        );
+        console.error('Full error:', error);
+        alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         setIsLoading(false);
       }

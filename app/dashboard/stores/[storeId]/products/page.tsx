@@ -9,7 +9,6 @@ import { ProductType } from "@/lib/types"
 import { useQuery } from "@apollo/client"
 import { GET_PRODUCTS_QUERY } from "@/lib/graphql/queries"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { LoadingSpinner } from "@/components/loading-spinner"
 
 export default function ProductsPage() {
