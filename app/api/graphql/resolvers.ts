@@ -1,6 +1,23 @@
 import { Session } from "next-auth"
 import driver from "@/lib/neo4j"
 
+interface CreateStoreInput {
+  name: string;
+  industry: string;
+  subdomain: string;
+}
+
+interface CreateProductInput {
+  name: string;
+  description?: string;
+  price: number;
+  sku: string;
+  category: string;
+  storeId: string;
+  inventory?: number;
+  status?: string;
+}
+
 export const resolvers = {
   Store: {
     metrics: (store: any) => store.metrics || {
@@ -153,49 +170,42 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createStore: async (_: unknown, { input }: { input: any }, context: { session?: Session }) => {
-      if (!context.session?.user?.id) {
-        throw new Error("Not authenticated - please sign in again");
+    createStore: async (
+      _: unknown,
+      { input }: { input: CreateStoreInput },
+      context: { session?: Session }
+    ) => {
+      if (!context.session?.user) {
+        throw new Error('Authentication required');
       }
-
-      console.log("Received store input:", input);
 
       const session = driver.session();
       try {
-        const result = await session.run(
-          `MATCH (u:User {id: $ownerId})
-           CREATE (s:Store {
-             id: randomUUID(),
-             name: $name,
-             industry: $industry,
-             subdomain: $subdomain,
-             ownerId: $ownerId,
-             createdAt: datetime(),
-             updatedAt: datetime()
-           })
-           CREATE (u)-[:OWNS]->(s)
-           RETURN s`,
-          {
-            name: input.name,
-            industry: input.industry,
-            subdomain: input.subdomain,
-            ownerId: context.session.user.id,
-          }
+        const result = await session.executeWrite(tx =>
+          tx.run(
+            `CREATE (s:Store {
+              id: apoc.create.uuid(),
+              name: $name,
+              industry: $industry,
+              subdomain: $subdomain,
+              createdAt: datetime(),
+              updatedAt: datetime()
+            })
+            RETURN s`,
+            input
+          )
         );
 
-        const store = result.records[0]?.get("s").properties;
-        if (!store) throw new Error("Failed to create store");
-
-        // Convert Neo4j datetime objects to strings
-        store.createdAt = store.createdAt.toString();
-        store.updatedAt = store.updatedAt.toString();
-
-        return store;
+        const store = result.records[0].get('s').properties;
+        return {
+          ...store,
+          metrics: { sales: 0, visitors: 0, conversion: 0 }, // Initialize metrics
+          createdAt: store.createdAt.toString(),
+          updatedAt: store.updatedAt.toString()
+        };
       } catch (error) {
-        console.error("Error creating store:", error);
-        throw new Error(
-          "Failed to create store: " + (error instanceof Error ? error.message : "Unknown error")
-        );
+        console.error('Error creating store:', error);
+        throw new Error('Failed to create store');
       } finally {
         await session.close();
       }
@@ -351,5 +361,63 @@ export const resolvers = {
         await session.close();
       }
     },
+    createProduct: async (
+      _: unknown, 
+      { input }: { input: CreateProductInput }, 
+      context: { session?: Session }
+    ) => {
+      // 1. Authentication check
+      if (!context.session?.user) {
+        throw new Error('Authentication required');
+      }
+
+      // 2. Input validation
+      if (!input.name || !input.price || !input.sku || !input.category || !input.storeId) {
+        throw new Error('Missing required fields');
+      }
+
+      // 3. Create product in database
+      const session = driver.session();
+      try {
+        const result = await session.executeWrite(tx =>
+          tx.run(
+            `MATCH (s:Store {id: $storeId})
+             CREATE (p:Product {
+               id: apoc.create.uuid(),
+               name: $name,
+               description: $description,
+               price: $price,
+               sku: $sku,
+               category: $category,
+               storeId: $storeId,
+               inventory: $inventory,
+               status: $status,
+               createdAt: datetime(),
+               updatedAt: datetime()
+             })
+             CREATE (s)-[:HAS_PRODUCT]->(p)
+             RETURN p`,
+            {
+              ...input,
+              status: input.status || 'ACTIVE',
+              inventory: input.inventory || 0
+            }
+          )
+        );
+
+        const product = result.records[0].get('p').properties;
+        return {
+          ...product,
+          createdAt: product.createdAt.toString(),
+          updatedAt: product.updatedAt.toString()
+        };
+      } catch (error) {
+        console.error('Error creating product:', error);
+        throw new Error('Failed to create product');
+      } finally {
+        await session.close();
+      }
+    },
   },
 };
+

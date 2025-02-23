@@ -13,22 +13,4 @@ export const CREATE_STORE_MUTATION = gql`
     }
   }
 
-`;
-
-export const CREATE_PRODUCT_MUTATION = gql`
-  mutation CreateProduct($input: CreateProductInput!) {
-    createProduct(input: $input) {
-      id
-      name
-      description
-      price
-      sku
-      category
-      storeId
-      createdAt
-      updatedAt
-      inventory
-      status
-    }
-  }
 `; 

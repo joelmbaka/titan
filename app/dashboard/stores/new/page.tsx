@@ -6,7 +6,25 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
+import { gql } from "@apollo/client";
+
+const CREATE_STORE_MUTATION = gql`
+  mutation CreateStore($input: CreateStoreInput!) {
+    createStore(input: $input) {
+      id
+      name
+      industry
+      subdomain
+      metrics {
+        sales
+        visitors
+        conversion
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 export default function NewStorePage() {
   const router = useRouter();

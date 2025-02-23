@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { NAICSCategory } from "@/lib/types";
 import { useMutation } from "@apollo/client";
-import { CREATE_STORE_MUTATION } from "@/lib/graphql/mutations";
+import { gql } from "@apollo/client";
 import { StoreContext } from "@/context/store-context";
 
 interface AddStoreModalProps {
@@ -25,6 +25,20 @@ interface AddStoreModalProps {
   onClose: () => void;
   onStoreAdded?: () => void;
 }
+
+// Add the mutation directly in the component
+const CREATE_STORE_MUTATION = gql`
+  mutation CreateStore($input: CreateStoreInput!) {
+    createStore(input: $input) {
+      id
+      name
+      industry
+      subdomain
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 export function AddStoreModal({ 
   open,

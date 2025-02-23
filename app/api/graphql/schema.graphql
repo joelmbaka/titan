@@ -31,14 +31,14 @@ type Mutation {
   deleteStore(id: ID!): Boolean!
   createIndustry(input: CreateIndustryInput!): Industry!
   updateIndustry(id: ID!, input: UpdateIndustryInput!): Industry!
+  createProduct(input: CreateProductInput!): Product!
 }
 
 type Store {
   id: ID!
   name: String!
-  industry: NAICSCategory!
+  industry: String!
   subdomain: String!
-  ownerId: String!
   metrics: StoreMetrics!
   createdAt: String!
   updatedAt: String!
@@ -53,14 +53,14 @@ type Industry {
 }
 
 type StoreMetrics {
-  sales: Int!
+  sales: Float!
   visitors: Int!
   conversion: Float!
 }
 
 input CreateStoreInput {
   name: String!
-  industry: NAICSCategory!
+  industry: String!
   subdomain: String!
 }
 
@@ -111,4 +111,15 @@ enum ProductStatus {
   DRAFT
   ACTIVE
   ARCHIVED
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  sku: String!
+  category: String!
+  storeId: String!
+  inventory: Int
+  status: ProductStatus
 }
