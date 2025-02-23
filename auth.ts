@@ -49,7 +49,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     updateAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      console.log("JWT Callback - Account:", account); // Log the account information
       if (user) {
         token.accessToken = user.accessToken;
         token.id = user.id;
