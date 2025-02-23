@@ -27,6 +27,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
+      authorization: {
+        params: {
+          scope: "user:email",
+        },
+      },
+      profile(profile) {
+        console.log("GitHub Profile Response:", profile); // Log the profile response
+        return {
+          id: profile.id.toString(),
+          name: profile.name || profile.login,
+          email: profile.email,
+          image: profile.avatar_url,
+        };
+      },
     }),
   ],
   session: {
