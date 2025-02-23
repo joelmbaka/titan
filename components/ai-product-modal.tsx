@@ -27,7 +27,7 @@ export function AIProductModal({ open, onClose, onGenerate }: AIProductModalProp
     setError("")
 
     try {
-      const response = await fetch("http://localhost:8000/generate-product", {
+      const response = await fetch("https://titan2-o.onrender.com/generate-product", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

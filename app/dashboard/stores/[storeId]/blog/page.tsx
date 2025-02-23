@@ -14,7 +14,7 @@ export default function BlogPage() {
   const handleGenerateBlog = async (prompt: string) => {
     try {
       console.log("Sending blog generation request with prompt:", prompt)
-      const response = await fetch("http://localhost:8000/generate-blog-post", {
+      const response = await fetch("https://titan2-o.onrender.com/generate-blog-post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
