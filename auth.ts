@@ -22,6 +22,7 @@ if (typeof window !== "undefined") {
 const session = driver.session();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
   adapter: Neo4jAdapter(session),
   providers: [
     GitHubProvider({
