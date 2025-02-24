@@ -1,7 +1,6 @@
 'use client';
 
 import { ThemeProvider } from "next-themes";
-import { SessionProvider } from "next-auth/react";
 import { ApolloProvider } from "@apollo/client";
 import client from "@/lib/apollo-client";
 import { ReactNode, useEffect, useState } from "react";
@@ -24,11 +23,9 @@ export function Providers({ children }: { children: ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <SessionProvider>
-        <ApolloProvider client={client}>
-          {children}
-        </ApolloProvider>
-      </SessionProvider>
+      <ApolloProvider client={client}>
+        {children}
+      </ApolloProvider>
     </ThemeProvider>
   );
 }

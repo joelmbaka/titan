@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
-import { authConfig } from "@/auth.config";
 
 declare module "next-auth" {
   interface Session {
@@ -11,13 +10,12 @@ declare module "next-auth" {
   }
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  ...authConfig,
-  basePath: "/api/auth",
-  session: {
-    strategy: "jwt",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
@@ -27,41 +25,51 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           scope: "user:email",
         },
       },
-      profile(profile) {
-        console.log("GitHub Profile Response:", profile);
-        return {
-          id: profile.id.toString(),
-          name: profile.name || profile.login,
-          email: profile.email,
-          image: profile.avatar_url,
-        };
-      },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
-      console.log("JWT Callback - Account:", account);
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.id = user.id;
+    async jwt({ token, account, profile }) {
+      if (account) {
+        token.accessToken = account.access_token;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token?.id) {
-        session.user.id = token.id as string;
+      if (token && session.user) {
+        session.user.id = token.sub as string;
         session.accessToken = token.accessToken as string;
       }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) {
+      // If the URL is the sign-in page with a callback, extract and use that callback
+      if (url.startsWith('/sign-in') && url.includes('callbackUrl=')) {
+        const callbackUrl = new URL(url, baseUrl).searchParams.get('callbackUrl');
+        if (callbackUrl) {
+          // Ensure the callback URL is safe (same origin or relative)
+          if (callbackUrl.startsWith('/') || callbackUrl.startsWith(baseUrl)) {
+            return callbackUrl;
+          }
+        }
+        return `${baseUrl}/dashboard`;
+      }
+      
+      // Handle other cases
+      if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
-      } else if (new URL(url).origin === baseUrl) {
+      }
+      if (url.startsWith(baseUrl)) {
         return url;
       }
       return baseUrl;
-    }
+    },
   },
-  debug: true,
+  pages: {
+    signIn: '/sign-in',
+    error: '/error',
+  },
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 });

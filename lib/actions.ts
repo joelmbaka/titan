@@ -1,9 +1,10 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
+import { redirect } from "next/navigation";
+import { signOut } from "@/auth";
 
 export async function githubSignIn() {
-  await signIn("github", { redirectTo: "/dashboard" });
+  redirect("/api/auth/signin?provider=github");
 }
 
 export async function userSignOut() {

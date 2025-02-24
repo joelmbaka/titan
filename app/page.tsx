@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AddStoreModal } from "@/components/add-store-modal";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { githubSignIn } from "@/lib/actions";
 
 export default function Home() {
   const router = useRouter();
@@ -136,6 +137,13 @@ export default function Home() {
           }
         }}
       />
+
+      <Button 
+        size="lg" 
+        onClick={async () => await githubSignIn()}
+      >
+        Sign in with GitHub
+      </Button>
     </div>
   );
 }

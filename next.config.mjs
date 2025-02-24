@@ -1,4 +1,4 @@
-console.log("Loading next.config.js...");
+console.log("Loading next.config.mjs...");
 console.log("VERCEL_API_TOKEN from process.env:", process.env.VERCEL_API_TOKEN);
 
 /** @type {import('next').NextConfig} */
@@ -9,9 +9,7 @@ const nextConfig = {
     NEO4J_URI: process.env.NEO4J_URI,
     NEO4J_USER: process.env.NEO4J_USER,
     NEO4J_PASSWORD: process.env.NEO4J_PASSWORD,
-    // ... other environment variables ...
   },
-  // Add public runtime config for client-side access
   publicRuntimeConfig: {
     NEO4J_URI: process.env.NEO4J_URI,
     NEO4J_USER: process.env.NEO4J_USER,
@@ -27,7 +25,6 @@ const nextConfig = {
       },
     ],
   },
-  // Move serverComponentsExternalPackages out of experimental
   serverExternalPackages: ['next-themes'],
   webpack: (config) => {
     config.experiments = {
@@ -36,19 +33,13 @@ const nextConfig = {
     };
     return config;
   },
-  // Add Turbopack configuration
   experimental: {
     turbo: {
-      resolveAlias: {
-        // Add any aliases you need
-      },
-      rules: {
-        // Add any rules you need
-      },
+      resolveAlias: {},
+      rules: {},
     },
   },
-  // ... rest of your config ...
 };
 
 console.log("Next.js config:", nextConfig);
-export default nextConfig;
+export default nextConfig; 
