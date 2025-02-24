@@ -159,6 +159,8 @@ export async function deleteIndustry(id: string): Promise<boolean> {
 }
 
 export async function getStoreBySubdomain(subdomain: string): Promise<Store | null> {
+  console.log('getStoreBySubdomain - Fetching store for subdomain:', subdomain);
+  
   const GET_STORE_BY_SUBDOMAIN = gql`
     query GetStoreBySubdomain($subdomain: String!) {
       storeBySubdomain(subdomain: $subdomain) {
@@ -183,9 +185,10 @@ export async function getStoreBySubdomain(subdomain: string): Promise<Store | nu
       variables: { subdomain },
     });
 
+    console.log('getStoreBySubdomain - Store data received:', data.storeBySubdomain);
     return data.storeBySubdomain;
   } catch (error) {
-    console.error('Error fetching store by subdomain:', error);
+    console.error('getStoreBySubdomain - Error:', error);
     return null;
   }
 } 
