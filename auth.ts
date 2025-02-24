@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string;
       accessToken?: string;
     };
+    accessToken?: string;
   }
 }
 
@@ -31,6 +32,7 @@ export const {
     async jwt({ token, account, profile }) {
       if (account) {
         token.accessToken = account.access_token;
+        token.id = token.sub;
       }
       return token;
     },
@@ -38,15 +40,22 @@ export const {
       if (token && session.user) {
         session.user.id = token.sub as string;
         session.accessToken = token.accessToken as string;
+        session.user.accessToken = token.accessToken as string;
       }
+      
+      console.log("Auth.ts Session:", {
+        hasUser: !!session.user,
+        userId: session.user?.id || 'none',
+        hasAccessToken: !!session.accessToken,
+        tokenPrefix: session.accessToken ? session.accessToken.substring(0, 5) + '...' : 'none'
+      });
+      
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // If the URL is the sign-in page with a callback, extract and use that callback
       if (url.startsWith('/sign-in') && url.includes('callbackUrl=')) {
         const callbackUrl = new URL(url, baseUrl).searchParams.get('callbackUrl');
         if (callbackUrl) {
-          // Ensure the callback URL is safe (same origin or relative)
           if (callbackUrl.startsWith('/') || callbackUrl.startsWith(baseUrl)) {
             return callbackUrl;
           }
@@ -54,7 +63,6 @@ export const {
         return `${baseUrl}/dashboard`;
       }
       
-      // Handle other cases
       if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
       }

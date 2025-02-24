@@ -17,12 +17,23 @@ const apolloServer = new ApolloServer({
 
 const handler = startServerAndCreateNextHandler(apolloServer, {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  context: async (_req): Promise<{ session?: Session; user?: any }> => {
+  context: async (req): Promise<{ session?: Session; user?: any }> => {
     // Get the session from the request
     const session = await auth();
     
-    // Log the session for debugging (remove in production)
-    console.log("GraphQL API Session:", session ? "Session exists" : "No session");
+    // Get the authorization header
+    const authHeader = req.headers.get('authorization');
+    const sessionId = req.headers.get('x-session-id');
+    
+    // Log detailed authentication info for debugging
+    console.log("GraphQL API Auth:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'none',
+      hasAuthHeader: !!authHeader,
+      authHeaderPrefix: authHeader ? authHeader.substring(0, 10) + '...' : 'none',
+      sessionIdHeader: sessionId || 'none'
+    });
     
     // Return the session and user in the context
     return { 
