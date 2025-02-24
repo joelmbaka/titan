@@ -3,18 +3,23 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const session = await auth();
   const url = request.nextUrl;
   const host = request.headers.get('host');
-  
+
   console.log('Middleware - Request URL:', url.toString());
   console.log('Middleware - Host:', host);
 
-  // Skip middleware for static files and API routes
-  if (url.pathname.startsWith('/_next/static') || url.pathname.startsWith('/api')) {
-    console.log('Middleware - Skipping static file or API route:', url.pathname);
+  // Skip middleware for static files, API routes, and favicon
+  if (
+    url.pathname.startsWith('/_next/static') ||
+    url.pathname.startsWith('/api') ||
+    url.pathname === '/favicon.ico'
+  ) {
+    console.log('Middleware - Skipping static file, API route, or favicon:', url.pathname);
     return NextResponse.next();
   }
+
+  const session = await auth();
 
   // Redirect unauthenticated users to the sign-in page
   if (!session && !url.pathname.startsWith('/auth')) {
