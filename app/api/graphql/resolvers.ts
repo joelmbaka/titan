@@ -248,7 +248,25 @@ export const resolvers = {
       } finally {
         await session.close();
       }
-    }
+    },
+    storeBySubdomain: async (_: unknown, { subdomain }: { subdomain: string }, context: { session?: Session }) => {
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const session = driver.session();
+      try {
+        const result = await session.run(
+          `MATCH (s:Store {subdomain: $subdomain}) RETURN s`,
+          { subdomain }
+        );
+        const store = result.records[0]?.get('s').properties;
+        if (!store) throw new Error("Store not found");
+        return store;
+      } finally {
+        await session.close();
+      }
+    },
   },
   Mutation: {
     createStore: async (

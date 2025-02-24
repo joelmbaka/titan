@@ -156,4 +156,36 @@ export async function deleteIndustry(id: string): Promise<boolean> {
   const { data, errors } = await response.json();
   if (errors) throw new Error(errors[0].message);
   return data.deleteIndustry;
+}
+
+export async function getStoreBySubdomain(subdomain: string): Promise<Store | null> {
+  const GET_STORE_BY_SUBDOMAIN = gql`
+    query GetStoreBySubdomain($subdomain: String!) {
+      storeBySubdomain(subdomain: $subdomain) {
+        id
+        name
+        industry
+        subdomain
+        metrics {
+          sales
+          visitors
+          conversion
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await client.query({
+      query: GET_STORE_BY_SUBDOMAIN,
+      variables: { subdomain },
+    });
+
+    return data.storeBySubdomain;
+  } catch (error) {
+    console.error('Error fetching store by subdomain:', error);
+    return null;
+  }
 } 
