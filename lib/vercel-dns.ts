@@ -18,7 +18,8 @@ export async function createDnsRecordForDomain(
     console.log("Creating DNS record for domain:", domain);
     const token = env.VERCEL_API_TOKEN;
     const baseUrl = "https://api.vercel.com";
-    const domainUrl = `${baseUrl}/v5/domains/${domain}`;
+    const teamId = env.VERCEL_TEAM_ID;
+    const domainUrl = `${baseUrl}/v5/domains/${domain}?teamId=${teamId}`;
 
     // Check domain existence
     const domainCheck = await fetch(domainUrl, {
@@ -38,7 +39,7 @@ export async function createDnsRecordForDomain(
     }
 
     // Create DNS record
-    const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records`;
+    const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records?teamId=${teamId}`;
     const dnsResponse = await fetch(dnsRecordUrl, {
       method: "POST",
       headers: {
