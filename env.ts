@@ -8,7 +8,6 @@ const envSchema = z.object({
   // ... other environment variables ...
 });
 
-const env = envSchema.parse(process.env);
-console.log("Environment variables successfully validated:", env);
+export const env = envSchema.parse(process.env);
 
-export { env }; 
+console.log("Environment variables successfully validated:", env); 
