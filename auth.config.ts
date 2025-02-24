@@ -10,7 +10,14 @@ export const authConfig: NextAuthConfig = {
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
       authorization: {
+        url: "https://github.com/login/oauth/authorize",
         params: { scope: "user:email" },
+      },
+      token: {
+        url: "https://github.com/login/oauth/access_token",
+      },
+      userinfo: {
+        url: "https://api.github.com/user",
       },
     }
   ],

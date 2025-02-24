@@ -19,9 +19,6 @@ export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const host = request.headers.get('host');
 
-  console.log('Middleware - Request URL:', url.toString());
-  console.log('Middleware - Host:', host);
-
   // Skip middleware for excluded paths first
   if (
     url.pathname.startsWith('/_next/static') ||
@@ -30,7 +27,6 @@ export async function middleware(request: NextRequest) {
     url.pathname.startsWith('/public') ||
     url.pathname.match(/\.(png|jpg|jpeg|gif|ico)$/)
   ) {
-    console.log('Middleware - Skipping static file, API route, or favicon:', url.pathname);
     return NextResponse.next();
   }
 
@@ -38,7 +34,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users to the sign-in page
   if (!session && !url.pathname.startsWith('/auth')) {
-    console.log('Middleware - Redirecting to sign-in page');
+    // Redirect unauthenticated users to the sign-in page
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }
 
@@ -46,13 +42,10 @@ export async function middleware(request: NextRequest) {
   const subdomain = host?.split('.')[0];
 
   if (subdomain && subdomain !== 'www' && subdomain !== 'localhost') {
-    console.log('Middleware - Detected subdomain:', subdomain);
     // Rewrite the URL to the dynamic store route
     url.pathname = `/store/${subdomain}${url.pathname}`;
-    console.log('Middleware - Rewriting to:', url.toString());
     return NextResponse.rewrite(url);
   }
 
-  console.log('Middleware - No subdomain detected, continuing');
   return NextResponse.next();
 } 
