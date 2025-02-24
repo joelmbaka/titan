@@ -9,11 +9,12 @@ export async function middleware(request: NextRequest) {
   console.log('Middleware - Request URL:', url.toString());
   console.log('Middleware - Host:', host);
 
-  // Skip middleware for static files, API routes, and favicon
+  // Skip middleware for static files, API routes, and favicons
   if (
     url.pathname.startsWith('/_next/static') ||
     url.pathname.startsWith('/api') ||
-    url.pathname === '/favicon.ico'
+    url.pathname === '/favicon.ico' ||
+    url.pathname === '/favicon.png'
   ) {
     console.log('Middleware - Skipping static file, API route, or favicon:', url.pathname);
     return NextResponse.next();
