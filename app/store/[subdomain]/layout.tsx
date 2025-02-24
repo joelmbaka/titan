@@ -1,13 +1,12 @@
 import { getStoreBySubdomain } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
 
-export default async function StoreLayout({
-  children,
-  params,
-}: {
+interface LayoutProps {
   children: React.ReactNode;
   params: { subdomain: string };
-}) {
+}
+
+export default async function StoreLayout({ children, params }: LayoutProps) {
   const store = await getStoreBySubdomain(params.subdomain);
 
   if (!store) {
