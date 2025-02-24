@@ -10,6 +10,12 @@ const nextConfig = {
     NEO4J_PASSWORD: process.env.NEO4J_PASSWORD,
     // ... other environment variables ...
   },
+  // Add public runtime config for client-side access
+  publicRuntimeConfig: {
+    NEO4J_URI: process.env.NEO4J_URI,
+    NEO4J_USER: process.env.NEO4J_USER,
+    NEO4J_PASSWORD: process.env.NEO4J_PASSWORD,
+  },
   // ... rest of your config ...
 };
 

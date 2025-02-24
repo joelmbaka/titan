@@ -16,9 +16,10 @@ import neo4j from "neo4j-driver";
 // console.log("NEO4J_PASSWORD:", process.env.NEO4J_PASSWORD);
 
 const getEnvVar = (name: string): string => {
-  const value = process.env[name];
+  const value = process.env[name] || process.env[`NEXT_PUBLIC_${name}`];
   if (!value) {
-    throw new Error(`Missing environment variable: ${name}`);
+    console.error(`Missing environment variable: ${name}`);
+    return 'default_value'; // Provide a fallback value
   }
   return value;
 };
