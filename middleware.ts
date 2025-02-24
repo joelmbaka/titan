@@ -2,23 +2,25 @@ import { auth } from "@/auth";
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api (API routes)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|api).*)',
+  ],
+};
+
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const host = request.headers.get('host');
 
   console.log('Middleware - Request URL:', url.toString());
   console.log('Middleware - Host:', host);
-
-  // Skip middleware for static files, API routes, and favicons
-  if (
-    url.pathname.startsWith('/_next/static') ||
-    url.pathname.startsWith('/api') ||
-    url.pathname === '/favicon.ico' ||
-    url.pathname === '/favicon.png'
-  ) {
-    console.log('Middleware - Skipping static file, API route, or favicon:', url.pathname);
-    return NextResponse.next();
-  }
 
   const session = await auth();
 
@@ -30,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
   // Check if the request is for a subdomain
   const subdomain = host?.split('.')[0];
-  
+
   if (subdomain && subdomain !== 'www' && subdomain !== 'localhost') {
     console.log('Middleware - Detected subdomain:', subdomain);
     // Rewrite the URL to the dynamic store route
