@@ -30,6 +30,7 @@ const handler = startServerAndCreateNextHandler(apolloServer, {
     // Extract headers safely
     let authHeader: string | null = null;
     let sessionId: string | null = null;
+    let authToken: string | null = null;
     
     try {
       // Check if headers exist and extract values
@@ -40,10 +41,12 @@ const handler = startServerAndCreateNextHandler(apolloServer, {
         if (headers instanceof Headers) {
           authHeader = headers.get('authorization');
           sessionId = headers.get('x-session-id');
+          authToken = headers.get('x-auth-token');
         } else if (typeof headers === 'object' && headers !== null) {
           // Handle plain object headers
           authHeader = headers.authorization as string || null;
           sessionId = headers['x-session-id'] as string || null;
+          authToken = headers['x-auth-token'] as string || null;
         }
       }
     } catch (error) {
@@ -57,11 +60,25 @@ const handler = startServerAndCreateNextHandler(apolloServer, {
       userId: session?.user?.id || 'none',
       hasAuthHeader: !!authHeader,
       authHeaderPrefix: authHeader ? authHeader.substring(0, 10) + '...' : 'none',
-      sessionIdHeader: sessionId || 'none'
+      sessionIdHeader: sessionId || 'none',
+      hasAuthToken: !!authToken
     });
     
-    // Convert user to Record<string, unknown> to satisfy TypeScript
-    const user = session?.user ? { ...session.user } as Record<string, unknown> : undefined;
+    // If we don't have a session but we have a sessionId from headers, create a minimal user object
+    let user: Record<string, unknown> | undefined = undefined;
+    
+    if (session?.user) {
+      // Convert user to Record<string, unknown> to satisfy TypeScript
+      user = { ...session.user } as Record<string, unknown>;
+    } else if (sessionId) {
+      // Create a minimal user object from the sessionId
+      user = { id: sessionId };
+      
+      // If we have an auth token, add it to the user object
+      if (authToken) {
+        user.accessToken = authToken;
+      }
+    }
     
     // Return the context
     return { 

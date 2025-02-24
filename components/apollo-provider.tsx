@@ -15,14 +15,15 @@ export default function ApolloProviderWrapper({
 
   useEffect(() => {
     // Reinitialize Apollo client when session changes
-    if (status === "authenticated") {
-      console.log("ApolloProvider - Session authenticated:", {
-        hasUser: !!session?.user,
-        userId: session?.user?.id || 'missing',
-        hasToken: !!session?.accessToken
-      });
-      setClient(getApolloClient());
-    }
+    console.log("ApolloProvider - Session status changed:", {
+      status,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'missing',
+      hasToken: !!session?.accessToken
+    });
+    
+    // Always reinitialize the client when session status changes
+    setClient(getApolloClient());
   }, [session, status]);
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;

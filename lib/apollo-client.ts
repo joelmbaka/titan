@@ -6,7 +6,7 @@ import { getSession } from "next-auth/react";
 export function getApolloClient() {
   const httpLink = createHttpLink({
     uri: "/api/graphql",
-    credentials: "same-origin"
+    credentials: "include"
   });
 
   const authLink = setContext(async (_, { headers }) => {
@@ -16,6 +16,8 @@ export function getApolloClient() {
     // More detailed logging for debugging
     console.log("Apollo Client Auth:", {
       hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'none',
       hasAccessToken: !!session?.accessToken,
       tokenPrefix: session?.accessToken ? session.accessToken.substring(0, 5) + '...' : 'none'
     });
@@ -25,7 +27,8 @@ export function getApolloClient() {
       headers: {
         ...headers,
         authorization: session?.accessToken ? `Bearer ${session.accessToken}` : "",
-        "x-session-id": session?.user?.id || ""
+        "x-session-id": session?.user?.id || "",
+        "x-auth-token": session?.accessToken || ""
       },
     };
   });
