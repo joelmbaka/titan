@@ -8,6 +8,8 @@ import { SessionProvider } from "next-auth/react";
 import ApolloProviderWrapper from "@/components/apollo-provider";
 import { StoreProvider } from "@/context/store-context";
 import { useEffect } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import AuthError from '@/components/auth-error';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +36,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
           <StoreProvider>
-            <SessionProvider>
-              <ApolloProviderWrapper>
-                <Header />
-                <main>{children}</main>
-              </ApolloProviderWrapper>
+            <SessionProvider refetchInterval={300} refetchOnWindowFocus={true}>
+              <ErrorBoundary fallback={<AuthError />}>
+                <ApolloProviderWrapper>
+                  <Header />
+                  <main>{children}</main>
+                </ApolloProviderWrapper>
+              </ErrorBoundary>
             </SessionProvider>
           </StoreProvider>
         </Providers>

@@ -2,8 +2,17 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig: NextAuthConfig = {
   providers: [
-    // Add your authentication providers here
-    // Example: GitHub, Google, etc.
+    // Add your GitHub provider configuration here
+    {
+      id: "github",
+      name: "GitHub",
+      type: "oauth",
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+      authorization: {
+        params: { scope: "user:email" },
+      },
+    }
   ],
   callbacks: {
     async session({ session, token }) {

@@ -5,13 +5,13 @@ import type { NextRequest } from 'next/server';
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file) - Excluded to avoid unnecessary middleware processing
-     * - api (API routes)
+     * Match all request paths except for:
+     * - Static files (_next/static, _next/image, favicons)
+     * - API routes
+     * - Auth routes
+     * - Public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|api).*)',
+    '/((?!_next/static|_next/image|favicon.ico|favicon.png|api|auth|public).*)',
   ],
 };
 
@@ -22,12 +22,13 @@ export async function middleware(request: NextRequest) {
   console.log('Middleware - Request URL:', url.toString());
   console.log('Middleware - Host:', host);
 
-  // Skip middleware for static files, API routes, and favicons
+  // Skip middleware for excluded paths first
   if (
     url.pathname.startsWith('/_next/static') ||
     url.pathname.startsWith('/api') ||
-    url.pathname === '/favicon.ico' ||
-    url.pathname === '/favicon.png'
+    url.pathname.startsWith('/auth') ||
+    url.pathname.startsWith('/public') ||
+    url.pathname.match(/\.(png|jpg|jpeg|gif|ico)$/)
   ) {
     console.log('Middleware - Skipping static file, API route, or favicon:', url.pathname);
     return NextResponse.next();
