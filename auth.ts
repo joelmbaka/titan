@@ -77,5 +77,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Otherwise, fall back to the baseUrl.
       return baseUrl;
     }
-  }
+  },
+  debug: true, // Enable extensive logging
 });

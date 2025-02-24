@@ -18,6 +18,7 @@ import { NAICSCategory } from "@/lib/types";
 import { useMutation } from "@apollo/client";
 import { gql } from "@apollo/client";
 import { StoreContext } from "@/context/store-context";
+import { createDnsRecordForDomain } from "@/lib/vercel-dns";
 
 interface AddStoreModalProps {
   open: boolean;
@@ -64,6 +65,19 @@ export function AddStoreModal({
     if (name.trim() && industry && subdomain.trim() && termsAccepted) {
       setIsLoading(true);
       try {
+        // First, create the DNS record
+        const dnsResult = await createDnsRecordForDomain(`${subdomain}.joelmbaka.site`, {
+          name: subdomain,
+          type: "CNAME",
+          value: "cname.vercel-dns.com",
+          ttl: 60,
+        });
+
+        if (!dnsResult.success) {
+          throw new Error(dnsResult.message);
+        }
+
+        // Then create the store
         const { data, errors } = await createStore({
           variables: {
             input: {
