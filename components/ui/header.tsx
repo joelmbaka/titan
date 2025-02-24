@@ -4,11 +4,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MainNav } from "@/components/main-nav";
 import { usePathname } from "next/navigation";
-import { githubSignIn, userSignOut } from "@/lib/actions";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 
@@ -16,7 +13,6 @@ export default function Header() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   
   // Debug logging for session state

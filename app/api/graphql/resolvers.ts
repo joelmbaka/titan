@@ -63,7 +63,7 @@ export const resolvers = {
     stores: async (
       _: unknown,
       __: unknown,
-      context: { session?: Session, user?: any }
+      context: { session?: Session, user?: Record<string, unknown> }
     ) => {
       console.log("Stores resolver context:", {
         hasSession: !!context.session,
@@ -495,7 +495,7 @@ export const resolvers = {
     createProduct: async (
       _: unknown, 
       { input }: { input: CreateProductInput }, 
-      context: { session?: Session, user?: any }
+      context: { session?: Session, user?: Record<string, unknown> }
     ) => {
       // Check authentication using the enhanced check we added to stores resolver
       if (!context.session && !context.user) {
