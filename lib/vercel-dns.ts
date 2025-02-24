@@ -14,17 +14,13 @@ export async function createDnsRecordForDomain(
   domain: string,
   dnsRecordPayload: DnsRecordPayload
 ): Promise<{ success: boolean; message: string }> {
-  console.log("Creating DNS record for domain:", domain);
-  console.log("DNS Record Payload:", dnsRecordPayload);
-
-  const token = env.VERCEL_API_TOKEN;
-  const baseUrl = "https://api.vercel.com";
-  
-  const domainUrl = `${baseUrl}/v5/domains/${domain}`;
-  const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records`;
-
   try {
-    console.log("Checking domain existence at:", domainUrl);
+    console.log("Creating DNS record for domain:", domain);
+    const token = env.VERCEL_API_TOKEN;
+    const baseUrl = "https://api.vercel.com";
+    const domainUrl = `${baseUrl}/v5/domains/${domain}`;
+
+    // Check domain existence
     const domainCheck = await fetch(domainUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -32,37 +28,17 @@ export async function createDnsRecordForDomain(
     });
 
     if (!domainCheck.ok) {
-      console.log("Domain check response status:", domainCheck.status);
-      if (domainCheck.status === 404) {
-        console.log("Domain doesn't exist, creating new domain...");
-        const createResponse = await fetch(`${baseUrl}/v5/domains`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: domain }),
-        });
-
-        if (!createResponse.ok) {
-          const error = await createResponse.json();
-          console.error("Error creating domain:", error);
-          return {
-            success: false,
-            message: `Error creating domain: ${error.error?.message || "Unknown error"}`,
-          };
-        }
-      } else {
-        const error = await domainCheck.json();
-        console.error("Error checking domain:", error);
-        return {
-          success: false,
-          message: `Error checking domain: ${error.error?.message || "Unknown error"}`,
-        };
+      if (domainCheck.status === 403) {
+        throw new Error(
+          "Not authorized: Ensure your Vercel API token has the correct scope and permissions."
+        );
       }
+      const error = await domainCheck.json();
+      throw new Error(error.error?.message || "Failed to check domain");
     }
 
-    console.log("Creating DNS record at:", dnsRecordUrl);
+    // Create DNS record
+    const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records`;
     const dnsResponse = await fetch(dnsRecordUrl, {
       method: "POST",
       headers: {
@@ -74,14 +50,9 @@ export async function createDnsRecordForDomain(
 
     if (!dnsResponse.ok) {
       const error = await dnsResponse.json();
-      console.error("Failed to create DNS record:", error);
-      return {
-        success: false,
-        message: `Failed to create DNS record: ${error.error?.message || "Unknown error"}`,
-      };
+      throw new Error(error.error?.message || "Failed to create DNS record");
     }
 
-    console.log("DNS record created successfully");
     return { success: true, message: "DNS record created successfully" };
   } catch (error) {
     console.error("Error in createDnsRecordForDomain:", error);
