@@ -6,6 +6,7 @@ import Header from "@/components/ui/header";
 import { SessionProvider } from "next-auth/react";
 import ApolloProviderWrapper from "@/components/apollo-provider";
 import { StoreProvider } from "@/context/store-context";
+import { useEffect } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    console.log('RootLayout - Mounted');
+    return () => console.log('RootLayout - Unmounted');
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>

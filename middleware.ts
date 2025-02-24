@@ -8,6 +8,12 @@ export function middleware(request: NextRequest) {
   console.log('Middleware - Request URL:', url.toString());
   console.log('Middleware - Host:', host);
 
+  // Skip middleware for static files
+  if (url.pathname.startsWith('/_next/static')) {
+    console.log('Middleware - Skipping static file:', url.pathname);
+    return NextResponse.next();
+  }
+
   // Check if the request is for a subdomain
   const subdomain = host?.split('.')[0];
   
