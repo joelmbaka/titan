@@ -65,6 +65,10 @@ export const resolvers = {
       __: unknown,
       context: { session?: Session }
     ) => {
+      if (!context.session) {
+        throw new Error("Authentication required");
+      }
+      
       console.log('Resolver context user ID:', context.session?.user?.id);
       if (!context.session?.user?.id) {
         throw new Error("Not authenticated");
