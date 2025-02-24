@@ -1,5 +1,5 @@
 import { Session } from "next-auth"
-import driver from "@/lib/neo4j"
+import { driver } from "@/lib/neo4j"
 import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types"
 
 interface CreateStoreInput {

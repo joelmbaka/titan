@@ -5,6 +5,9 @@ const nextConfig = {
   env: {
     VERCEL_API_TOKEN: process.env.VERCEL_API_TOKEN,
     VERCEL_TEAM_ID: process.env.VERCEL_TEAM_ID,
+    NEO4J_URI: process.env.NEO4J_URI,
+    NEO4J_USER: process.env.NEO4J_USER,
+    NEO4J_PASSWORD: process.env.NEO4J_PASSWORD,
     // ... other environment variables ...
   },
   // ... rest of your config ...

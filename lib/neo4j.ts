@@ -1,3 +1,8 @@
+// Add at the very top
+if (process.env.NEXT_RUNTIME === 'edge') {
+  throw new Error('Neo4j driver is not compatible with Edge runtime');
+}
+
 // Add server-side guard at the top
 if (typeof window !== 'undefined') {
   throw new Error('Neo4j driver cannot be used in client-side code');
@@ -19,40 +24,17 @@ const getEnvVar = (name: string): string => {
 };
 
 const NEO4J_URI = getEnvVar("NEO4J_URI");
-const NEO4J_USERNAME = getEnvVar("NEO4J_USERNAME");
+const NEO4J_USER = getEnvVar("NEO4J_USER");
 const NEO4J_PASSWORD = getEnvVar("NEO4J_PASSWORD");
 
-interface Neo4jConfig {
-  uri: string;
-  username: string;
-  password: string;
-  options?: {
-    maxConnectionPoolSize?: number;
-    connectionTimeout?: number;
-  };
-}
-
-const config: Neo4jConfig = {
-  uri: NEO4J_URI,
-  username: NEO4J_USERNAME,
-  password: NEO4J_PASSWORD,
-  options: {
+// Create and export the driver
+export const driver = neo4j.driver(
+  NEO4J_URI,
+  neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+  {
     maxConnectionPoolSize: 50,
-    connectionTimeout: 30000
+    connectionTimeout: 30000,
   }
-};
-
-const driver = neo4j.driver(
-  config.uri,
-  neo4j.auth.basic(config.username, config.password),
-  config.options
 );
 
-// Ensure the driver is closed when the process exits
-process.on('exit', () => {
-  driver.close().catch((error) => {
-    console.error('Error closing Neo4j driver:', error);
-  });
-});
-
-export default driver; 
+// Create a separate API route for Neo4j operations 

@@ -1,7 +1,5 @@
 import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
-import { Neo4jAdapter } from "@auth/neo4j-adapter";
-import driver from "@/lib/neo4j";
 import { authConfig } from "@/auth.config";
 
 declare module "next-auth" {
@@ -13,17 +11,13 @@ declare module "next-auth" {
   }
 }
 
-// Ensure this file is only used on the server
-if (typeof window !== "undefined") {
-  throw new Error("Neo4j adapter should only be used on the server side");
-}
-
-// Add session creation right before adapter configuration
-const session = driver.session();
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: Neo4jAdapter(session),
+  basePath: "/api/auth",
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
@@ -34,7 +28,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
       },
       profile(profile) {
-        console.log("GitHub Profile Response:", profile); // Log the profile response
+        console.log("GitHub Profile Response:", profile);
         return {
           id: profile.id.toString(),
           name: profile.name || profile.login,
@@ -44,14 +38,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
   callbacks: {
     async jwt({ token, user, account }) {
-      console.log("JWT Callback - Account:", account); // Log the account information
+      console.log("JWT Callback - Account:", account);
       if (user) {
         token.accessToken = user.accessToken;
         token.id = user.id;
@@ -66,17 +55,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // If the provided URL is relative, append it to the baseUrl.
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`;
-      }
-      // If the URL is absolute and matches our origin, allow it.
-      else if (new URL(url).origin === baseUrl) {
+      } else if (new URL(url).origin === baseUrl) {
         return url;
       }
-      // Otherwise, fall back to the baseUrl.
       return baseUrl;
     }
   },
-  debug: true, // Enable extensive logging
+  debug: true,
 });

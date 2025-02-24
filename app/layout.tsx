@@ -1,7 +1,8 @@
 'use client';
 
 import { Providers } from "@/lib/providers";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import "./globals.css";
 import Header from "@/components/ui/header";
 import { SessionProvider } from "next-auth/react";
@@ -10,16 +11,6 @@ import { StoreProvider } from "@/context/store-context";
 import { useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import AuthError from '@/components/auth-error';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
@@ -31,12 +22,25 @@ export default function RootLayout({
     return () => console.log('RootLayout - Unmounted');
   }, []);
 
+  useEffect(() => {
+    const handleSessionError = (ev: ErrorEvent) => {
+      console.error('Session error:', ev.error);
+    };
+
+    window.addEventListener('error', handleSessionError);
+    return () => window.removeEventListener('error', handleSessionError);
+  }, []);
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body>
         <Providers>
           <StoreProvider>
-            <SessionProvider refetchInterval={300} refetchOnWindowFocus={true}>
+            <SessionProvider 
+              refetchInterval={300} 
+              refetchOnWindowFocus={true}
+              basePath="/api/auth"
+            >
               <ErrorBoundary fallback={<AuthError />}>
                 <ApolloProviderWrapper>
                   <Header />
