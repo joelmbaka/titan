@@ -5,16 +5,54 @@ import { Button } from "@/components/ui/button";
 import { MainNav } from "@/components/main-nav";
 import { usePathname } from "next/navigation";
 import { githubSignIn, userSignOut } from "@/lib/actions";
-import { useSession } from "next-auth/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  
+  // Debug logging for session state
+  useEffect(() => {
+    console.log("Header session state:", {
+      status,
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || "none",
+      route: pathname
+    });
+    setMounted(true);
+  }, [session, status, pathname]);
+
+  // Fix for hydration mismatch
+  if (!mounted) return null;
+
+  // Handle sign in click with debug logging
+  const handleSignIn = async () => {
+    console.log("Sign in button clicked");
+    try {
+      await signIn("github", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      console.error("Sign in error:", error);
+    }
+  };
+
+  // Handle sign out click with debug logging
+  const handleSignOut = async () => {
+    console.log("Sign out button clicked");
+    try {
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
 
   if (isDashboard) return null;
 
@@ -31,49 +69,64 @@ export default function Header() {
         </div>
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {status === "authenticated" ? (
+          {status === "loading" ? (
+            // Loading state
+            <Button variant="ghost" size="sm" disabled>
+              Loading...
+            </Button>
+          ) : session ? (
+            // User is signed in
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                {session.user?.image && (
-                  <Image
-                    src={session.user.image}
-                    alt="User Avatar"
-                    className="h-8 w-8 rounded-full cursor-pointer"
-                    width={32}
-                    height={32}
-                  />
-                )}
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage 
+                      src={session.user?.image || ""} 
+                      alt={session.user?.name || "User"} 
+                    />
+                    <AvatarFallback>
+                      {session.user?.name?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="min-w-[160px]">
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {session.user?.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {session.user?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <button
-                    onClick={() => router.push('/dashboard')}
-                    className="w-full px-4 py-2 text-sm hover:bg-accent text-left cursor-pointer"
-                  >
-                    Go to Dashboard
-                  </button>
+                  <Link href="/dashboard">Dashboard</Link>
                 </DropdownMenuItem>
-                <form action={async () => {
-                  await userSignOut();
-                  router.refresh();
-                }}>
-                  <DropdownMenuItem asChild>
-                    <button 
-                      type="submit" 
-                      className="w-full px-4 py-2 text-sm text-destructive-foreground bg-destructive hover:bg-destructive/90 text-left cursor-pointer"
-                    >
-                      Sign Out
-                    </button>
-                  </DropdownMenuItem>
-                </form>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={handleSignOut}
+                >
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <form action={githubSignIn}>
-              <Button type="submit" variant="outline">
-                Sign In
-              </Button>
-            </form>
+            // User is not signed in
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={handleSignIn}
+              data-testid="signin-button"
+            >
+              Sign In
+            </Button>
           )}
         </div>
       </div>

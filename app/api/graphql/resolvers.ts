@@ -63,24 +63,38 @@ export const resolvers = {
     stores: async (
       _: unknown,
       __: unknown,
-      context: { session?: Session }
+      context: { session?: Session, user?: any }
     ) => {
-      if (!context.session) {
+      console.log("Stores resolver context:", {
+        hasSession: !!context.session,
+        hasUser: !!context.user,
+        userId: context.user?.id || context.session?.user?.id || 'none',
+        sessionInfo: context.session ? 'present' : 'missing'
+      });
+      
+      if (!context.session && !context.user) {
+        console.error("Authentication missing in stores resolver");
         throw new Error("Authentication required");
       }
       
-      console.log('Resolver context user ID:', context.session?.user?.id);
-      if (!context.session?.user?.id) {
-        throw new Error("Not authenticated");
+      // Get the user ID from either source
+      const userId = context.user?.id || context.session?.user?.id;
+      
+      if (!userId) {
+        console.error("User ID missing in authenticated context");
+        throw new Error("User ID required");
       }
       
       const session = driver.session();
       try {
+        console.log("Executing Neo4j query with params:", { ownerId: userId });
         const result = await session.run(
           `MATCH (u:User {id: $ownerId})-[:OWNS]->(s:Store) RETURN s`,
-          { ownerId: context.session.user.id }
+          { ownerId: userId }
         );
-        console.log('Found stores:', result.records.length);
+        console.log('Neo4j query result:', {
+          recordCount: result.records.length
+        });
         return result.records.map(record => {
           const store = record.get('s').properties;
           return {
@@ -481,21 +495,39 @@ export const resolvers = {
     createProduct: async (
       _: unknown, 
       { input }: { input: CreateProductInput }, 
-      context: { session?: Session }
+      context: { session?: Session, user?: any }
     ) => {
-      // 1. Authentication check
-      if (!context.session?.user) {
-        throw new Error('Authentication required');
+      // Check authentication using the enhanced check we added to stores resolver
+      if (!context.session && !context.user) {
+        console.error("Authentication missing in createProduct resolver");
+        throw new Error("Authentication required");
       }
-
-      // 2. Input validation
-      if (!input.name || !input.price || !input.sku || !input.category || !input.storeId) {
-        throw new Error('Missing required fields');
+      
+      // Get the user ID from either source
+      const userId = context.user?.id || context.session?.user?.id;
+      
+      if (!userId) {
+        console.error("User ID missing in createProduct context");
+        throw new Error("User ID required");
       }
-
-      // 3. Create product in database
+      
       const session = driver.session();
       try {
+        console.log("Creating product with input:", {
+          ...input,
+          userIdFromContext: userId
+        });
+        
+        // First verify that the user owns this store
+        const storeCheck = await session.run(
+          `MATCH (u:User {id: $userId})-[:OWNS]->(s:Store {id: $storeId}) RETURN s`,
+          { userId, storeId: input.storeId }
+        );
+        
+        if (storeCheck.records.length === 0) {
+          throw new Error("Store not found or user doesn't have permission");
+        }
+        
         const result = await session.executeWrite(tx =>
           tx.run(
             `MATCH (s:Store {id: $storeId})
@@ -506,7 +538,6 @@ export const resolvers = {
                price: $price,
                sku: $sku,
                category: $category,
-               storeId: $storeId,
                inventory: $inventory,
                status: $status,
                createdAt: datetime(),
@@ -516,21 +547,42 @@ export const resolvers = {
              RETURN p`,
             {
               ...input,
-              status: input.status || 'ACTIVE',
-              inventory: input.inventory || 0
+              description: input.description || "",
+              inventory: input.inventory || 0,
+              status: input.status || 'ACTIVE'
             }
           )
         );
-
-        const product = result.records[0].get('p').properties;
+        
+        // Add better error handling for empty results
+        if (!result.records || result.records.length === 0) {
+          console.error("No records returned from product creation query");
+          throw new Error("Failed to create product - no result returned");
+        }
+        
+        // Add null checks and debugging
+        const record = result.records[0];
+        console.log("Product creation record:", {
+          hasP: record.has('p'),
+          keys: record.keys,
+          fieldTypes: record.get('p') ? typeof record.get('p') : 'undefined'
+        });
+        
+        if (!record.has('p') || !record.get('p')) {
+          console.error("Missing 'p' in result record");
+          throw new Error("Failed to create product - missing data in result");
+        }
+        
+        // Safely access properties with optional chaining
+        const product = record.get('p').properties;
         return {
           ...product,
-          createdAt: product.createdAt.toString(),
-          updatedAt: product.updatedAt.toString()
+          createdAt: product.createdAt?.toString() || new Date().toISOString(),
+          updatedAt: product.updatedAt?.toString() || new Date().toISOString()
         };
       } catch (error) {
         console.error('Error creating product:', error);
-        throw new Error('Failed to create product');
+        throw error; // Throw the original error for better debugging
       } finally {
         await session.close();
       }

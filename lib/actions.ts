@@ -8,5 +8,5 @@ export async function githubSignIn() {
 }
 
 export async function userSignOut() {
-  await signOut();
+await signOut();
 }

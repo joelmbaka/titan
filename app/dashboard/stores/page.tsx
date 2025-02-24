@@ -24,7 +24,19 @@ export default function StoresPage() {
   }, [status, router]);
 
   const { loading, error, data, refetch } = useQuery(GET_STORES_QUERY, {
-    skip: status !== "authenticated"
+    skip: status !== "authenticated",
+    onError: (error) => {
+      console.error("Stores query error details:", {
+        message: error.message,
+        networkError: error.networkError?.message,
+        graphQLErrors: error.graphQLErrors?.map(e => e.message)
+      });
+    },
+    context: {
+      headers: {
+        'x-debug-query': 'stores-query'
+      }
+    }
   });
 
   if (status === "loading" || status === "unauthenticated") {

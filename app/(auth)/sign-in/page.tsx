@@ -18,6 +18,14 @@ export default async function SignIn(props: any) {
 
     // Redirect authenticated users to the callback URL or dashboard
     if (session) {
+        // Add a console log to check if session has the necessary properties
+        console.log("Sign-in page session:", {
+            hasUser: !!session.user,
+            userId: session.user?.id || 'missing',
+            hasAccessToken: !!session.accessToken,
+            tokenPrefix: session.accessToken ? session.accessToken.substring(0, 5) + '...' : 'missing'
+        });
+        
         redirect(callbackUrl);
     }
 
@@ -27,7 +35,12 @@ export default async function SignIn(props: any) {
             <form
                 action={async () => {
                     "use server";
-                    await signIn("github", { redirectTo: callbackUrl });
+                    await signIn("github", { 
+                        redirectTo: callbackUrl,
+                        // Request additional scopes if needed
+                        // These will be merged with those from auth.ts
+                        scope: "user:email repo" 
+                    });
                 }}
             >
                 <Button type="submit">Sign In with GitHub</Button>

@@ -4,6 +4,11 @@ import { auth } from './auth';
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
+  console.log("Middleware auth check:", {
+    path: request.nextUrl.pathname,
+    hasSession: !!session,
+    userId: session?.user?.id || 'none'
+  });
   const { pathname } = request.nextUrl;
 
   // Define public paths that don't require authentication
