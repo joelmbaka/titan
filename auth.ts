@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { Neo4jAdapter } from "@auth/neo4j-adapter";
 import driver from "@/lib/neo4j";
-import type { User } from "@/lib/types";
+import { authConfig } from "@/auth.config";
 
 declare module "next-auth" {
   interface Session {
@@ -22,7 +22,7 @@ if (typeof window !== "undefined") {
 const session = driver.session();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  ...authConfig,
   adapter: Neo4jAdapter(session),
   providers: [
     GitHubProvider({
