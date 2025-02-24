@@ -17,6 +17,8 @@ export async function createDnsRecordForDomain(
   const domainUrl = `${baseUrl}/v5/domains/${domain}`;
   const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records`;
 
+  console.log("Vercel API Token:", env.VERCEL_API_TOKEN);
+
   try {
     // Step 1: Check if the domain exists
     const domainCheck = await fetch(domainUrl, {
