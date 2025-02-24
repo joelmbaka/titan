@@ -34,7 +34,6 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users to the sign-in page
   if (!session && !url.pathname.startsWith('/auth')) {
-    // Redirect unauthenticated users to the sign-in page
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }
 
