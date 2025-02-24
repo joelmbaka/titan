@@ -1,5 +1,5 @@
 import { getNeo4jConfig } from '@/lib/env';
-import { driver } from '@/lib/neo4j';
+import neo4j from 'neo4j-driver';
 
 export const runtime = 'nodejs'; // Force Node.js runtime
 
