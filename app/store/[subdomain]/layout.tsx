@@ -3,11 +3,13 @@ import { notFound } from 'next/navigation';
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: { subdomain: string };
+  params: Promise<{ subdomain: string }>;
 }
 
 export default async function StoreLayout({ children, params }: LayoutProps) {
-  const store = await getStoreBySubdomain(params.subdomain);
+  // Await the params promise
+  const { subdomain } = await params;
+  const store = await getStoreBySubdomain(subdomain);
 
   if (!store) {
     return notFound();
