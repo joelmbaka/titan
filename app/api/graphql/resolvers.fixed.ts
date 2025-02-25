@@ -1,6 +1,7 @@
 import { Session } from "next-auth"
 import { driver, executeQuery } from "@/lib/neo4j"
 import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types"
+import { Record as Neo4jRecord } from "neo4j-driver"
 
 interface CreateStoreInput {
   name: string;
@@ -85,7 +86,7 @@ export const resolvers = {
     stores: async (
       _: unknown,
       __: unknown,
-      context: { session?: Session, user?: Record<string, unknown> }
+      context: { session?: Session, user?: Record<string, any> }
     ) => {
       console.log("Stores resolver context:", {
         hasSession: !!context.session,
@@ -135,7 +136,7 @@ export const resolvers = {
           recordCount: result.records.length
         });
         
-        return result.records.map(record => {
+        return result.records.map((record: Neo4jRecord) => {
           const store = record.get('s').properties;
           return {
             ...store,
@@ -608,7 +609,7 @@ export const resolvers = {
     createProduct: async (
       _: unknown, 
       { input }: { input: CreateProductInput }, 
-      context: { session?: Session, user?: Record<string, unknown> }
+      context: { session?: Session, user?: Record<string, any> }
     ) => {
       // Check authentication using the enhanced check we added to stores resolver
       if (!context.session && !context.user) {

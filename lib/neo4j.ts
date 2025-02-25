@@ -8,7 +8,7 @@ if (typeof window !== 'undefined') {
   throw new Error('Neo4j driver cannot be used in client-side code');
 }
 
-import neo4j from "neo4j-driver";
+import neo4j, { Driver } from "neo4j-driver";
 
 // Debugging: Log environment variables (commented out for production)
 // console.log("NEO4J_URI:", process.env.NEO4J_URI);
@@ -25,6 +25,10 @@ const getEnvVar = (name: string, required = true): string | null => {
   if (!value) {
     if (required && !isBuildTime) {
       console.error(`Missing environment variable: ${name}`);
+      // Don't throw during build time
+      if (isBuildTime) {
+        return null;
+      }
       throw new Error(`Required environment variable ${name} is missing`);
     }
     return null;
@@ -33,9 +37,9 @@ const getEnvVar = (name: string, required = true): string | null => {
 };
 
 // Get Neo4j connection details from environment variables
-const NEO4J_URI = getEnvVar("NEO4J_URI");
-const NEO4J_USER = getEnvVar("NEO4J_USER");
-const NEO4J_PASSWORD = getEnvVar("NEO4J_PASSWORD");
+const NEO4J_URI = getEnvVar("NEO4J_URI", false);
+const NEO4J_USER = getEnvVar("NEO4J_USER", false);
+const NEO4J_PASSWORD = getEnvVar("NEO4J_PASSWORD", false);
 
 // Create a dummy driver for build time
 const createDummyDriver = () => {
@@ -46,30 +50,35 @@ const createDummyDriver = () => {
       close: async () => {}
     }),
     close: async () => {}
-  } as unknown as neo4j.Driver;
+  } as unknown as Driver;
 };
 
 // Only create a real driver if we have all the required environment variables
 export const driver = (NEO4J_URI && NEO4J_USER && NEO4J_PASSWORD) 
   ? (() => {
-      // Log connection attempt (without exposing credentials)
-      console.log(`Connecting to Neo4j at ${NEO4J_URI} with user ${NEO4J_USER}`);
-      
-      return neo4j.driver(
-        NEO4J_URI,
-        neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
-        {
-          maxConnectionPoolSize: 50,
-          connectionTimeout: 30000, // 30 seconds
-          connectionAcquisitionTimeout: 10000, // 10 seconds
-          maxTransactionRetryTime: 30000, // 30 seconds
-          logging: {
-            level: 'info',
-            logger: (level, message) => console.log(`[Neo4j ${level}]: ${message}`)
-          },
-          disableLosslessIntegers: true, // Convert Neo4j integers to JavaScript numbers
-        }
-      );
+      try {
+        // Log connection attempt (without exposing credentials)
+        console.log(`Connecting to Neo4j at ${NEO4J_URI} with user ${NEO4J_USER}`);
+        
+        return neo4j.driver(
+          NEO4J_URI,
+          neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+          {
+            maxConnectionPoolSize: 50,
+            connectionTimeout: 30000, // 30 seconds
+            connectionAcquisitionTimeout: 60000, // 60 seconds (must be >= connectionTimeout)
+            maxTransactionRetryTime: 30000, // 30 seconds
+            logging: {
+              level: 'info',
+              logger: (level, message) => console.log(`[Neo4j ${level}]: ${message}`)
+            },
+            disableLosslessIntegers: true, // Convert Neo4j integers to JavaScript numbers
+          }
+        );
+      } catch (error) {
+        console.error('Error creating Neo4j driver:', error);
+        return createDummyDriver();
+      }
     })()
   : createDummyDriver();
 

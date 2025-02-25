@@ -1,6 +1,7 @@
 import { Session } from "next-auth";
 import { driver, executeQuery } from "@/lib/neo4j";
 import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types";
+import { Transaction, ManagedTransaction } from "neo4j-driver";
 
 interface CreateStoreInput {
   name: string;
@@ -151,7 +152,7 @@ export const resolvers = {
             console.log(`Created ${fixResult.records.length} new OWNS relationships`);
             
             // Return the newly connected stores
-            return fixResult.records.map((record) => {
+            return fixResult.records.map((record: any) => {
               const store = record.get("s").properties;
               return {
                 ...store,
@@ -168,7 +169,7 @@ export const resolvers = {
         }
         
         // Return stores with existing relationships
-        return result.records.map((record) => {
+        return result.records.map((record: any) => {
           const store = record.get("s").properties;
           return {
             ...store,
@@ -348,7 +349,7 @@ export const resolvers = {
           `MATCH (c:Industry) RETURN c ORDER BY c.name`,
           {},
         );
-        return result.records.map((record) => record.get("c").properties);
+        return result.records.map((record: any) => record.get("c").properties);
       } catch (error: unknown) {
         console.error("Error fetching industries:", error);
         throw new Error(
@@ -396,7 +397,7 @@ export const resolvers = {
           { storeId },
         );
 
-        return result.records.map((record) => {
+        return result.records.map((record: any) => {
           const product = record.get("p").properties;
           return {
             ...product,
@@ -427,7 +428,7 @@ export const resolvers = {
           { storeId },
         );
 
-        return result.records.map((record) => {
+        return result.records.map((record: any) => {
           const blogPost = record.get("b").properties;
           return {
             ...blogPost,
@@ -793,7 +794,7 @@ export const resolvers = {
           throw new Error("Store not found or user doesn't have permission");
         }
 
-        const result = await session.executeWrite((tx) =>
+        const result = await session.executeWrite((tx: ManagedTransaction) =>
           tx.run(
             `MATCH (s:Store {id: $storeId})
              CREATE (p:Product {
@@ -864,7 +865,7 @@ export const resolvers = {
 
       const session = driver.session();
       try {
-        const result = await session.executeWrite((tx) =>
+        const result = await session.executeWrite((tx: ManagedTransaction) =>
           tx.run(
             `MATCH (s:Store {id: $storeId})
              CREATE (b:BlogPost {

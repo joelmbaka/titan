@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/neo4j';
 import { auth } from '@/auth';
+import { Record } from 'neo4j-driver';
 
 export async function GET() {
   try {
@@ -48,7 +49,7 @@ export async function GET() {
     if (userExists && orphanedStoresResult.records.length > 0) {
       console.log(`Found ${orphanedStoresResult.records.length} orphaned stores, attempting to fix`);
       
-      for (const record of orphanedStoresResult.records) {
+      for (const record of orphanedStoresResult.records as Record[]) {
         const storeId = record.get('storeId');
         
         // Create the missing OWNS relationship
@@ -74,12 +75,12 @@ export async function GET() {
       success: true,
       userId,
       userExists,
-      relationships: relationshipResult.records.map(record => ({
+      relationships: relationshipResult.records.map((record: Record) => ({
         storeId: record.get('storeId'),
         storeName: record.get('storeName'),
         relationshipType: record.get('relationshipType')
       })),
-      orphanedStores: orphanedStoresResult.records.map(record => ({
+      orphanedStores: orphanedStoresResult.records.map((record: Record) => ({
         storeId: record.get('storeId'),
         storeName: record.get('storeName')
       })),
