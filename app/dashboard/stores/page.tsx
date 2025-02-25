@@ -49,6 +49,9 @@ export default function StoresPage() {
         'x-session-id': session?.user?.id || '',
         'x-auth-token': session?.accessToken || ''
       }
+    },
+    onCompleted: (data) => {
+      console.log("Stores query completed:", data);
     }
   });
 

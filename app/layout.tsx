@@ -10,6 +10,7 @@ import ApolloProviderWrapper from "@/components/apollo-provider";
 import { StoreProvider } from "@/context/store-context";
 import { ErrorBoundary } from 'react-error-boundary';
 import AuthError from '@/components/auth-error';
+import UserSyncProvider from "@/components/user-sync-provider";
 
 export default function RootLayout({
   children,
@@ -23,10 +24,12 @@ export default function RootLayout({
           <StoreProvider>
             <SessionProvider>
               <ErrorBoundary FallbackComponent={AuthError}>
-                <ApolloProviderWrapper>
-                  <Header />
-                  <main>{children}</main>
-                </ApolloProviderWrapper>
+                <UserSyncProvider>
+                  <ApolloProviderWrapper>
+                    <Header />
+                    <main>{children}</main>
+                  </ApolloProviderWrapper>
+                </UserSyncProvider>
               </ErrorBoundary>
             </SessionProvider>
           </StoreProvider>

@@ -104,6 +104,27 @@ export function MainNav() {
           </NavigationMenuContent>
         </NavigationMenuItem>
 
+        {/* Debug Tools */}
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>Debug</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2">
+              <NavItem title="Session Debug" href="/debug">
+                Check session and authentication state
+              </NavItem>
+              <NavItem title="GraphQL Debug" href="/debug-graphql">
+                Test GraphQL API endpoints
+              </NavItem>
+              <NavItem title="Resolvers Debug" href="/debug/resolvers">
+                Test GraphQL resolvers
+              </NavItem>
+              <NavItem title="Neo4j Debug" href="/api/debug-neo4j">
+                Test Neo4j connection
+              </NavItem>
+            </div>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+
         {/* Settings */}
         <NavigationMenuItem>
           <Link href="/settings" legacyBehavior passHref>

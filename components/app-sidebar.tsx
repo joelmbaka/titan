@@ -19,7 +19,21 @@ import {
   BarChart,
   LayoutDashboard,
   Megaphone,
-  LineChart
+  LineChart,
+  ShoppingBag,
+  Package,
+  CreditCard,
+  Tag,
+  Truck,
+  UserCircle,
+  Heart,
+  Palette,
+  Globe,
+  MessageSquare,
+  HelpCircle,
+  PieChart,
+  Zap,
+  Image
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useContext } from "react";
@@ -100,40 +114,36 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        {/* Store Metrics */}
         <SidebarContent className="flex-1 overflow-y-auto">
+          {/* Dashboard Overview */}
           <SidebarGroup>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Link href="/dashboard" className="flex items-center gap-3">
+                  <Home className="h-5 w-5" />
+                  <span>Dashboard</span>
+                </Link>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          {/* Store Performance */}
+          <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <PieChart className="h-5 w-5" />
+              <span className="font-medium">Store Performance</span>
+            </div>
             <div className="px-4 py-2">
-              <h3 className="font-medium mb-2">Store Metrics</h3>
               <div className="space-y-1">
-                <div className="flex justify-between hover:bg-accent p-1 rounded">
-                  <Link 
-                    href={`/dashboard/stores/${currentStore?.id}/products`} 
-                    className="flex-1 flex justify-between"
-                  >
-                    Products
-                    <span className="font-medium">
-                      {currentStore?.metrics?.products || 0}
-                    </span>
-                  </Link>
-                </div>
-                <div className="flex justify-between hover:bg-accent p-1 rounded">
-                  <Link 
-                    href={`/dashboard/stores/${currentStore?.id}/orders`} 
-                    className="flex-1 flex justify-between"
-                  >
-                    Orders
-                    <span className="font-medium">
-                      {currentStore?.metrics?.orders || 0}
-                    </span>
-                  </Link>
-                </div>
                 <div className="flex justify-between hover:bg-accent p-1 rounded">
                   <Link 
                     href={`/dashboard/stores/${currentStore?.id}/revenue`} 
                     className="flex-1 flex justify-between"
                   >
-                    Revenue
+                    <span className="flex items-center">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Revenue
+                    </span>
                     <span className="font-medium">
                       ${(currentStore?.metrics?.revenue || 0).toLocaleString()}
                     </span>
@@ -144,7 +154,10 @@ export function AppSidebar() {
                     href={`/dashboard/stores/${currentStore?.id}/web-analytics`} 
                     className="flex-1 flex justify-between"
                   >
-                    Web Analytics
+                    <span className="flex items-center">
+                      <Globe className="mr-2 h-4 w-4" />
+                      Visitors
+                    </span>
                     <span className="font-medium">
                       {currentStore?.metrics?.visitors || 0}
                     </span>
@@ -154,84 +167,157 @@ export function AppSidebar() {
             </div>
           </SidebarGroup>
 
-          {/* Management Section */}
-          <SidebarGroup>
+          {/* Products & Inventory */}
+          <SidebarGroup className="mt-2 border-t pt-2">
             <div className="w-full px-4 py-2 flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <span className="font-medium">Team Management</span>
+              <Package className="h-5 w-5" />
+              <span className="font-medium">Products & Inventory</span>
             </div>
-            
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="flex items-center gap-3">
-                  <Home className="h-5 w-5" />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
+                <Link href={`/dashboard/stores/${currentStore?.id}/products`} className="flex items-center gap-3">
+                  <ShoppingBag className="h-5 w-5" />
+                  <span>All Products</span>
+                  <span className="ml-auto text-xs bg-muted px-2 py-1 rounded-full">
+                    {currentStore?.metrics?.products || 0}
+                  </span>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <Link href={`/dashboard/stores/${currentStore?.id}/categories`} className="flex items-center gap-3">
+                  <Tag className="h-5 w-5" />
+                  <span>Categories</span>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/inventory`} className="flex items-center gap-3">
+                  <Package className="h-5 w-5" />
+                  <span>Inventory</span>
+                </Link>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          {/* Orders & Fulfillment */}
+          <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              <span className="font-medium">Orders & Fulfillment</span>
+            </div>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/orders`} className="flex items-center gap-3">
+                  <ShoppingBag className="h-5 w-5" />
+                  <span>Orders</span>
+                  <span className="ml-auto text-xs bg-muted px-2 py-1 rounded-full">
+                    {currentStore?.metrics?.orders || 0}
+                  </span>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/shipping`} className="flex items-center gap-3">
+                  <Truck className="h-5 w-5" />
+                  <span>Shipping</span>
+                </Link>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          {/* Customers */}
+          <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <UserCircle className="h-5 w-5" />
+              <span className="font-medium">Customers</span>
+            </div>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/customers`} className="flex items-center gap-3">
                   <Users className="h-5 w-5" />
-                  <span>AI Agents</span>
-                </SidebarMenuButton>
+                  <span>Customer List</span>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Megaphone className="h-5 w-5" />
+                <Link href={`/dashboard/stores/${currentStore?.id}/segments`} className="flex items-center gap-3">
+                  <Heart className="h-5 w-5" />
+                  <span>Segments</span>
+                </Link>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          {/* Marketing */}
+          <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <Megaphone className="h-5 w-5" />
+              <span className="font-medium">Marketing</span>
+            </div>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/campaigns`} className="flex items-center gap-3">
+                  <Zap className="h-5 w-5" />
                   <span>Campaigns</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-
-          {/* Content Section */}
-          <SidebarGroup className="mt-2 border-t pt-2">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <FileText className="h-5 w-5" />
-                  <span>Content Hub</span>
-                </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <Link href={`/dashboard/stores/${currentStore?.id}/email`} className="flex items-center gap-3">
                   <Mail className="h-5 w-5" />
-                  <span>Email Templates</span>
-                </SidebarMenuButton>
+                  <span>Email Marketing</span>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/discounts`} className="flex items-center gap-3">
+                  <Tag className="h-5 w-5" />
+                  <span>Discounts</span>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
 
-          {/* Analytics Section */}
+          {/* Content */}
           <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              <span className="font-medium">Content</span>
+            </div>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <BarChart className="h-5 w-5" />
-                  <span>Campaign Analytics</span>
-                </SidebarMenuButton>
+                <Link href={`/dashboard/stores/${currentStore?.id}/blog`} className="flex items-center gap-3">
+                  <FileText className="h-5 w-5" />
+                  <span>Blog</span>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <BarChart className="h-5 w-5" />
-                  <span>Sales Metrics</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <LineChart className="h-5 w-5" />
-                  <span>Performance Reports</span>
-                </SidebarMenuButton>
+                <Link href={`/dashboard/stores/${currentStore?.id}/pages`} className="flex items-center gap-3">
+                  <Image className="h-5 w-5" />
+                  <span>Pages</span>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
 
-          {/* Blog Section */}
+          {/* Store Settings */}
           <SidebarGroup className="mt-2 border-t pt-2">
+            <div className="w-full px-4 py-2 flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              <span className="font-medium">Store Settings</span>
+            </div>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href={`/dashboard/stores/${currentStore?.id}/blog`} className="flex items-center">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Blog
+                <Link href={`/dashboard/stores/${currentStore?.id}/settings/general`} className="flex items-center gap-3">
+                  <Settings className="h-5 w-5" />
+                  <span>General</span>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/settings/appearance`} className="flex items-center gap-3">
+                  <Palette className="h-5 w-5" />
+                  <span>Appearance</span>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href={`/dashboard/stores/${currentStore?.id}/settings/team`} className="flex items-center gap-3">
+                  <Users className="h-5 w-5" />
+                  <span>Team Members</span>
                 </Link>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -241,24 +327,25 @@ export function AppSidebar() {
         <SidebarFooter className="p-4 border-t">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Settings className="h-5 w-5" />
-                <span>System Settings</span>
-              </SidebarMenuButton>
+              <Link href="/help" className="flex items-center gap-3">
+                <HelpCircle className="h-5 w-5" />
+                <span>Help & Support</span>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/profile" className="flex items-center gap-3">
+                <UserCircle className="h-5 w-5" />
+                <span>My Profile</span>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-      
+
       <AddStoreModal
         open={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
-        onStoreAdded={async () => {
-          await refetch();
-          if (data?.stores?.length) {
-            setCurrentStore(data.stores[data.stores.length - 1]);
-          }
-        }}
+        onStoreAdded={refetch}
       />
     </>
   );

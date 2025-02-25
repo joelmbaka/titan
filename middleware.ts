@@ -3,13 +3,15 @@ import type { NextRequest } from 'next/server';
 import { auth } from './auth';
 
 export async function middleware(request: NextRequest) {
+  // Only log authentication info, don't try to sync with Neo4j here
   const session = await auth();
+  
+  // Log authentication information for debugging
   console.log("Middleware auth check:", {
     path: request.nextUrl.pathname,
     hasSession: !!session,
     userId: session?.user?.id || 'none'
   });
-  const { pathname } = request.nextUrl;
 
   // Define public paths that don't require authentication
   const isPublicPath = [
@@ -17,10 +19,11 @@ export async function middleware(request: NextRequest) {
     '/api/auth',
     '/',
     '/error',
-  ].some(path => pathname.startsWith(path));
+    '/api/graphql', // Allow GraphQL API to handle its own auth
+  ].some(path => request.nextUrl.pathname.startsWith(path));
 
   // Define protected paths that require authentication
-  const isProtectedPath = pathname.startsWith('/dashboard');
+  const isProtectedPath = request.nextUrl.pathname.startsWith('/dashboard');
 
   // Handle authentication redirects
   if (isProtectedPath && !session) {
@@ -28,26 +31,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
-  if (isPublicPath && session) {
-    // Redirect to dashboard if trying to access public route while authenticated
-    if (pathname === '/sign-in') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+  if (isPublicPath && session && request.nextUrl.pathname === '/sign-in') {
+    // Redirect to dashboard if trying to access sign-in while authenticated
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
+  // Allow all other requests to proceed
   return NextResponse.next();
 }
 
-// Configure which paths the middleware should run on
+// Only run middleware on specific routes, NOT on API routes that use Neo4j
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * 1. /_next/ (Next.js internals)
-     * 2. /api/auth/ (NextAuth.js internals)
-     * 3. /static (public files)
-     * 4. .*\\..*$ (files with extensions)
-     */
-    '/((?!_next|api/auth|static|.*\\..*$).*)',
+    '/((?!api/graphql|api/neo4j|api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
 }; 

@@ -45,6 +45,7 @@ type Store {
   name: String!
   industry: String!
   subdomain: String!
+  owner: User!
   metrics: StoreMetrics!
   createdAt: String!
   updatedAt: String!
