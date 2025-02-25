@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { executeQuery } from "@/lib/neo4j";
+import { getStoreBySubdomain } from "@/lib/storeFunctions.server";
 
 // Define the Store type
 interface Store {
@@ -78,9 +78,13 @@ export default async function StorePage({
 }: { 
   params: { subdomain: string } 
 }) {
+  console.log('StorePage - Rendering page for subdomain:', params.subdomain);
+  
   const store = await getStoreBySubdomain(params.subdomain);
+  console.log('StorePage - Store data:', store);
   
   if (!store) {
+    console.log('StorePage - Store not found');
     notFound();
   }
   

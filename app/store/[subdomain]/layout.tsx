@@ -1,18 +1,17 @@
-import { getStoreBySubdomain } from '@/lib/storeFunctions';
+import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: Promise<{ subdomain: string }>;
+  params: { subdomain: string };
 }
 
 export default async function StoreLayout({ children, params }: LayoutProps) {
   console.log('StoreLayout - Rendering layout');
   
   try {
-    // Await the params promise
-    const { subdomain } = await params;
+    const { subdomain } = params;
     console.log('StoreLayout - Subdomain:', subdomain);
 
     const store = await getStoreBySubdomain(subdomain);
@@ -35,11 +34,11 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
               </div>
               <nav>
                 <ul className="flex space-x-6">
-                  <li><Link href={`/store/${subdomain}`} className="hover:text-blue-600">Home</Link></li>
-                  <li><Link href={`/store/${subdomain}/products`} className="hover:text-blue-600">Products</Link></li>
-                  <li><Link href={`/store/${subdomain}/blog`} className="hover:text-blue-600">Blog</Link></li>
-                  <li><Link href={`/store/${subdomain}/about`} className="hover:text-blue-600">About</Link></li>
-                  <li><Link href={`/store/${subdomain}/contact`} className="hover:text-blue-600">Contact</Link></li>
+                  <li><Link href="/" className="hover:text-blue-600">Home</Link></li>
+                  <li><Link href="/products" className="hover:text-blue-600">Products</Link></li>
+                  <li><Link href="/blog" className="hover:text-blue-600">Blog</Link></li>
+                  <li><Link href="/about" className="hover:text-blue-600">About</Link></li>
+                  <li><Link href="/contact" className="hover:text-blue-600">Contact</Link></li>
                 </ul>
               </nav>
             </div>
