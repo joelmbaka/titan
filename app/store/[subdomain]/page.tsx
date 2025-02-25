@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStoreBySubdomain } from "@/lib/storeFunctions.server";
+import Link from "next/link";
 
 // Generate metadata for the page
 export async function generateMetadata({ 
@@ -49,6 +50,36 @@ export default async function StorePage({
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Debug Information</h2>
+          <div className="bg-gray-100 p-4 rounded">
+            <p><strong>Subdomain:</strong> {params.subdomain}</p>
+            <p><strong>Store ID:</strong> {store.id}</p>
+            <p><strong>Store Name:</strong> {store.name}</p>
+            <p><strong>Industry:</strong> {store.industry}</p>
+            <p><strong>Timestamp:</strong> {new Date().toISOString()}</p>
+          </div>
+          
+          <h3 className="text-lg font-semibold mt-4 mb-2">Navigation Links</h3>
+          <ul className="space-y-2">
+            <li>
+              <Link href="/test" className="text-blue-600 hover:underline">
+                Test Page
+              </Link>
+            </li>
+            <li>
+              <Link href="/products" className="text-blue-600 hover:underline">
+                Products
+              </Link>
+            </li>
+            <li>
+              <Link href="/api/check-subdomain-store" className="text-blue-600 hover:underline">
+                API: Check Store
+              </Link>
+            </li>
+          </ul>
+        </div>
+      
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <section className="mb-12">

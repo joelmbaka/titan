@@ -1,5 +1,6 @@
 import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function TestPage({ 
   params 
@@ -29,6 +30,26 @@ export default async function TestPage({
           <li><strong>Subdomain:</strong> {params.subdomain}</li>
           <li><strong>Store Name:</strong> {store.name}</li>
           <li><strong>Industry:</strong> {store.industry}</li>
+          <li><strong>Timestamp:</strong> {new Date().toISOString()}</li>
+        </ul>
+        
+        <h2 className="text-xl font-semibold mt-6 mb-4">Navigation</h2>
+        <ul className="space-y-2">
+          <li>
+            <Link href="/" className="text-blue-600 hover:underline">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link href="/products" className="text-blue-600 hover:underline">
+              Products
+            </Link>
+          </li>
+          <li>
+            <Link href="/api/check-subdomain-store" className="text-blue-600 hover:underline">
+              API: Check Store
+            </Link>
+          </li>
         </ul>
       </div>
     </div>

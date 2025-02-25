@@ -19,7 +19,8 @@ export async function middleware(request: NextRequest) {
     hostname,
     pathname,
     subdomain,
-    isSubdomainRequest
+    isSubdomainRequest,
+    url: request.url
   });
 
   // Handle subdomain requests - IMPORTANT: Do this before auth checks
@@ -32,7 +33,13 @@ export async function middleware(request: NextRequest) {
     
     // Rewrite the URL to the store route for non-API paths
     const url = request.nextUrl.clone();
-    url.pathname = `/store/${subdomain}${pathname === '/' ? '' : pathname}`;
+    
+    // Handle root path specially
+    if (pathname === '/') {
+      url.pathname = `/store/${subdomain}`;
+    } else {
+      url.pathname = `/store/${subdomain}${pathname}`;
+    }
     
     console.log("Rewriting subdomain request to:", url.pathname);
     return NextResponse.rewrite(url);
@@ -57,6 +64,8 @@ export async function middleware(request: NextRequest) {
       '/',
       '/error',
       '/api/graphql', // Allow GraphQL API to handle its own auth
+      '/api/check-subdomain-store', // Allow checking store existence
+      '/api/create-test-store', // Allow creating test stores
     ].some(path => request.nextUrl.pathname.startsWith(path));
 
     // Define protected paths that require authentication
