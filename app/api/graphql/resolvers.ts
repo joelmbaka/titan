@@ -554,7 +554,37 @@ export const resolvers = {
           );
         }
 
-        // Create store
+        // Set up subdomain first to ensure it's available before creating the store
+        console.log("Setting up subdomain for store:", input.subdomain);
+        
+        try {
+          // Check if subdomain is available
+          const subdomainResult = await setupStoreSubdomain({
+            subdomain: input.subdomain,
+            name: input.name,
+            industry: input.industry as any, // Cast to any to avoid type issues
+            id: "temp-" + uuidv4(), // Temporary ID for checking
+            ownerId: userId,
+            createdAt: new Date().toISOString(), // Convert Date to string
+            updatedAt: new Date().toISOString(), // Convert Date to string
+            metrics: {
+              sales: 0,
+              visitors: 0,
+              conversion: 0
+            }
+          });
+          
+          if (!subdomainResult.success) {
+            throw new Error(subdomainResult.message);
+          }
+          
+          console.log("Subdomain setup completed successfully");
+        } catch (subdomainError) {
+          console.error("Error setting up subdomain:", subdomainError);
+          throw new Error(`Subdomain setup failed: ${subdomainError instanceof Error ? subdomainError.message : String(subdomainError)}`);
+        }
+
+        // Create store after successful subdomain setup
         const storeId = uuidv4();
         const result = await executeQuery(
           `
@@ -584,18 +614,20 @@ export const resolvers = {
           throw new Error("Failed to create store");
         }
 
-        // Set up subdomain
-        console.log("Setting up subdomain for store:", store);
-        try {
-          // Try to set up the subdomain, but don't fail the store creation if it fails
-          await setupStoreSubdomain(store);
-          console.log("Subdomain setup completed successfully");
-        } catch (subdomainError) {
-          // Log the error but continue with store creation
-          console.error("Error setting up subdomain:", subdomainError);
-          console.log("Store created successfully, but subdomain setup failed. User can set up subdomain manually later.");
-        }
+        // Create relationship between user and store
+        await executeQuery(
+          `
+          MATCH (u:User {id: $userId}), (s:Store {id: $storeId})
+          CREATE (u)-[:OWNS]->(s)
+          `,
+          {
+            userId,
+            storeId: store.id,
+          }
+        );
 
+        console.log("Store created successfully with ID:", store.id);
+        
         return {
           ...store,
           createdAt: new Date(store.createdAt),

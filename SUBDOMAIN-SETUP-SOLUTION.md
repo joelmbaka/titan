@@ -6,6 +6,15 @@ This document outlines the solution implemented to fix the "DEPLOYMENT_NOT_FOUND
 
 When creating a new store, users encountered a "DEPLOYMENT_NOT_FOUND" error (404) during the subdomain setup process. This was caused by DNS record conflicts when attempting to create a new CNAME record for a subdomain that already had an existing record.
 
+## Root Causes
+
+The "DEPLOYMENT_NOT_FOUND" error can occur for several reasons:
+
+1. **DNS Record Exists but No Deployment**: A DNS record points to Vercel, but no corresponding deployment exists
+2. **DNS Propagation Delay**: The DNS record has been created, but DNS changes haven't fully propagated
+3. **Vercel Configuration Issues**: The Vercel project isn't properly configured to handle the subdomain
+4. **Stale DNS Records**: Old DNS records that point to non-existent deployments
+
 ## Solution Overview
 
 The solution implements a robust subdomain setup process with the following features:
@@ -15,6 +24,7 @@ The solution implements a robust subdomain setup process with the following feat
 3. **Manual Setup**: Added a UI component to allow users to manually trigger subdomain setup if automatic setup fails.
 4. **User Feedback**: Enhanced UI to provide clear feedback on the subdomain setup process.
 5. **Utility Scripts**: Created scripts for managing DNS records and checking subdomain availability.
+6. **DNS Record Management**: Tools to delete and recreate DNS records when needed.
 
 ## Implementation Details
 
@@ -66,7 +76,7 @@ npm run check-subdomain <subdomain>
 
 ### Deleting Conflicting DNS Records
 
-If you encounter a DNS record conflict, you can delete the conflicting record:
+If you encounter a DNS record conflict or a "DEPLOYMENT_NOT_FOUND" error, you can delete the conflicting record:
 
 ```
 cd scripts
@@ -82,6 +92,33 @@ If automatic subdomain setup fails, you can manually trigger it:
 3. Click the "Subdomain Setup" button
 4. Click the "Setup Subdomain" button in the expanded section
 
+## Troubleshooting "DEPLOYMENT_NOT_FOUND" Errors
+
+If you encounter a "DEPLOYMENT_NOT_FOUND" error when accessing a store subdomain, follow these steps:
+
+1. **Check DNS Record**: Verify if the DNS record exists using the check-subdomain script
+   ```
+   cd scripts
+   npm run check-subdomain <subdomain>
+   ```
+
+2. **Delete and Recreate**: If the DNS record exists but the deployment is not found, delete the record and set it up again
+   ```
+   cd scripts
+   npm run delete-dns <subdomain>
+   ```
+   Then trigger the subdomain setup again from the store card in the dashboard.
+
+3. **Verify Vercel Configuration**: Ensure that your Vercel project is configured to handle subdomains
+   ```
+   cd scripts
+   npm run check-vercel
+   ```
+
+4. **Wait for DNS Propagation**: DNS changes can take time to propagate (up to 48 hours in some cases)
+
+5. **Check Store Status**: Ensure the store is properly created and has a valid subdomain assigned
+
 ## Conclusion
 
 The implemented solution addresses the "DEPLOYMENT_NOT_FOUND" error by:
@@ -90,5 +127,6 @@ The implemented solution addresses the "DEPLOYMENT_NOT_FOUND" error by:
 2. Providing clear error messages to users
 3. Offering manual setup options when automatic setup fails
 4. Creating utility scripts for managing DNS records
+5. Providing troubleshooting steps for resolving deployment issues
 
 These changes ensure a more robust and user-friendly subdomain setup process for the Titan 2.0 platform. 

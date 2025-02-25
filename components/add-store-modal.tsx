@@ -18,7 +18,8 @@ import { NAICSCategory } from "@/lib/types";
 import { useMutation } from "@apollo/client";
 import { gql } from "@apollo/client";
 import { StoreContext } from "@/context/store-context";
-import { createDnsRecordForDomain } from "@/lib/vercel-dns";
+import { ExternalLink, Globe, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AddStoreModalProps {
   open: boolean;
@@ -52,6 +53,7 @@ export function AddStoreModal({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [dnsStatus, setDnsStatus] = useState<"pending" | "success" | "error">("pending");
   const router = useRouter();
   const [createStore] = useMutation(CREATE_STORE_MUTATION);
   const { addStore } = useContext(StoreContext);
@@ -59,22 +61,15 @@ export function AddStoreModal({
     name: string;
     industry: string;
     subdomain: string;
+    id: string;
   } | null>(null);
 
   const handleAdd = async () => {
     if (name.trim() && industry && subdomain.trim() && termsAccepted) {
       setIsLoading(true);
       try {
-        console.log("Starting DNS record creation process...");
-        const dnsResult = await createDnsRecordForDomain(subdomain);
-
-        console.log("DNS creation result:", dnsResult);
-
-        if (!dnsResult.success) {
-          throw new Error(dnsResult.message);
-        }
-
-        // Then create the store
+        // Create the store through GraphQL mutation
+        // The resolver will handle DNS record creation
         const { data, errors } = await createStore({
           variables: {
             input: {
@@ -96,6 +91,7 @@ export function AddStoreModal({
           addStore(data.createStore);
           setCreatedStore(data.createStore);
           setShowSuccess(true);
+          setDnsStatus("success"); // DNS is handled by the resolver
           
           if (onStoreAdded) {
             await onStoreAdded();
@@ -103,6 +99,7 @@ export function AddStoreModal({
         }
       } catch (error) {
         console.error('Full error:', error);
+        setDnsStatus("error");
         alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         setIsLoading(false);
@@ -118,6 +115,30 @@ export function AddStoreModal({
       .replace(/^-|-$/g, '');
     setSubdomain(value);
   };
+  
+  const handleVisitStore = () => {
+    if (createdStore?.subdomain) {
+      window.open(`https://${createdStore.subdomain}.joelmbaka.site`, "_blank");
+    }
+  };
+  
+  const handleGoToDashboard = () => {
+    onClose();
+    if (createdStore?.id) {
+      router.push(`/dashboard/stores/${createdStore.id}`);
+    } else {
+      router.push('/dashboard/stores');
+    }
+  };
+  
+  const resetForm = () => {
+    setName("");
+    setIndustry("");
+    setSubdomain("");
+    setTermsAccepted(false);
+    setShowSuccess(false);
+    setDnsStatus("pending");
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -130,32 +151,48 @@ export function AddStoreModal({
         
         {showSuccess ? (
           <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="bg-green-100 p-3 rounded-full">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </div>
+            
             <p className="text-lg font-semibold">🎉 Store Created Successfully!</p>
-            <div className="text-left space-y-2">
+            
+            <Alert className="bg-green-50 border-green-200 text-green-800">
+              <AlertDescription>
+                Your store is now live at <span className="font-semibold">https://{createdStore?.subdomain}.joelmbaka.site</span>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="text-left space-y-2 bg-gray-50 p-4 rounded-md">
               <p><span className="font-medium">Name:</span> {createdStore?.name}</p>
               <p><span className="font-medium">Industry:</span> {createdStore?.industry.replace(/_/g, ' ')}</p>
               <p><span className="font-medium">Subdomain:</span> {createdStore?.subdomain}.joelmbaka.site</p>
             </div>
-            <div className="flex gap-2 justify-center">
+            
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={handleVisitStore}
+                className="gap-2"
+              >
+                <Globe className="h-4 w-4" />
+                Visit Your Store
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </Button>
+              
               <Button
                 variant="outline"
-                onClick={() => {
-                  setName("");
-                  setIndustry("");
-                  setSubdomain("");
-                  setTermsAccepted(false);
-                  setShowSuccess(false);
-                }}
+                onClick={handleGoToDashboard}
               >
-                Create Another
+                Go to Store Dashboard
               </Button>
+              
               <Button
-                onClick={() => {
-                  onClose();
-                  router.push('/dashboard');
-                }}
+                variant="ghost"
+                onClick={resetForm}
               >
-                Go to Dashboard
+                Create Another Store
               </Button>
             </div>
           </div>
