@@ -3,6 +3,35 @@ import type { NextRequest } from 'next/server';
 import { auth } from './auth';
 
 export async function middleware(request: NextRequest) {
+  // Get the hostname from the request
+  const hostname = request.headers.get('host') || '';
+  const pathname = request.nextUrl.pathname;
+  
+  // Check if this is a subdomain request
+  const subdomain = hostname.split('.')[0];
+  const isSubdomainRequest = 
+    hostname.includes('.joelmbaka.site') && 
+    subdomain !== 'www' && 
+    subdomain !== 'joelmbaka';
+  
+  // Log request information for debugging
+  console.log("Middleware request:", {
+    hostname,
+    pathname,
+    subdomain,
+    isSubdomainRequest
+  });
+
+  // Handle subdomain requests
+  if (isSubdomainRequest) {
+    // Rewrite the URL to the store route
+    const url = request.nextUrl.clone();
+    url.pathname = `/store/${subdomain}${pathname === '/' ? '' : pathname}`;
+    
+    console.log("Rewriting subdomain request to:", url.pathname);
+    return NextResponse.rewrite(url);
+  }
+
   // Only log authentication info, don't try to sync with Neo4j here
   const session = await auth();
   
