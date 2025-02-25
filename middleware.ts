@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
     isSubdomainRequest
   });
 
-  // Handle subdomain requests
+  // Handle subdomain requests - IMPORTANT: Do this before auth checks
   if (isSubdomainRequest) {
     // Rewrite the URL to the store route
     const url = request.nextUrl.clone();
@@ -32,37 +32,40 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // Only log authentication info, don't try to sync with Neo4j here
-  const session = await auth();
-  
-  // Log authentication information for debugging
-  console.log("Middleware auth check:", {
-    path: request.nextUrl.pathname,
-    hasSession: !!session,
-    userId: session?.user?.id || 'none'
-  });
+  // Only check authentication for non-subdomain requests
+  if (!isSubdomainRequest) {
+    // Only log authentication info, don't try to sync with Neo4j here
+    const session = await auth();
+    
+    // Log authentication information for debugging
+    console.log("Middleware auth check:", {
+      path: request.nextUrl.pathname,
+      hasSession: !!session,
+      userId: session?.user?.id || 'none'
+    });
 
-  // Define public paths that don't require authentication
-  const isPublicPath = [
-    '/sign-in',
-    '/api/auth',
-    '/',
-    '/error',
-    '/api/graphql', // Allow GraphQL API to handle its own auth
-  ].some(path => request.nextUrl.pathname.startsWith(path));
+    // Define public paths that don't require authentication
+    const isPublicPath = [
+      '/sign-in',
+      '/api/auth',
+      '/',
+      '/error',
+      '/api/graphql', // Allow GraphQL API to handle its own auth
+    ].some(path => request.nextUrl.pathname.startsWith(path));
 
-  // Define protected paths that require authentication
-  const isProtectedPath = request.nextUrl.pathname.startsWith('/dashboard');
+    // Define protected paths that require authentication
+    const isProtectedPath = request.nextUrl.pathname.startsWith('/dashboard');
 
-  // Handle authentication redirects
-  if (isProtectedPath && !session) {
-    // Redirect to sign-in if trying to access protected route without auth
-    return NextResponse.redirect(new URL('/sign-in', request.url));
-  }
+    // Handle authentication redirects
+    if (isProtectedPath && !session) {
+      // Redirect to sign-in if trying to access protected route without auth
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
 
-  if (isPublicPath && session && request.nextUrl.pathname === '/sign-in') {
-    // Redirect to dashboard if trying to access sign-in while authenticated
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (isPublicPath && session && request.nextUrl.pathname === '/sign-in') {
+      // Redirect to dashboard if trying to access sign-in while authenticated
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   // Allow all other requests to proceed

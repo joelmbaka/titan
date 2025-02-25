@@ -270,9 +270,9 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               {user?.image ? (
-                <Image
-                  src={user.image}
-                  alt="Profile Avatar"
+        <Image
+          src={user.image}
+          alt="Profile Avatar"
                   className="rounded-full"
                   width={150}
                   height={150}
@@ -321,7 +321,7 @@ export default function Profile() {
             >
               <AlertCircle className="mr-2 h-4 w-4" />
               {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-            </Button>
+        </Button>
           </div>
         </div>
         
@@ -341,21 +341,21 @@ export default function Profile() {
                       <label htmlFor="name" className="block text-sm font-medium mb-1">
                         Name
                       </label>
-                      <Input
+          <Input
                         id="name"
-                        name="name"
+            name="name"
                         defaultValue={user.name || ""}
                         required
-                      />
+          />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium mb-1">
                         Email
                       </label>
-                      <Input
+          <Input
                         id="email"
                         name="email"
-                        type="email"
+            type="email"
                         defaultValue={user.email || ""}
                         required
                       />
@@ -366,18 +366,18 @@ export default function Profile() {
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                       >
-                        Cancel
-                      </Button>
+              Cancel
+            </Button>
                       <Button type="submit" disabled={updateLoading}>
                         {updateLoading ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
+            </Button>
+          </div>
                     {updateError && (
                       <p className="text-red-500 text-sm mt-2">
                         Error: {updateError.message}
                       </p>
                     )}
-                  </form>
+        </form>
                 ) : (
                   <div className="space-y-4">
                     <div>

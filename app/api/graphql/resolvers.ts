@@ -102,7 +102,7 @@ export const resolvers = {
 
       // Get the user ID from either source
       const userId = context.user?.id || context.session?.user?.id;
-      
+
       if (!userId) {
         console.error("User ID missing in authenticated context");
         throw new Error("User ID required");
@@ -508,8 +508,8 @@ export const resolvers = {
       try {
         // Check if user is authenticated
         if (!context.session) {
-          throw new Error("Not authenticated");
-        }
+        throw new Error("Not authenticated");
+      }
 
         console.log("Create store input:", input);
         console.log("Session:", context.session);
@@ -588,15 +588,15 @@ export const resolvers = {
         const storeId = uuidv4();
         const result = await executeQuery(
           `
-          CREATE (s:Store {
+           CREATE (s:Store {
             id: $id,
-            name: $name,
-            industry: $industry,
-            subdomain: $subdomain,
+             name: $name,
+             industry: $industry,
+             subdomain: $subdomain,
             ownerId: $ownerId,
-            createdAt: datetime(),
-            updatedAt: datetime()
-          })
+             createdAt: datetime(),
+             updatedAt: datetime()
+           })
           RETURN s
           `,
           {

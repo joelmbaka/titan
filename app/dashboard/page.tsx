@@ -71,9 +71,9 @@ export default function Dashboard() {
   }
 
   if (error) {
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>Error loading stores: {error.message}</AlertDescription>
         </Alert>
