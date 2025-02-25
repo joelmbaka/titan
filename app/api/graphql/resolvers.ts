@@ -479,17 +479,23 @@ export const resolvers = {
       { subdomain }: { subdomain: string },
       context: { session?: Session },
     ) => {
-      if (!context.session?.user) {
-        throw new Error("Not authenticated");
-      }
+      // Remove authentication check to make this endpoint public
+      // Store pages need to be accessible without authentication
 
       try {
+        console.log(`Resolvers - Fetching store with subdomain: ${subdomain}`);
         const result = await executeQuery(
           `MATCH (s:Store {subdomain: $subdomain}) RETURN s`,
           { subdomain },
         );
+        
+        if (!result.records.length) {
+          console.log(`Resolvers - No store found with subdomain: ${subdomain}`);
+          return null; // Return null instead of throwing an error
+        }
+        
         const store = result.records[0]?.get("s").properties;
-        if (!store) throw new Error("Store not found");
+        console.log(`Resolvers - Found store: ${store.name}`);
         return store;
       } catch (error: unknown) {
         console.error("Error fetching store by subdomain:", error);
