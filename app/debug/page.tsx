@@ -5,9 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+interface HeaderInfo {
+  [key: string]: string | string[] | { error: string };
+}
+
 export default function DebugPage() {
   const { data: session, status, update } = useSession();
-  const [headerInfo, setHeaderInfo] = useState<any>(null);
+  const [headerInfo, setHeaderInfo] = useState<HeaderInfo | null>(null);
 
   // Fetch headers to check what's being sent
   useEffect(() => {

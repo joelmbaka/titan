@@ -1,6 +1,4 @@
-console.log("Loading next.config.js...");
-console.log("VERCEL_API_TOKEN from process.env:", process.env.VERCEL_API_TOKEN);
-
+// Next.js configuration
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
@@ -12,10 +10,11 @@ const nextConfig = {
     // ... other environment variables ...
   },
   // Add public runtime config for client-side access
+  // Only expose what's absolutely necessary to the client
   publicRuntimeConfig: {
     NEO4J_URI: process.env.NEO4J_URI,
     NEO4J_USER: process.env.NEO4J_USER,
-    NEO4J_PASSWORD: process.env.NEO4J_PASSWORD,
+    // Don't expose sensitive passwords to the client
   },
   images: {
     domains: ['avatars.githubusercontent.com'],
@@ -50,5 +49,4 @@ const nextConfig = {
   // ... rest of your config ...
 };
 
-console.log("Next.js config:", nextConfig);
 export default nextConfig;
