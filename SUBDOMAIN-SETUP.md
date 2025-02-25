@@ -48,6 +48,46 @@ const result = await response.json();
 console.log(result);
 ```
 
+## Utility Scripts
+
+The `scripts` directory contains several utility scripts for managing subdomains:
+
+### Check Subdomain Availability
+
+Check if a subdomain is available for use:
+
+```
+cd scripts
+npm run check-subdomain <subdomain>
+```
+
+### Delete DNS Record
+
+Delete a DNS record for a specific subdomain:
+
+```
+cd scripts
+npm run delete-dns <subdomain>
+```
+
+### Test Subdomain Setup
+
+Test the subdomain setup process by creating a test subdomain:
+
+```
+cd scripts
+npm run test-subdomain
+```
+
+### Check Vercel Credentials
+
+Check if your Vercel API token and team ID are valid and working correctly:
+
+```
+cd scripts
+npm run check-vercel
+```
+
 ## Troubleshooting
 
 If you encounter issues with subdomain setup, check the following:
@@ -56,6 +96,7 @@ If you encounter issues with subdomain setup, check the following:
 2. **Vercel Team ID**: Ensure that the `VERCEL_TEAM_ID` environment variable is set correctly
 3. **DNS Propagation**: DNS changes can take time to propagate. Wait a few minutes and try again
 4. **Subdomain Availability**: Make sure the subdomain is not already in use
+5. **DNS Record Conflicts**: If you receive a conflict error, use the `delete-dns` script to remove the conflicting record
 
 ## Environment Variables
 

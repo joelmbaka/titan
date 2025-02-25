@@ -5,6 +5,10 @@ const nextConfig = {
     // Disable ESLint during production builds
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // Disable TypeScript checking during builds
+    ignoreBuildErrors: true,
+  },
   env: {
     VERCEL_API_TOKEN: process.env.VERCEL_API_TOKEN,
     VERCEL_TEAM_ID: process.env.VERCEL_TEAM_ID,

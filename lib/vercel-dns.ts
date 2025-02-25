@@ -1,8 +1,8 @@
 import { env } from "@/env";
 
 console.log("Initializing Vercel DNS client...");
-console.log("Using Vercel API Token:", env.VERCEL_API_TOKEN);
-console.log("Using Vercel Team ID:", env.VERCEL_TEAM_ID);
+console.log("Using Vercel API Token:", env.VERCEL_API_TOKEN ? "Present" : "Missing");
+console.log("Using Vercel Team ID:", env.VERCEL_TEAM_ID || "Missing");
 
 interface DnsRecordPayload {
   name: string;
@@ -11,91 +11,79 @@ interface DnsRecordPayload {
   ttl?: number;
 }
 
+/**
+ * Creates a DNS record for a domain using the Vercel API
+ * @param subdomain The subdomain to create (without the base domain)
+ * @returns Object with success status and message
+ */
 export async function createDnsRecordForDomain(
-  domain: string,
-  dnsRecordPayload: DnsRecordPayload
+  subdomain: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    console.log("Starting DNS record creation process...");
-    console.log("Creating DNS record for domain:", domain);
-    console.log("DNS Record Payload:", dnsRecordPayload);
-
+    // Check for required environment variables
     const token = env.VERCEL_API_TOKEN;
     const teamId = env.VERCEL_TEAM_ID;
-    
+
     if (!token) {
       console.error("Vercel API token is missing");
       return { success: false, message: "Vercel API token is missing" };
     }
-    
-    const baseUrl = "https://api.vercel.com";
-    const domainUrl = `${baseUrl}/v5/domains/${domain}${teamId ? `?teamId=${teamId}` : ''}`;
 
-    console.log("Checking domain existence at:", domainUrl);
-    const domainCheck = await fetch(domainUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("Domain check response status:", domainCheck.status);
-    if (!domainCheck.ok) {
-      if (domainCheck.status === 403) {
-        console.error("403 Forbidden: Token may not have the correct scope or permissions");
-        throw new Error(
-          "Not authorized: Ensure your Vercel API token has the correct scope and permissions."
-        );
-      }
-      
-      if (domainCheck.status === 404) {
-        // Domain doesn't exist, let's add it
-        console.log("Domain not found, adding it...");
-        const addDomainUrl = `${baseUrl}/v9/projects/titan-2/domains${teamId ? `?teamId=${teamId}` : ''}`;
-        const addDomainResponse = await fetch(addDomainUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: domain }),
-        });
-        
-        if (!addDomainResponse.ok) {
-          const error = await addDomainResponse.json();
-          console.error("Failed to add domain:", error);
-          throw new Error(error.error?.message || "Failed to add domain");
-        }
-        
-        console.log("Domain added successfully");
-      } else {
-        const error = await domainCheck.json();
-        console.error("Error checking domain:", error);
-        throw new Error(error.error?.message || "Failed to check domain");
-      }
+    if (!teamId) {
+      console.error("Vercel team ID is missing");
+      return { success: false, message: "Vercel team ID is missing" };
     }
 
-    const dnsRecordUrl = `${baseUrl}/v2/domains/${domain}/records${teamId ? `?teamId=${teamId}` : ''}`;
-    console.log("Creating DNS record at:", dnsRecordUrl);
+    console.log(`Creating DNS record for subdomain: ${subdomain}`);
+
+    // Create the DNS record
+    const dnsRecordUrl = `https://api.vercel.com/v2/domains/joelmbaka.site/records?teamId=${teamId}`;
     const dnsResponse = await fetch(dnsRecordUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(dnsRecordPayload),
+      body: JSON.stringify({
+        name: subdomain,
+        type: "CNAME",
+        value: "cname.vercel-dns.com",
+        ttl: 60,
+      }),
     });
 
-    console.log("DNS record creation response status:", dnsResponse.status);
     if (!dnsResponse.ok) {
       const error = await dnsResponse.json();
       console.error("Failed to create DNS record:", error);
-      throw new Error(error.error?.message || "Failed to create DNS record");
+      
+      // Handle specific error cases
+      if (error.error?.code === "forbidden") {
+        return { 
+          success: false, 
+          message: "Permission denied. Check your Vercel API token and team ID." 
+        };
+      }
+      
+      if (error.error?.code === "not_found") {
+        return { 
+          success: false, 
+          message: "Domain not found. Make sure joelmbaka.site is added to your Vercel account." 
+        };
+      }
+      
+      return { 
+        success: false, 
+        message: error.error?.message || "Failed to create DNS record" 
+      };
     }
 
-    console.log("DNS record created successfully");
-    return { success: true, message: "DNS record created successfully" };
+    console.log(`DNS record created successfully for ${subdomain}.joelmbaka.site`);
+    return {
+      success: true,
+      message: `Subdomain ${subdomain}.joelmbaka.site created successfully`,
+    };
   } catch (error) {
-    console.error("Error in createDnsRecordForDomain:", error);
+    console.error("Error creating DNS record:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred",

@@ -3,6 +3,7 @@ import { driver, executeQuery } from "@/lib/neo4j";
 import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types";
 import { Transaction, ManagedTransaction } from "neo4j-driver";
 import { setupStoreSubdomain } from "@/lib/subdomain-setup";
+import { v4 as uuidv4 } from "uuid";
 
 interface CreateStoreInput {
   name: string;
@@ -500,107 +501,109 @@ export const resolvers = {
   },
   Mutation: {
     createStore: async (
-      _: unknown,
+      _: any,
       { input }: { input: CreateStoreInput },
-      context: { session?: Session },
+      context: { session: Session | null }
     ) => {
-      if (!context.session?.user) {
-        console.error("Authentication failed - no session user");
-        throw new Error("Not authenticated");
-      }
-
-      console.log("CreateStore Input:", input);
-      console.log("User Session:", context.session?.user);
-      console.log("User ID:", context.session.user.id);
-
       try {
-        // First, ensure the user exists in Neo4j
-        const userCheck = await executeQuery(
-          `MATCH (u:User {id: $userId}) RETURN u`,
-          { userId: context.session.user.id }
+        // Check if user is authenticated
+        if (!context.session) {
+          throw new Error("Not authenticated");
+        }
+
+        console.log("Create store input:", input);
+        console.log("Session:", context.session);
+
+        // Check if user exists in Neo4j
+        const userEmail = context.session.user?.email;
+        if (!userEmail) {
+          throw new Error("User email not found in session");
+        }
+
+        // Find user by email
+        const userResult = await executeQuery(
+          `
+          MATCH (u:User {email: $email})
+          RETURN u
+          `,
+          { email: userEmail }
         );
-        
-        if (userCheck.records.length === 0) {
-          console.log(`User ${context.session.user.id} not found in Neo4j, creating user first`);
-          
-          // Create the user if not found
+
+        let userId = userResult.records[0]?.get("u")?.properties?.id;
+
+        // If user doesn't exist, create one
+        if (!userId) {
+          console.log("User not found, creating new user");
+          userId = uuidv4();
           await executeQuery(
-            `CREATE (u:User {
-              id: $userId,
+            `
+            CREATE (u:User {
+              id: $id,
               name: $name,
               email: $email,
-              image: $image,
-              createdAt: datetime()
-            })`,
+              image: $image
+            })
+            RETURN u
+            `,
             {
-              userId: context.session.user.id,
-              name: context.session.user.name || "Anonymous",
-              email: context.session.user.email || `user-${context.session.user.id}-${Date.now()}@example.com`,
-              image: context.session.user.image || ""
+              id: userId,
+              name: context.session.user?.name || "",
+              email: userEmail,
+              image: context.session.user?.image || "",
             }
           );
         }
-        
-        console.log("Executing Neo4j query to create store...");
+
+        // Create store
+        const storeId = uuidv4();
         const result = await executeQuery(
-          `MATCH (u:User {id: $userId})
-           CREATE (s:Store {
-             id: apoc.create.uuid(),
-             name: $name,
-             industry: $industry,
-             subdomain: $subdomain,
-             ownerId: $userId,
-             createdAt: datetime(),
-             updatedAt: datetime()
-           })
-           CREATE (u)-[:OWNS]->(s)
-           RETURN s`,
+          `
+          CREATE (s:Store {
+            id: $id,
+            name: $name,
+            industry: $industry,
+            subdomain: $subdomain,
+            ownerId: $ownerId,
+            createdAt: datetime(),
+            updatedAt: datetime()
+          })
+          RETURN s
+          `,
           {
-            userId: context.session.user.id,
-            ...input,
-          },
+            id: storeId,
+            name: input.name,
+            industry: input.industry,
+            subdomain: input.subdomain,
+            ownerId: userId,
+          }
         );
 
-        console.log(
-          "Neo4j query result:",
-          result.records[0]?.get("s").properties,
-        );
-        const store = result.records[0]?.get("s").properties;
+        const store = result.records[0]?.get("s")?.properties;
         
-        // Set up the subdomain for the store
-        try {
-          const subdomainResult = await setupStoreSubdomain(store);
-          console.log(`Subdomain setup result for ${store.subdomain}:`, subdomainResult);
-          
-          // Even if subdomain setup fails, we still return the store
-          if (!subdomainResult.success) {
-            console.warn(`Subdomain setup failed for ${store.subdomain}: ${subdomainResult.message}`);
-          }
-        } catch (subdomainError) {
-          console.error(`Error setting up subdomain for ${store.subdomain}:`, subdomainError);
-          // Continue even if subdomain setup fails
+        if (!store) {
+          throw new Error("Failed to create store");
         }
-        
+
+        // Set up subdomain
+        console.log("Setting up subdomain for store:", store);
+        try {
+          // Try to set up the subdomain, but don't fail the store creation if it fails
+          await setupStoreSubdomain(store);
+          console.log("Subdomain setup completed successfully");
+        } catch (subdomainError) {
+          // Log the error but continue with store creation
+          console.error("Error setting up subdomain:", subdomainError);
+          console.log("Store created successfully, but subdomain setup failed. User can set up subdomain manually later.");
+        }
+
         return {
           ...store,
-          metrics: { sales: 0, visitors: 0, conversion: 0 }, // Initialize metrics
-          createdAt: store.createdAt.toString(),
-          updatedAt: store.updatedAt.toString(),
-          owner: {
-            id: context.session.user.id,
-            name: context.session.user.name || "Anonymous",
-            email: context.session.user.email || "",
-            image: context.session.user.image || "",
-            roles: ["USER"],
-          },
+          createdAt: new Date(store.createdAt),
+          updatedAt: new Date(store.updatedAt),
         };
-      } catch (error: unknown) {
+      } catch (error) {
         console.error("Error creating store:", error);
-        if (error instanceof Error) {
-          throw new Error(`Failed to create store: ${error.message}`);
-        } else {
-          throw new Error("Failed to create store: Unknown error");
-        }
+        throw error;
       }
     },
     updateStore: async (

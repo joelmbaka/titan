@@ -1,89 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { executeQuery } from '@/lib/neo4j';
 import { setupStoreSubdomain } from '@/lib/subdomain-setup';
+import { executeQuery } from '@/lib/neo4j';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    // Get the session
+    // Check authentication
     const session = await auth();
-    
-    // Check if user is authenticated
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Authentication required', details: 'No user session found' },
+        { error: 'Not authenticated' },
         { status: 401 }
       );
     }
-    
-    // Parse the request body
-    const body = await request.json();
-    const { storeId, subdomain } = body;
-    
-    if (!storeId && !subdomain) {
+
+    // Get store ID from request body
+    const { storeId } = await req.json();
+    if (!storeId) {
       return NextResponse.json(
-        { error: 'Missing parameters', details: 'Either storeId or subdomain is required' },
+        { error: 'Store ID is required' },
         { status: 400 }
       );
     }
-    
-    // Find the store
-    let storeQuery = '';
-    let queryParams = {};
-    
-    if (storeId) {
-      storeQuery = `MATCH (s:Store {id: $storeId}) RETURN s`;
-      queryParams = { storeId };
-    } else {
-      storeQuery = `MATCH (s:Store {subdomain: $subdomain}) RETURN s`;
-      queryParams = { subdomain };
-    }
-    
-    const result = await executeQuery(storeQuery, queryParams);
-    
-    if (result.records.length === 0) {
+
+    console.log(`Setting up subdomain for store ID: ${storeId}`);
+
+    // Get store from database
+    const result = await executeQuery(
+      `
+      MATCH (s:Store {id: $storeId})
+      RETURN s
+      `,
+      { storeId }
+    );
+
+    const store = result.records[0]?.get('s')?.properties;
+    if (!store) {
       return NextResponse.json(
-        { error: 'Store not found', details: 'No store found with the provided ID or subdomain' },
+        { error: 'Store not found' },
         { status: 404 }
       );
     }
-    
-    const store = result.records[0].get('s').properties;
-    
-    // Check if the user owns this store
-    const ownershipCheck = await executeQuery(
-      `MATCH (u:User {id: $userId})-[:OWNS]->(s:Store {id: $storeId}) RETURN s`,
-      { userId: session.user.id, storeId: store.id }
+
+    // Check if user owns the store
+    const ownershipResult = await executeQuery(
+      `
+      MATCH (u:User {email: $email})-[:OWNS]->(s:Store {id: $storeId})
+      RETURN s
+      `,
+      { 
+        email: session.user.email,
+        storeId 
+      }
     );
-    
-    if (ownershipCheck.records.length === 0) {
+
+    if (ownershipResult.records.length === 0) {
       return NextResponse.json(
-        { error: 'Permission denied', details: 'You do not own this store' },
+        { error: 'You don\'t have permission to set up this store\'s subdomain' },
         { status: 403 }
       );
     }
-    
-    // Set up the subdomain
+
+    // Set up subdomain
     const setupResult = await setupStoreSubdomain(store);
-    
-    return NextResponse.json({
-      success: setupResult.success,
-      message: setupResult.message,
-      store: {
-        id: store.id,
-        name: store.name,
-        subdomain: store.subdomain,
-        url: `https://${store.subdomain}.joelmbaka.site`
+
+    if (!setupResult.success) {
+      // Check if the error is because the subdomain already exists
+      if (setupResult.message.includes('already exists')) {
+        return NextResponse.json(
+          { 
+            error: setupResult.message,
+            code: 'SUBDOMAIN_EXISTS',
+            suggestion: 'Please update your store with a different subdomain name.'
+          },
+          { status: 409 } // Conflict status code
+        );
       }
+      
+      return NextResponse.json(
+        { error: setupResult.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: setupResult.message,
+      subdomain: `${store.subdomain}.joelmbaka.site`
     });
   } catch (error) {
-    console.error('Error in setup-subdomain API:', error);
+    console.error('Error setting up subdomain:', error);
     return NextResponse.json(
-      { 
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      },
+      { error: 'Failed to set up subdomain' },
       { status: 500 }
     );
   }

@@ -66,12 +66,7 @@ export function AddStoreModal({
       setIsLoading(true);
       try {
         console.log("Starting DNS record creation process...");
-        const dnsResult = await createDnsRecordForDomain(`${subdomain}.joelmbaka.site`, {
-          name: subdomain,
-          type: "CNAME",
-          value: "cname.vercel-dns.com",
-          ttl: 60,
-        });
+        const dnsResult = await createDnsRecordForDomain(subdomain);
 
         console.log("DNS creation result:", dnsResult);
 

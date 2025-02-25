@@ -1,0 +1,16 @@
+{
+  "name": "titan-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scripts for Titan 2.0 kifaru",
+  "scripts": {
+    "test-subdomain": "node test-subdomain-setup.js",
+    "check-vercel": "node check-vercel-credentials.js",
+    "delete-dns": "node delete-dns-record.js",
+    "check-subdomain": "node check-subdomain.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
+  }
+} 

@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Store } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ExternalLink, Globe, Settings } from 'lucide-react';
 import { SetupSubdomainButton } from '@/components/setup-subdomain-button';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
 
 interface StoreCardProps {
   store: Store;
@@ -13,72 +14,100 @@ interface StoreCardProps {
 export function StoreCard({ store }: StoreCardProps) {
   const [showSubdomainSetup, setShowSubdomainSetup] = useState(false);
   
-  // Prevent the Link from activating when clicking on the subdomain setup button
+  // Format metrics for display
+  const formatMetric = (value: number) => {
+    return value.toLocaleString();
+  };
+  
+  // Handle subdomain button click
   const handleSubdomainButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); // Prevent the link from being activated
     setShowSubdomainSetup(!showSubdomainSetup);
   };
   
-  // Prevent the Link from activating when clicking on the visit store button
+  // Handle visit store click
   const handleVisitStoreClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); // Prevent the link from being activated
     window.open(`https://${store.subdomain}.joelmbaka.site`, '_blank');
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <Link href={`/dashboard/stores/${store.id}`} className="block">
-        <CardHeader>
-          <CardTitle>{store.name}</CardTitle>
-          <CardDescription>{store.industry.replace(/_/g, ' ')}</CardDescription>
+    <Link href={`/dashboard/stores/${store.id}`} passHref>
+      <Card className="h-full overflow-hidden transition-all hover:border-primary/50">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl">{store.name}</CardTitle>
+            <Badge variant="outline">{store.industry}</Badge>
+          </div>
+          <CardDescription>
+            {store.subdomain && (
+              <span className="text-sm text-muted-foreground">
+                {store.subdomain}.joelmbaka.site
+              </span>
+            )}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <p className="font-medium">{store.metrics?.sales || 0}</p>
-              <p className="text-muted-foreground">Sales</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Sales</span>
+              <span className="text-xl font-bold">
+                ${formatMetric(store.metrics?.sales || 0)}
+              </span>
             </div>
-            <div className="text-center">
-              <p className="font-medium">{store.metrics?.visitors || 0}</p>
-              <p className="text-muted-foreground">Visitors</p>
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Visitors</span>
+              <span className="text-xl font-bold">
+                {formatMetric(store.metrics?.visitors || 0)}
+              </span>
             </div>
-            <div className="text-center">
-              <p className="font-medium">{store.metrics?.conversion || 0}%</p>
-              <p className="text-muted-foreground">Conversion</p>
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Conversion</span>
+              <span className="text-xl font-bold">
+                {(store.metrics?.conversion || 0).toFixed(1)}%
+              </span>
             </div>
           </div>
         </CardContent>
-      </Link>
-      
-      <CardFooter className="flex flex-col space-y-4">
-        <div className="flex justify-between w-full">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleSubdomainButtonClick}
-          >
-            {showSubdomainSetup ? 'Hide Subdomain Setup' : 'Subdomain Setup'}
+        <CardFooter className="flex justify-between border-t p-4">
+          <Button variant="ghost" size="sm" className="gap-1">
+            <Settings className="h-4 w-4" />
+            Dashboard
           </Button>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleVisitStoreClick}
-          >
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Visit Store
-          </Button>
-        </div>
+          {store.subdomain ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1"
+              onClick={handleVisitStoreClick}
+            >
+              <Globe className="h-4 w-4" />
+              Visit Store
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1"
+              onClick={handleSubdomainButtonClick}
+            >
+              <Globe className="h-4 w-4" />
+              Setup Subdomain
+            </Button>
+          )}
+        </CardFooter>
         
         {showSubdomainSetup && (
-          <SetupSubdomainButton 
-            store={store} 
-            onSuccess={() => setShowSubdomainSetup(false)}
-          />
+          <div className="border-t p-4" onClick={(e) => e.preventDefault()}>
+            <SetupSubdomainButton 
+              store={store} 
+              onSuccess={() => setShowSubdomainSetup(false)}
+            />
+          </div>
         )}
-      </CardFooter>
-    </Card>
+      </Card>
+    </Link>
   );
 } 
