@@ -2,51 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStoreBySubdomain } from "@/lib/storeFunctions.server";
 
-// Define the Store type
-interface Store {
-  id: string;
-  name: string;
-  subdomain: string;
-  industry: string;
-  metrics?: {
-    sales: number;
-    visitors: number;
-    conversion: number;
-  };
-}
-
-// Function to get store by subdomain
-async function getStoreBySubdomain(subdomain: string): Promise<Store | null> {
-  try {
-    console.log(`Fetching store with subdomain: ${subdomain}`);
-    
-    const result = await executeQuery(
-      `MATCH (s:Store {subdomain: $subdomain}) RETURN s`,
-      { subdomain }
-    );
-    
-    if (result.records.length === 0) {
-      console.log(`No store found with subdomain: ${subdomain}`);
-      return null;
-    }
-    
-    const store = result.records[0].get("s").properties;
-    console.log(`Found store: ${store.name}`);
-    
-    return {
-      ...store,
-      metrics: store.metrics || {
-        sales: 0,
-        visitors: 0,
-        conversion: 0
-      }
-    };
-  } catch (error) {
-    console.error(`Error fetching store by subdomain ${subdomain}:`, error);
-    return null;
-  }
-}
-
 // Generate metadata for the page
 export async function generateMetadata({ 
   params 
@@ -93,14 +48,7 @@ export default async function StorePage({
   
   return (
     <div className="min-h-screen">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold">{store.name}</h1>
-          <p className="text-gray-600">Welcome to our store!</p>
-        </div>
-      </header>
-      
-      <main className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <section className="mb-12">
@@ -155,21 +103,7 @@ export default async function StorePage({
             </div>
           </div>
         </div>
-      </main>
-      
-      <footer className="bg-gray-100 border-t mt-12">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h2 className="text-xl font-bold">{store.name}</h2>
-              <p className="text-gray-600">© {new Date().getFullYear()} All rights reserved.</p>
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm">Powered by Titan 2.0</p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 } 
