@@ -24,7 +24,13 @@ export async function middleware(request: NextRequest) {
 
   // Handle subdomain requests - IMPORTANT: Do this before auth checks
   if (isSubdomainRequest) {
-    // Rewrite the URL to the store route
+    // Skip API routes for subdomain requests - let Vercel handle them
+    if (pathname.startsWith('/api/')) {
+      console.log("Skipping middleware for API route on subdomain:", pathname);
+      return NextResponse.next();
+    }
+    
+    // Rewrite the URL to the store route for non-API paths
     const url = request.nextUrl.clone();
     url.pathname = `/store/${subdomain}${pathname === '/' ? '' : pathname}`;
     
@@ -72,9 +78,9 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Only run middleware on specific routes, NOT on API routes that use Neo4j
+// Update matcher to exclude API routes on subdomains
 export const config = {
   matcher: [
-    '/((?!api/graphql|api/neo4j|api/auth|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }; 
