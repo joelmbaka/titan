@@ -4,7 +4,6 @@ import { ApolloProvider } from "@apollo/client";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { getApolloClient } from "@/lib/apollo-client";
-import { usePathname } from "next/navigation";
 
 export default function ApolloProviderWrapper({
   children,
@@ -13,7 +12,6 @@ export default function ApolloProviderWrapper({
 }) {
   const { data: session, status } = useSession();
   const [client, setClient] = useState(getApolloClient());
-  const pathname = usePathname();
   const prevStatusRef = useRef(status);
   const prevUserIdRef = useRef(session?.user?.id);
   const syncAttemptRef = useRef(0);
@@ -32,7 +30,6 @@ export default function ApolloProviderWrapper({
       hasToken: !!session?.accessToken,
       statusChanged,
       userIdChanged,
-      pathname
     });
     
     // Update refs
@@ -87,7 +84,7 @@ export default function ApolloProviderWrapper({
       // Reset sync attempt counter when unauthenticated
       syncAttemptRef.current = 0;
     }
-  }, [status, session, pathname]);
+  }, [status, session]);
 
   // Debug client changes
   useEffect(() => {

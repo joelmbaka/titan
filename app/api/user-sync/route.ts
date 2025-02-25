@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { ensureUserInNeo4j, createTestStoreForUser } from '@/lib/user-sync';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get the session
     const session = await auth();

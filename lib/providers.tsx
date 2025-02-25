@@ -1,9 +1,13 @@
 'use client';
 
 import { ThemeProvider } from "next-themes";
-import { ApolloProvider } from "@apollo/client";
-import client from "@/lib/apollo-client";
 import { ReactNode, useEffect, useState } from "react";
+import { SessionProvider } from "next-auth/react";
+import ApolloProviderWrapper from "@/components/apollo-provider";
+import { StoreProvider } from "@/context/store-context";
+import { ErrorBoundary } from 'react-error-boundary';
+import AuthError from '@/components/auth-error';
+import UserSyncProvider from "@/components/user-sync-provider";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -23,9 +27,17 @@ export function Providers({ children }: { children: ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <ApolloProvider client={client}>
-        {children}
-      </ApolloProvider>
+      <StoreProvider>
+        <SessionProvider>
+          <ErrorBoundary FallbackComponent={AuthError}>
+            <UserSyncProvider>
+              <ApolloProviderWrapper>
+                {children}
+              </ApolloProviderWrapper>
+            </UserSyncProvider>
+          </ErrorBoundary>
+        </SessionProvider>
+      </StoreProvider>
     </ThemeProvider>
   );
 }

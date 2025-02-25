@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { gql } from "@apollo/client";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Pencil, RefreshCw, Bug, AlertCircle } from "lucide-react"; // Import icons
-import { signOut, useSession } from "next-auth/react"; // Import signOut and useSession
+import { Pencil, RefreshCw, AlertCircle } from "lucide-react"; // Import icons
+import { useSession } from "next-auth/react"; // Import useSession
 import Image from 'next/image';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -98,7 +98,7 @@ export default function Profile() {
     } finally {
       setSyncLoading(false);
     }
-  }, [client, refetch]);
+  }, [setSyncLoading, setSyncError, refetch, client]);
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -127,7 +127,7 @@ export default function Profile() {
   };
 
   // Manual retry function with exponential backoff
-  const manualRetry = useCallback(async () => {
+  const manualRetry = async () => {
     try {
       setManualRetryCount(prev => prev + 1);
       setLastRetryTime(Date.now());
@@ -142,7 +142,7 @@ export default function Profile() {
     } catch (err) {
       console.error('Manual retry failed:', err);
     }
-  }, [client, refetch, manualRetryCount]);
+  };
 
   // Auto-retry if we have a session but no data
   useEffect(() => {
@@ -319,16 +319,8 @@ export default function Profile() {
               className="w-full"
               variant="outline"
             >
-              <Bug className="mr-2 h-4 w-4" />
+              <AlertCircle className="mr-2 h-4 w-4" />
               {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-            </Button>
-            
-            <Button 
-              onClick={() => signOut({ callbackUrl: "/" })} 
-              className="w-full"
-              variant="destructive"
-            >
-              Sign Out
             </Button>
           </div>
         </div>

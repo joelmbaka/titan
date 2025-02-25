@@ -8,7 +8,6 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { 
   Home, 
@@ -16,10 +15,8 @@ import {
   Users, 
   Mail, 
   FileText, 
-  BarChart,
   LayoutDashboard,
   Megaphone,
-  LineChart,
   ShoppingBag,
   Package,
   CreditCard,
@@ -29,7 +26,6 @@ import {
   Heart,
   Palette,
   Globe,
-  MessageSquare,
   HelpCircle,
   PieChart,
   Zap,
@@ -288,7 +284,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <Link href={`/dashboard/stores/${currentStore?.id}/pages`} className="flex items-center gap-3">
-                  <Image className="h-5 w-5" />
+                  <FileText className="h-5 w-5" />
                   <span>Pages</span>
                 </Link>
               </SidebarMenuItem>

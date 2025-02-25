@@ -38,8 +38,8 @@ const StatusIndicator = ({
 
 export default function DebugGraphQLPage() {
   const { data: session, status } = useSession();
-  const [neo4jStatus, setNeo4jStatus] = useState<any>(null);
-  const [neo4jError, setNeo4jError] = useState<string | null>(null);
+  const [neo4jStatus, _setNeo4jStatus] = useState<any>(null);
+  const [neo4jError, _setNeo4jError] = useState<string | null>(null);
   const [graphqlApiStatus, setGraphqlApiStatus] = useState<any>(null);
   const [graphqlApiError, setGraphqlApiError] = useState<string | null>(null);
   const [directGraphqlStatus, setDirectGraphqlStatus] = useState<any>(null);
@@ -51,7 +51,7 @@ export default function DebugGraphQLPage() {
   const [isHelloLoading, setIsHelloLoading] = useState(false);
   
   // GraphQL queries
-  const [getHello, { loading: helloLoading, error: helloError, data: helloData }] = useLazyQuery(HELLO_QUERY, {
+  const [getHello, { loading: _helloLoading, error: helloError, data: helloData }] = useLazyQuery(HELLO_QUERY, {
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: false,
   });

@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, createHttpLink, from, HttpLink, ApolloLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, from } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import { getSession } from "next-auth/react";
@@ -92,7 +92,7 @@ export function getApolloClient() {
   });
 
   // Create an error handling link
-  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, locations, path }) => {
         console.error(
@@ -125,8 +125,8 @@ export function getApolloClient() {
         message: networkError.message,
         stack: networkError.stack,
         operation: operation.operationName,
-        statusCode: (networkError as any).statusCode,
-        bodyText: (networkError as any).bodyText
+        statusCode: (networkError as { statusCode?: number }).statusCode,
+        bodyText: (networkError as { bodyText?: string }).bodyText
       });
       
       // Try to refresh the session on network errors
@@ -140,7 +140,7 @@ export function getApolloClient() {
       });
       
       // For status code 0 errors (CORS/network issues), try a direct fetch to test connectivity
-      if ((networkError as any).statusCode === 0) {
+      if ((networkError as { statusCode?: number }).statusCode === 0) {
         console.log('Detected status code 0 error, testing direct fetch to API');
         fetch('/api/debug-graphql')
           .then(response => response.json())

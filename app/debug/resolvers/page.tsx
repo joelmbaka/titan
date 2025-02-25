@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -96,7 +96,6 @@ export default function ResolversDebugPage() {
 
   const [getProducts, { loading: productsLoading }] = useLazyQuery(PRODUCTS_QUERY, {
     variables: { storeId: selectedStoreId || '' },
-    skip: !selectedStoreId,
     onCompleted: (data) => {
       setTestResults(prev => ({
         ...prev,
@@ -110,6 +109,13 @@ export default function ResolversDebugPage() {
       }));
     }
   });
+
+  // Only fetch products when a store is selected
+  useEffect(() => {
+    if (selectedStoreId) {
+      getProducts({ variables: { storeId: selectedStoreId } });
+    }
+  }, [selectedStoreId, getProducts]);
 
   const [getIndustries, { loading: industriesLoading }] = useLazyQuery(INDUSTRIES_QUERY, {
     onCompleted: (data) => {

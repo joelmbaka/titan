@@ -1,6 +1,12 @@
 // This file handles synchronizing users between NextAuth and Neo4j
-import { driver, executeQuery } from "./neo4j";
+import { executeQuery } from "./neo4j";
 import { Session } from "next-auth";
+
+// Define error types
+interface Neo4jError extends Error {
+  message: string;
+  code?: string;
+}
 
 // Function to ensure a user exists in Neo4j
 export async function ensureUserInNeo4j(session: Session): Promise<boolean> {
@@ -79,11 +85,12 @@ export async function ensureUserInNeo4j(session: Session): Promise<boolean> {
     console.log(`User creation result: ${userCreated ? "Success" : "Failed"}`);
     
     return userCreated;
-  } catch (error: any) {
-    console.error("Error ensuring user in Neo4j:", error?.message || String(error));
+  } catch (error: unknown) {
+    const typedError = error as Neo4jError;
+    console.error("Error ensuring user in Neo4j:", typedError?.message || String(error));
     
     // Try one more time with a completely unique email as a fallback
-    if (error?.message && error.message.includes("property uniqueness constraint violated")) {
+    if (typedError?.message && typedError.message.includes("property uniqueness constraint violated")) {
       try {
         console.log(`Retrying user creation with unique email for user: ${session.user.id}`);
         const fallbackResult = await executeQuery(
@@ -106,8 +113,9 @@ export async function ensureUserInNeo4j(session: Session): Promise<boolean> {
         console.log(`Fallback user creation result: ${userCreated ? "Success" : "Failed"}`);
         
         return userCreated;
-      } catch (fallbackError: any) {
-        console.error("Error in fallback user creation:", fallbackError?.message || String(fallbackError));
+      } catch (fallbackError: unknown) {
+        const typedFallbackError = fallbackError as Neo4jError;
+        console.error("Error in fallback user creation:", typedFallbackError?.message || String(fallbackError));
         return false;
       }
     }
@@ -162,8 +170,9 @@ export async function createTestStoreForUser(userId: string): Promise<boolean> {
     console.log(`Test store creation result: ${storeCreated ? "Success" : "Failed"}`);
     
     return storeCreated;
-  } catch (error: any) {
-    console.error("Error creating test store:", error?.message || String(error));
+  } catch (error: unknown) {
+    const typedError = error as Neo4jError;
+    console.error("Error creating test store:", typedError?.message || String(error));
     return false;
   }
 } 

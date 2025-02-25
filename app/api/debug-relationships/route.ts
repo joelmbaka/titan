@@ -44,7 +44,7 @@ export async function GET() {
     );
     
     // Fix missing relationships if needed
-    let fixedRelationships = [];
+    const fixedRelationships = [];
     if (userExists && orphanedStoresResult.records.length > 0) {
       console.log(`Found ${orphanedStoresResult.records.length} orphaned stores, attempting to fix`);
       
