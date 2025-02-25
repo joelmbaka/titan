@@ -2,6 +2,7 @@ import { Session } from "next-auth";
 import { driver, executeQuery } from "@/lib/neo4j";
 import { UpdateStoreInput, CreateIndustryInput } from "@/lib/types";
 import { Transaction, ManagedTransaction } from "neo4j-driver";
+import { setupStoreSubdomain } from "@/lib/subdomain-setup";
 
 interface CreateStoreInput {
   name: string;
@@ -565,6 +566,21 @@ export const resolvers = {
           result.records[0]?.get("s").properties,
         );
         const store = result.records[0]?.get("s").properties;
+        
+        // Set up the subdomain for the store
+        try {
+          const subdomainResult = await setupStoreSubdomain(store);
+          console.log(`Subdomain setup result for ${store.subdomain}:`, subdomainResult);
+          
+          // Even if subdomain setup fails, we still return the store
+          if (!subdomainResult.success) {
+            console.warn(`Subdomain setup failed for ${store.subdomain}: ${subdomainResult.message}`);
+          }
+        } catch (subdomainError) {
+          console.error(`Error setting up subdomain for ${store.subdomain}:`, subdomainError);
+          // Continue even if subdomain setup fails
+        }
+        
         return {
           ...store,
           metrics: { sales: 0, visitors: 0, conversion: 0 }, // Initialize metrics
