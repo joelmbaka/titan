@@ -199,6 +199,29 @@ export function getApolloClient() {
             me: {
               // Don't cache the me query
               merge: true,
+            },
+            stores: {
+              // Merge function for stores to ensure proper updates
+              merge(existing = [], incoming) {
+                // Log store updates
+                console.log('Apollo cache: Merging stores', {
+                  existingCount: existing?.length || 0,
+                  incomingCount: incoming?.length || 0
+                });
+                return incoming; // Always use latest store data
+              },
+            }
+          }
+        },
+        Store: {
+          // Ensure stores are identified by their id
+          keyFields: ['id'],
+          fields: {
+            metrics: {
+              // Merge metrics properly when updating
+              merge(existing, incoming) {
+                return incoming || existing;
+              }
             }
           }
         }
@@ -206,7 +229,7 @@ export function getApolloClient() {
     }),
     defaultOptions: {
       watchQuery: {
-        fetchPolicy: 'network-only', // Always fetch from network for queries
+        fetchPolicy: 'cache-and-network', // Use cache but verify with network
         errorPolicy: 'all',
         notifyOnNetworkStatusChange: true,
       },

@@ -3,72 +3,43 @@ import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the hostname from the request
-    const hostname = request.headers.get('host') || '';
-    const subdomain = hostname.split('.')[0];
-    const isSubdomainRequest = 
-      hostname.includes('.joelmbaka.site') && 
-      subdomain !== 'www' && 
-      subdomain !== 'joelmbaka';
-    
-    // If not a subdomain request, get the subdomain from the query parameters
+    // Get the subdomain from the query parameter
     const searchParams = request.nextUrl.searchParams;
-    const querySubdomain = searchParams.get('subdomain');
+    const subdomain = searchParams.get('subdomain');
     
-    // Use the subdomain from the hostname or the query parameter
-    const targetSubdomain = isSubdomainRequest ? subdomain : querySubdomain;
-    
-    if (!targetSubdomain) {
-      return NextResponse.json({
-        success: false,
-        message: 'No subdomain provided',
-        isSubdomainRequest,
-        hostname,
-        request: {
-          url: request.url,
-          method: request.method,
-          headers: Object.fromEntries(request.headers.entries())
-        }
+    if (!subdomain) {
+      return NextResponse.json({ 
+        error: 'Subdomain parameter is required' 
       }, { status: 400 });
     }
     
-    console.log(`Checking store for subdomain: ${targetSubdomain}`);
+    console.log(`API - Checking store for subdomain: ${subdomain}`);
     
-    // Check if the store exists
-    const store = await getStoreBySubdomain(targetSubdomain);
+    // Try to fetch the store
+    const store = await getStoreBySubdomain(subdomain);
     
-    // Get middleware info
-    const middlewareInfo = {
-      rewritePath: isSubdomainRequest ? `/store/${subdomain}${request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname}` : null,
-      vercelRewriteDestination: isSubdomainRequest ? `/store/${subdomain}/${request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname.substring(1)}` : null
-    };
+    if (!store) {
+      return NextResponse.json({ 
+        exists: false,
+        message: `No store found for subdomain: ${subdomain}` 
+      });
+    }
     
+    // Return store info without sensitive data
     return NextResponse.json({
-      success: true,
-      exists: !!store,
-      subdomain: targetSubdomain,
-      store: store ? {
+      exists: true,
+      store: {
         id: store.id,
         name: store.name,
-        industry: store.industry,
-        subdomain: store.subdomain
-      } : null,
-      request: {
-        isSubdomainRequest,
-        hostname,
-        url: request.url,
-        pathname: request.nextUrl.pathname,
-        headers: Object.fromEntries(request.headers.entries())
-      },
-      middleware: middlewareInfo,
-      timestamp: new Date().toISOString()
+        subdomain: store.subdomain,
+        industry: store.industry
+      }
     });
   } catch (error) {
     console.error('Error checking store:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'Failed to check store',
-      error: error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ 
+      error: 'Failed to check store',
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 } 

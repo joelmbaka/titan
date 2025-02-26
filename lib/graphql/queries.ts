@@ -7,6 +7,12 @@ export const GET_STORES_QUERY = gql`
       name
       industry
       subdomain
+      owner {
+        id
+        name
+        email
+        image
+      }
       metrics {
         sales
         visitors

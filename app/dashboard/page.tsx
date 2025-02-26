@@ -41,7 +41,16 @@ export default function Dashboard() {
     onCompleted: (data) => {
       if (data?.stores?.length && !currentStore) {
         setCurrentStore(data.stores[0]);
+        console.log(`Dashboard: Set current store to ${data.stores[0].name} (ID: ${data.stores[0].id})`);
+      } else {
+        console.log(`Dashboard: Stores data received - ${data?.stores?.length || 0} stores found`);
       }
+    },
+    onError: (error) => {
+      console.error("Dashboard: Error fetching stores:", error.message, {
+        graphQLErrors: error.graphQLErrors?.map(e => e.message),
+        networkError: error.networkError
+      });
     }
   });
 
@@ -57,6 +66,13 @@ export default function Dashboard() {
       });
     }
   }, [currentStore, refetch]);
+  
+  // Log the number of stores fetched - moved to here to maintain hook order
+  useEffect(() => {
+    if (data?.stores) {
+      console.log(`Dashboard: Successfully loaded ${data.stores.length} stores for user ${session?.user?.id}`);
+    }
+  }, [data?.stores, session?.user?.id]);
 
   if (status === "loading") {
     return <DashboardSkeleton />;

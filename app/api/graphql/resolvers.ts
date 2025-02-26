@@ -105,7 +105,7 @@ export const resolvers = {
 
       if (!userId) {
         console.error("User ID missing in authenticated context");
-        throw new Error("User ID required");
+        throw new Error("Authentication required to fetch stores");
       }
 
       try {
@@ -120,11 +120,15 @@ export const resolvers = {
           throw new Error("User not found");
         }
         
+        console.log(`Fetching all stores owned by user: ${userId}`);
+        
         // Try to find stores with OWNS relationship
         const result = await executeQuery(
-          `MATCH (u:User {id: $userId})-[:OWNS]->(s:Store) RETURN s`,
+          `MATCH (u:User {id: $userId})-[:OWNS]->(s:Store) RETURN s ORDER BY s.createdAt DESC`,
           { userId }
         );
+        
+        console.log(`Found ${result.records.length} stores for user ${userId}`);
         
         // If no stores found with relationship, check for orphaned stores
         if (result.records.length === 0) {
@@ -147,7 +151,7 @@ export const resolvers = {
               `MATCH (u:User {id: $userId}), (s:Store)
                WHERE NOT (s)<-[:OWNS]-()
                CREATE (u)-[:OWNS]->(s)
-               RETURN s`,
+               RETURN s ORDER BY s.createdAt DESC`,
               { userId }
             );
             

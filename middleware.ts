@@ -31,6 +31,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
     
+    // Skip Next.js internal routes
+    if (pathname.startsWith('/_next/') || 
+        pathname.includes('/favicon.ico') ||
+        pathname.includes('.png') ||
+        pathname.includes('.jpg') ||
+        pathname.includes('.svg')) {
+      console.log("Skipping middleware for static asset:", pathname);
+      return NextResponse.next();
+    }
+    
     // Rewrite the URL to the store route for non-API paths
     const url = request.nextUrl.clone();
     
@@ -42,7 +52,21 @@ export async function middleware(request: NextRequest) {
     }
     
     console.log("Rewriting subdomain request to:", url.pathname);
-    return NextResponse.rewrite(url);
+    
+    // Add debug header to track the rewrite
+    const response = NextResponse.rewrite(url);
+    response.headers.set('x-middleware-rewrite', url.pathname);
+    response.headers.set('x-middleware-subdomain', subdomain);
+    
+    // Add a cookie to track the subdomain
+    response.cookies.set('subdomain', subdomain, {
+      path: '/',
+      maxAge: 3600,
+      sameSite: 'strict',
+      secure: true
+    });
+    
+    return response;
   }
 
   // Only check authentication for non-subdomain requests
@@ -66,6 +90,7 @@ export async function middleware(request: NextRequest) {
       '/api/graphql', // Allow GraphQL API to handle its own auth
       '/api/check-subdomain-store', // Allow checking store existence
       '/api/create-test-store', // Allow creating test stores
+      '/api/debug-request', // Allow debug endpoint
     ].some(path => request.nextUrl.pathname.startsWith(path));
 
     // Define protected paths that require authentication
@@ -87,9 +112,9 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Update matcher to exclude API routes on subdomains
+// Update matcher to exclude static assets
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
   ],
 }; 
