@@ -71,8 +71,8 @@ export async function middleware(request: NextRequest) {
         return response;
       } catch (error) {
         console.error("Error in middleware URL rewrite:", error);
-        // Fallback using hostname directly
-        return NextResponse.rewrite(new URL(`https://${hostname}/store/${subdomain}${pathname === '/' ? '' : pathname}`));
+        // Fallback using a relative path string directly
+        return NextResponse.rewrite(`/store/${subdomain}${pathname === '/' ? '' : pathname}`);
       }
     }
 
