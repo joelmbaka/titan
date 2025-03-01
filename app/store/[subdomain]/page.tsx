@@ -54,103 +54,123 @@ export default async function StorePage({
       notFound();
     }
     
+    // Get middleware headers for debugging (keeping for backend logging only)
     const headersList = headers();
-    
-    // Get middleware headers for debugging
     const middlewareSubdomain = headersList.get('x-middleware-subdomain');
     const middlewareRewrite = headersList.get('x-middleware-rewrite');
     
-    // Increment visitor count (you can implement this later)
-    // await incrementVisitorCount(store.id);
+    // Log debug info but don't display it
+    console.log('Debug Info:', {
+      subdomain: params.subdomain,
+      middlewareSubdomain,
+      middlewareRewrite,
+      storeId: store.id,
+      timestamp: new Date().toISOString()
+    });
     
     return (
       <div className="min-h-screen">
         <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Debug Information</h2>
-            <div className="bg-gray-100 p-4 rounded">
-              <p><strong>Subdomain:</strong> {params.subdomain}</p>
-              <p><strong>Middleware Subdomain:</strong> {middlewareSubdomain || 'Not set'}</p>
-              <p><strong>Middleware Rewrite:</strong> {middlewareRewrite || 'Not set'}</p>
-              <p><strong>Store ID:</strong> {store.id}</p>
-              <p><strong>Store Name:</strong> {store.name}</p>
-              <p><strong>Industry:</strong> {store.industry}</p>
-              <p><strong>Timestamp:</strong> {new Date().toISOString()}</p>
+          {/* Hero Section */}
+          <section className="mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
+            <div className="max-w-3xl">
+              <h1 className="text-3xl font-bold mb-4">{store.name}</h1>
+              <p className="text-lg text-gray-700 mb-6">
+                Your trusted partner in {store.industry.toLowerCase().replace(/_/g, ' ')}.
+                We provide high-quality products and exceptional service.
+              </p>
+              <div className="flex space-x-4">
+                <Link 
+                  href="/products" 
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Browse Products
+                </Link>
+                <Link 
+                  href="/contact" 
+                  className="px-6 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                >
+                  Contact Us
+                </Link>
+              </div>
             </div>
-            
-            <h3 className="text-lg font-semibold mt-4 mb-2">Navigation Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-blue-600 hover:underline">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/test" className="text-blue-600 hover:underline">
-                  Test Page
-                </Link>
-              </li>
-              <li>
-                <Link href="/debug" className="text-blue-600 hover:underline">
-                  Debug Page
-                </Link>
-              </li>
-              <li>
-                <Link href="/products" className="text-blue-600 hover:underline">
-                  Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/api/health-check" className="text-blue-600 hover:underline">
-                  API: Health Check
-                </Link>
-              </li>
-              <li>
-                <Link href="/api/subdomain-test" className="text-blue-600 hover:underline">
-                  API: Subdomain Test
-                </Link>
-              </li>
-            </ul>
-          </div>
+          </section>
         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
               <section className="mb-12">
-                <h2 className="text-2xl font-bold mb-4">Featured Products</h2>
+                <h2 className="text-2xl font-bold mb-6 pb-2 border-b">Featured Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="border rounded-lg p-4">
+                  <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="bg-gray-200 h-48 rounded-md mb-4"></div>
-                    <h3 className="font-semibold">Product Name</h3>
-                    <p className="text-gray-600 text-sm mb-2">Product description goes here</p>
-                    <p className="font-bold">$99.99</p>
+                    <h3 className="font-semibold text-lg">Premium Crop Seeds</h3>
+                    <p className="text-gray-600 text-sm mb-2">High-yield, disease-resistant seeds for optimal growth</p>
+                    <p className="font-bold text-blue-600">$49.99</p>
                   </div>
-                  <div className="border rounded-lg p-4">
+                  <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="bg-gray-200 h-48 rounded-md mb-4"></div>
-                    <h3 className="font-semibold">Product Name</h3>
-                    <p className="text-gray-600 text-sm mb-2">Product description goes here</p>
-                    <p className="font-bold">$99.99</p>
+                    <h3 className="font-semibold text-lg">Organic Fertilizer</h3>
+                    <p className="text-gray-600 text-sm mb-2">100% natural, environmentally friendly soil enrichment</p>
+                    <p className="font-bold text-blue-600">$29.99</p>
                   </div>
+                </div>
+                <div className="mt-6 text-center">
+                  <Link 
+                    href="/products" 
+                    className="inline-block px-4 py-2 text-blue-600 hover:underline"
+                  >
+                    View All Products →
+                  </Link>
                 </div>
               </section>
               
-              <section>
-                <h2 className="text-2xl font-bold mb-4">About Us</h2>
+              <section className="mb-12">
+                <h2 className="text-2xl font-bold mb-6 pb-2 border-b">About Us</h2>
                 <p className="text-gray-700 mb-4">
-                  Welcome to {store.name}! We're dedicated to providing the best products and services to our customers.
+                  Welcome to {store.name}! We're dedicated to providing the best products and services to our customers
+                  in the {store.industry.toLowerCase().replace(/_/g, ' ')} industry.
+                </p>
+                <p className="text-gray-700 mb-4">
+                  With years of experience and a commitment to quality, we've established ourselves as a trusted
+                  provider of agricultural solutions that help farmers maximize their yields and profitability.
                 </p>
                 <p className="text-gray-700">
-                  Our store specializes in {store.industry} products, carefully selected for quality and value.
+                  Our team of experts is always available to provide guidance and support, ensuring that you have
+                  the knowledge and tools you need to succeed in your agricultural endeavors.
                 </p>
+              </section>
+              
+              <section>
+                <h2 className="text-2xl font-bold mb-6 pb-2 border-b">Our Services</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-lg mb-2">Crop Consulting</h3>
+                    <p className="text-gray-600">Expert advice on crop selection, planting strategies, and pest management</p>
+                  </div>
+                  <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-lg mb-2">Soil Analysis</h3>
+                    <p className="text-gray-600">Comprehensive soil testing to optimize fertilization and irrigation</p>
+                  </div>
+                  <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-lg mb-2">Equipment Rental</h3>
+                    <p className="text-gray-600">Access to modern farming equipment without the high investment costs</p>
+                  </div>
+                  <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-lg mb-2">Harvest Support</h3>
+                    <p className="text-gray-600">Assistance with harvesting, storage, and distribution of your crops</p>
+                  </div>
+                </div>
               </section>
             </div>
             
             <div>
               <div className="border rounded-lg p-6 sticky top-6">
-                <h2 className="text-xl font-bold mb-4">Store Information</h2>
+                <h2 className="text-xl font-bold mb-4 pb-2 border-b">Store Information</h2>
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-semibold text-gray-700">Contact</h3>
                     <p className="text-gray-600">info@{store.subdomain}.joelmbaka.site</p>
+                    <p className="text-gray-600">+1 (555) 123-4567</p>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-700">Hours</h3>
@@ -160,8 +180,16 @@ export default async function StorePage({
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-700">Location</h3>
-                    <p className="text-gray-600">123 Store Street</p>
-                    <p className="text-gray-600">City, State 12345</p>
+                    <p className="text-gray-600">123 Farm Road</p>
+                    <p className="text-gray-600">Agriville, AG 12345</p>
+                  </div>
+                  <div className="pt-4 mt-4 border-t">
+                    <Link 
+                      href="/contact" 
+                      className="block w-full py-2 px-4 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Contact Us
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -184,11 +212,6 @@ export default async function StorePage({
             </p>
             
             <div className="space-y-4">
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 text-sm">
-                <p className="font-medium mb-2">Error details:</p>
-                <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
-              </div>
-              
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-sm">
                 <p className="font-medium mb-2">Try these solutions:</p>
                 <ul className="list-disc list-inside space-y-1">
