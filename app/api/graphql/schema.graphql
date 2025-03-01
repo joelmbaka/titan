@@ -50,6 +50,7 @@ type Store {
   metrics: StoreMetrics!
   createdAt: String
   updatedAt: String
+  description: String
 }
 
 type Industry {
