@@ -77,23 +77,11 @@ export async function middleware(request: NextRequest) {
       if (!storeExists) {
         console.log("Store does not exist:", subdomain);
         
-        // Extract domain parts to get the main domain
-        const domainParts = hostname.split('.');
-        // Remove the subdomain
-        domainParts.shift();
-        // Get the main domain
-        const mainDomain = domainParts.join('.');
+        // Simple redirect to store not found page
+        const redirectUrl = `https://joelmbaka.site/store-not-found?subdomain=${subdomain}`;
+        console.log("Redirecting to store not found page:", redirectUrl);
         
-        try {
-          // Redirect to a "store not found" page on the main domain
-          const notFoundUrl = new URL(`https://${mainDomain}/store-not-found?subdomain=${subdomain}`);
-          console.log("Redirecting to store not found page:", notFoundUrl.toString());
-          return NextResponse.redirect(notFoundUrl.toString(), 307);
-        } catch (error) {
-          console.error("Error creating not found URL:", error);
-          // Fallback to a simpler redirect
-          return NextResponse.redirect(`https://joelmbaka.site/store-not-found?subdomain=${subdomain}`, 307);
-        }
+        return NextResponse.redirect(redirectUrl, 307);
       }
       
       // Instead of redirecting, rewrite the URL to serve the store content
@@ -105,31 +93,27 @@ export async function middleware(request: NextRequest) {
       console.log("Handling subdomain request for:", subdomain);
       console.log("Rewriting to:", targetPath);
       
-      try {
-        // Create a rewrite response without using the URL constructor
-        const req = request.nextUrl.clone();
-        req.pathname = targetPath;
-        
-        const response = NextResponse.rewrite(req);
-        
-        // Add a cookie to track the subdomain
-        response.cookies.set('subdomain', subdomain, {
-          path: '/',
-          maxAge: 3600,
-          sameSite: 'strict',
-          secure: true
-        });
-        
-        // Add debug headers
-        response.headers.set('x-middleware-rewrite', targetPath);
-        response.headers.set('x-middleware-subdomain', subdomain);
-        
-        return response;
-      } catch (error) {
-        console.error("Error in rewrite:", error);
-        // If rewrite fails, just continue without rewriting
-        return NextResponse.next();
-      }
+      // IMPORTANT: Use a simpler approach to rewrite the URL
+      // Create a new request with the modified pathname
+      const newUrl = new URL(request.url);
+      newUrl.pathname = targetPath;
+      
+      // Create a response that will internally rewrite the request
+      const response = NextResponse.rewrite(newUrl);
+      
+      // Add a cookie to track the subdomain
+      response.cookies.set('subdomain', subdomain, {
+        path: '/',
+        maxAge: 3600,
+        sameSite: 'strict',
+        secure: true
+      });
+      
+      // Add debug headers
+      response.headers.set('x-middleware-rewrite', targetPath);
+      response.headers.set('x-middleware-subdomain', subdomain);
+      
+      return response;
     }
 
     // Only check authentication for non-subdomain requests
@@ -163,25 +147,15 @@ export async function middleware(request: NextRequest) {
 
       // Handle authentication redirects
       if (isProtectedPath && !session) {
-        try {
-          // Redirect to sign-in if trying to access protected route without auth
-          return NextResponse.redirect(new URL('/sign-in', request.url), 307);
-        } catch (error) {
-          console.error("Error redirecting to sign-in:", error);
-          // Fallback to a simpler redirect
-          return NextResponse.redirect(`https://joelmbaka.site/sign-in`, 307);
-        }
+        // Redirect to sign-in if trying to access protected route without auth
+        const signInUrl = `https://joelmbaka.site/sign-in`;
+        return NextResponse.redirect(signInUrl, 307);
       }
 
       if (isPublicPath && session && request.nextUrl.pathname === '/sign-in') {
-        try {
-          // Redirect to dashboard if trying to access sign-in while authenticated
-          return NextResponse.redirect(new URL('/dashboard', request.url), 307);
-        } catch (error) {
-          console.error("Error redirecting to dashboard:", error);
-          // Fallback to a simpler redirect
-          return NextResponse.redirect(`https://joelmbaka.site/dashboard`, 307);
-        }
+        // Redirect to dashboard if trying to access sign-in while authenticated
+        const dashboardUrl = `https://joelmbaka.site/dashboard`;
+        return NextResponse.redirect(dashboardUrl, 307);
       }
     }
 
