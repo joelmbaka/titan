@@ -164,7 +164,7 @@ export default async function StorePage({
             </div>
             
             <div>
-              <div className="border rounded-lg p-6 sticky top-6">
+              <div className="border rounded-lg p-6 sticky top-24">
                 <h2 className="text-xl font-bold mb-4 pb-2 border-b">Store Information</h2>
                 <div className="space-y-4">
                   <div>
