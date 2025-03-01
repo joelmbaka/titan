@@ -626,7 +626,11 @@ export const resolvers = {
             name: input.name,
             industry: input.industry as any, // Cast to any to avoid type issues
             id: "temp-" + uuidv4(), // Temporary ID for checking
-            ownerId: userId,
+            owner: {
+              id: userId,
+              name: "",
+              email: ""
+            },
             createdAt: new Date().toISOString(), // Convert Date to string
             updatedAt: new Date().toISOString(), // Convert Date to string
             metrics: {
