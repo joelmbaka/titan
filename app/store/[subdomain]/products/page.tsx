@@ -72,6 +72,11 @@ export default async function StoreProductsPage({ params }: PageProps) {
       }
     ];
 
+    // Log the products fetched from the database
+    console.log('StoreProductsPage - Products fetched:', products);
+    // Log the number of products found
+    console.log('StoreProductsPage - Number of products:', products.length);
+
     return (
       <div>
         <div className="mb-8">
