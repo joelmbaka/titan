@@ -659,7 +659,6 @@ export const resolvers = {
              name: $name,
              industry: $industry,
              subdomain: $subdomain,
-            ownerId: $ownerId,
              createdAt: datetime(),
              updatedAt: datetime()
            })
@@ -670,7 +669,6 @@ export const resolvers = {
             name: input.name,
             industry: input.industry,
             subdomain: input.subdomain,
-            ownerId: userId,
           }
         );
 
