@@ -3,13 +3,35 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AddStoreModal } from "@/components/add-store-modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { githubSignIn } from "@/lib/actions";
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
+
+  useEffect(() => {
+    // Check if we have a subdomain cookie
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    
+    const subdomain = getCookie('subdomain');
+    
+    if (subdomain) {
+      console.log('Subdomain cookie detected:', subdomain);
+      console.log('Redirecting to store page...');
+      
+      // Redirect to the store page
+      router.push(`/store/${subdomain}`);
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen">
@@ -46,7 +68,7 @@ export default function Home() {
           
           <Card className="p-8 hover:border-primary transition-colors">
             <h3 className="text-xl font-semibold mb-4">📈 Marketing Team</h3>
-            <p className="text-base text-muted-foreground">p
+            <p className="text-base text-muted-foreground">
               AI-managed ad campaigns and social media scheduling
             </p>
           </Card>
@@ -69,45 +91,6 @@ export default function Home() {
                 <div className="h-64 w-full bg-muted rounded-lg" />
               </div>
               <div className="h-48 w-full bg-muted rounded-lg" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Section */}
-      <section className="container mx-auto py-32">
-        <h2 className="text-4xl font-bold text-center mb-24">
-          Everything You Need to Run Your Online Business
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-12 max-w-7xl mx-auto">
-          <div className="space-y-6">
-            <div className="flex items-center gap-6">
-              <div className="p-4 rounded-xl bg-primary/10">
-                <span className="text-2xl">📝</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold">Automated Content Creation</h3>
-                <p className="text-lg text-muted-foreground">
-                  Generate SEO-optimized product descriptions, blog posts, 
-                  and marketing copy in your brand voice
-                </p>
-              </div>
-            </div>
-            {/* Add more features in same pattern */}
-          </div>
-          
-          <div className="bg-muted/50 rounded-2xl p-8 h-full">
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between p-6 bg-background rounded-xl">
-                <span className="text-lg">AI Agents Active</span>
-                <span className="font-mono text-xl text-primary">12/12</span>
-              </div>
-              <div className="flex items-center justify-between p-6 bg-background rounded-xl">
-                <span className="text-lg">Current Tasks</span>
-                <span className="font-mono text-xl text-primary">48</span>
-              </div>
-              {/* Add more status items */}
             </div>
           </div>
         </div>
@@ -138,12 +121,14 @@ export default function Home() {
         }}
       />
 
-      <Button 
-        size="lg" 
-        onClick={async () => await githubSignIn()}
-      >
-        Sign in with GitHub
-      </Button>
+      <div className="flex justify-center py-8">
+        <Button 
+          size="lg" 
+          onClick={async () => await githubSignIn()}
+        >
+          Sign in with GitHub
+        </Button>
+      </div>
     </div>
   );
 }
