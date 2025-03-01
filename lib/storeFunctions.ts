@@ -252,7 +252,7 @@ export async function getProductsByStoreId(storeId: string) {
   console.log('getProductsByStoreId - Fetching products for store:', storeId);
   
   const GET_PRODUCTS_BY_STORE_ID = gql`
-    query GetProductsByStoreId($storeId: String!) {
+    query GetProductsByStoreId($storeId: ID!) {
       products(storeId: $storeId) {
         id
         name
@@ -271,7 +271,7 @@ export async function getProductsByStoreId(storeId: string) {
   try {
     const { data } = await client.query({
       query: GET_PRODUCTS_BY_STORE_ID,
-      variables: { storeId },
+      variables: { storeId: storeId.toString() },
     });
 
     console.log('getProductsByStoreId - Products received:', data.products);
@@ -286,7 +286,7 @@ export async function getProductById(productId: string) {
   console.log('getProductById - Fetching product:', productId);
   
   const GET_PRODUCT_BY_ID = gql`
-    query GetProductById($productId: String!) {
+    query GetProductById($productId: ID!) {
       product(id: $productId) {
         id
         name
@@ -305,7 +305,7 @@ export async function getProductById(productId: string) {
   try {
     const { data } = await client.query({
       query: GET_PRODUCT_BY_ID,
-      variables: { productId },
+      variables: { productId: productId.toString() },
     });
 
     console.log('getProductById - Product received:', data.product);
@@ -321,7 +321,7 @@ export async function getBlogPostsByStoreId(storeId: string) {
   console.log('getBlogPostsByStoreId - Fetching blog posts for store:', storeId);
   
   const GET_BLOG_POSTS_BY_STORE_ID = gql`
-    query GetBlogPostsByStoreId($storeId: String!) {
+    query GetBlogPostsByStoreId($storeId: ID!) {
       blogPosts(storeId: $storeId) {
         id
         title
@@ -339,7 +339,7 @@ export async function getBlogPostsByStoreId(storeId: string) {
   try {
     const { data } = await client.query({
       query: GET_BLOG_POSTS_BY_STORE_ID,
-      variables: { storeId },
+      variables: { storeId: storeId.toString() },
     });
 
     console.log('getBlogPostsByStoreId - Blog posts received:', data.blogPosts);
