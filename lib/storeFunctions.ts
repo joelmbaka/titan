@@ -168,7 +168,11 @@ export async function getStoreBySubdomain(subdomain: string): Promise<Store | nu
         name
         subdomain
         industry
-        ownerId
+        owner {
+          id
+          name
+          email
+        }
         metrics {
           sales
           visitors

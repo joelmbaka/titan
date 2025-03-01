@@ -15,7 +15,11 @@ export interface Store {
   };
   industry: NAICSCategory;
   subdomain: string;
-  ownerId: string;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+  };
   createdAt?: string;
   updatedAt?: string;
   category?: string;
