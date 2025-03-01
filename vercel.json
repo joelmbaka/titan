@@ -11,6 +11,16 @@
       "destination": "/api/:path*"
     },
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<subdomain>[^.]+).joelmbaka.site"
+        }
+      ],
+      "destination": "/store/:subdomain"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
