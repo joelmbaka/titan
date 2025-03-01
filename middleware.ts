@@ -84,24 +84,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl, 307);
       }
       
-      // Instead of redirecting, rewrite the URL to serve the store content
-      // while keeping the user on the subdomain URL
-      const targetPath = pathname === '/' 
-        ? `/store/${subdomain}` 
-        : `/store/${subdomain}${pathname}`;
-      
+      // IMPORTANT CHANGE: Instead of trying to rewrite the URL, we'll just pass through
+      // the request and let the Vercel rewrites in vercel.json handle it
       console.log("Handling subdomain request for:", subdomain);
-      console.log("Rewriting to:", targetPath);
-      
-      // IMPORTANT: Use a simpler approach to rewrite the URL
-      // Create a new request with the modified pathname
-      const newUrl = new URL(request.url);
-      newUrl.pathname = targetPath;
-      
-      // Create a response that will internally rewrite the request
-      const response = NextResponse.rewrite(newUrl);
+      console.log("Letting Vercel rewrites handle the request");
       
       // Add a cookie to track the subdomain
+      const response = NextResponse.next();
       response.cookies.set('subdomain', subdomain, {
         path: '/',
         maxAge: 3600,
@@ -110,7 +99,6 @@ export async function middleware(request: NextRequest) {
       });
       
       // Add debug headers
-      response.headers.set('x-middleware-rewrite', targetPath);
       response.headers.set('x-middleware-subdomain', subdomain);
       
       return response;
