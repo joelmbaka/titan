@@ -8,12 +8,16 @@ export interface Store {
   id: string;
   name: string;
   icon?: string;
-  metrics: StoreMetrics;
+  metrics?: {
+    sales: number;
+    visitors: number;
+    conversion?: number;
+  };
   industry: NAICSCategory;
   subdomain: string;
   ownerId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   category?: string;
 }
 
@@ -142,4 +146,21 @@ export interface CreateProductInput {
   storeId: string
   inventory?: number
   status?: 'draft' | 'active' | 'archived'
+}
+
+// Cart types
+export interface CartItem {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}
+
+export interface Cart {
+  items: CartItem[];
+  storeId: string;
+  subdomain: string;
+  total: number;
 }

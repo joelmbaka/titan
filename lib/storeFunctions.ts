@@ -191,4 +191,107 @@ export async function getStoreBySubdomain(subdomain: string): Promise<Store | nu
     console.error('getStoreBySubdomain - Error:', error);
     return null;
   }
+}
+
+// Product functions
+export async function getProductsByStoreId(storeId: string) {
+  console.log('getProductsByStoreId - Fetching products for store:', storeId);
+  
+  const GET_PRODUCTS_BY_STORE_ID = gql`
+    query GetProductsByStoreId($storeId: String!) {
+      products(storeId: $storeId) {
+        id
+        name
+        description
+        price
+        sku
+        category
+        inventory
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await client.query({
+      query: GET_PRODUCTS_BY_STORE_ID,
+      variables: { storeId },
+    });
+
+    console.log('getProductsByStoreId - Products received:', data.products);
+    return data.products;
+  } catch (error) {
+    console.error('getProductsByStoreId - Error:', error);
+    return [];
+  }
+}
+
+export async function getProductById(productId: string) {
+  console.log('getProductById - Fetching product:', productId);
+  
+  const GET_PRODUCT_BY_ID = gql`
+    query GetProductById($productId: String!) {
+      product(id: $productId) {
+        id
+        name
+        description
+        price
+        sku
+        category
+        inventory
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await client.query({
+      query: GET_PRODUCT_BY_ID,
+      variables: { productId },
+    });
+
+    console.log('getProductById - Product received:', data.product);
+    return data.product;
+  } catch (error) {
+    console.error('getProductById - Error:', error);
+    return null;
+  }
+}
+
+// Blog functions
+export async function getBlogPostsByStoreId(storeId: string) {
+  console.log('getBlogPostsByStoreId - Fetching blog posts for store:', storeId);
+  
+  const GET_BLOG_POSTS_BY_STORE_ID = gql`
+    query GetBlogPostsByStoreId($storeId: String!) {
+      blogPosts(storeId: $storeId) {
+        id
+        title
+        content
+        metaDescription
+        tags
+        category
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+
+  try {
+    const { data } = await client.query({
+      query: GET_BLOG_POSTS_BY_STORE_ID,
+      variables: { storeId },
+    });
+
+    console.log('getBlogPostsByStoreId - Blog posts received:', data.blogPosts);
+    return data.blogPosts;
+  } catch (error) {
+    console.error('getBlogPostsByStoreId - Error:', error);
+    return [];
+  }
 } 
