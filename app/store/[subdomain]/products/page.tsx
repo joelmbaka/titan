@@ -76,6 +76,7 @@ export default async function StoreProductsPage({ params }: PageProps) {
     console.log('StoreProductsPage - Products fetched:', products);
     // Log the number of products found
     console.log('StoreProductsPage - Number of products:', products.length);
+    console.log('StoreProductsPage - Display Products:', displayProducts);
 
     return (
       <div>
