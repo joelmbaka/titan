@@ -81,6 +81,11 @@ export default async function StorePage({
             <h3 className="text-lg font-semibold mt-4 mb-2">Navigation Links</h3>
             <ul className="space-y-2">
               <li>
+                <Link href="/" className="text-blue-600 hover:underline">
+                  Home
+                </Link>
+              </li>
+              <li>
                 <Link href="/test" className="text-blue-600 hover:underline">
                   Test Page
                 </Link>
@@ -194,10 +199,10 @@ export default async function StorePage({
               </div>
               
               <Link 
-                href="https://joelmbaka.site" 
+                href="/" 
                 className="inline-block w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-center transition-colors"
               >
-                Go to Main Site
+                Go to Home
               </Link>
             </div>
           </div>

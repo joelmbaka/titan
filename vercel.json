@@ -9,16 +9,6 @@
         }
       ],
       "destination": "/api/:path*"
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "(?<subdomain>[^.]+).joelmbaka.site"
-        }
-      ],
-      "destination": "/store/:subdomain/:path*"
     }
   ]
 } 

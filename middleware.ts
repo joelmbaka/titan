@@ -95,63 +95,33 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(notFoundUrl, 307);
       }
       
-      // Create the target path on the main domain
+      // Instead of redirecting, rewrite the URL to serve the store content
+      // while keeping the user on the subdomain URL
       const targetPath = pathname === '/' 
         ? `/store/${subdomain}` 
         : `/store/${subdomain}${pathname}`;
       
       console.log("Handling subdomain request for:", subdomain);
+      console.log("Rewriting to:", targetPath);
       
-      try {
-        // Extract domain parts to get the main domain
-        const domainParts = hostname.split('.');
-        // Remove the subdomain
-        domainParts.shift();
-        // Get the main domain
-        const mainDomain = domainParts.join('.');
-        
-        // Create a redirect URL to the main domain with the store path
-        const redirectUrl = new URL(targetPath, `https://${mainDomain}`);
-        
-        console.log("Redirecting to main domain:", redirectUrl.toString());
-        
-        // Create a temporary redirect (307) to preserve the request method
-        const response = NextResponse.redirect(redirectUrl, 307);
-        
-        // Add debug headers
-        response.headers.set('x-middleware-redirect', redirectUrl.toString());
-        response.headers.set('x-middleware-subdomain', subdomain);
-        
-        // Add a cookie to track the subdomain
-        response.cookies.set('subdomain', subdomain, {
-          path: '/',
-          maxAge: 3600,
-          sameSite: 'strict',
-          secure: true
-        });
-        
-        return response;
-      } catch (error) {
-        console.error("Error in middleware redirect:", error);
-        
-        // Fallback approach - try a simpler redirect construction
-        try {
-          // Hardcode the main domain as a fallback
-          const fallbackRedirectUrl = `https://joelmbaka.site${targetPath}`;
-          console.log("Fallback redirect URL:", fallbackRedirectUrl);
-          
-          const response = NextResponse.redirect(fallbackRedirectUrl, 307);
-          response.headers.set('x-middleware-redirect', fallbackRedirectUrl);
-          response.headers.set('x-middleware-subdomain', subdomain);
-          
-          return response;
-        } catch (fallbackError) {
-          console.error("Fallback redirect also failed:", fallbackError);
-          
-          // Last resort - just continue without redirecting
-          return NextResponse.next();
-        }
-      }
+      // Create a new URL for the rewrite (internal only, user stays on subdomain)
+      const url = request.nextUrl.clone();
+      url.pathname = targetPath;
+      
+      // Add a cookie to track the subdomain
+      const response = NextResponse.rewrite(url);
+      response.cookies.set('subdomain', subdomain, {
+        path: '/',
+        maxAge: 3600,
+        sameSite: 'strict',
+        secure: true
+      });
+      
+      // Add debug headers
+      response.headers.set('x-middleware-rewrite', url.pathname);
+      response.headers.set('x-middleware-subdomain', subdomain);
+      
+      return response;
     }
 
     // Only check authentication for non-subdomain requests

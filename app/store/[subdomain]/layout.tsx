@@ -29,8 +29,10 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
           <div className="container mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-2xl font-bold">{store.name}</h1>
-                <p className="text-sm text-gray-500">{store.industry}</p>
+                <Link href="/" className="block">
+                  <h1 className="text-2xl font-bold">{store.name}</h1>
+                  <p className="text-sm text-gray-500">{store.industry}</p>
+                </Link>
               </div>
               <nav>
                 <ul className="flex space-x-6">
@@ -53,7 +55,9 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
           <div className="container mx-auto px-4 py-6">
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-500">© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
-              <p className="text-sm text-gray-500">Powered by Titan 2.0</p>
+              <p className="text-sm text-gray-500">
+                Powered by <a href="https://joelmbaka.site" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Titan 2.0</a>
+              </p>
             </div>
           </div>
         </footer>
