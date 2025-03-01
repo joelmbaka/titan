@@ -159,15 +159,16 @@ export async function deleteIndustry(id: string): Promise<boolean> {
 }
 
 export async function getStoreBySubdomain(subdomain: string): Promise<Store | null> {
-  console.log('getStoreBySubdomain - Fetching store for subdomain:', subdomain);
+  console.log('getStoreBySubdomain - Fetching store with subdomain:', subdomain);
   
   const GET_STORE_BY_SUBDOMAIN = gql`
     query GetStoreBySubdomain($subdomain: String!) {
       storeBySubdomain(subdomain: $subdomain) {
         id
         name
-        industry
         subdomain
+        industry
+        ownerId
         metrics {
           sales
           visitors
@@ -186,6 +187,55 @@ export async function getStoreBySubdomain(subdomain: string): Promise<Store | nu
     });
 
     console.log('getStoreBySubdomain - Store data received:', data.storeBySubdomain);
+    
+    // Format date fields to handle complex date objects
+    if (data.storeBySubdomain) {
+      const store = { ...data.storeBySubdomain };
+      
+      // Convert date objects to ISO strings if they're not already strings
+      if (store.createdAt && typeof store.createdAt !== 'string') {
+        try {
+          // If it's a complex date object, try to convert it to a proper date
+          if (store.createdAt.year && store.createdAt.month && store.createdAt.day) {
+            const date = new Date(
+              store.createdAt.year, 
+              store.createdAt.month - 1, // JavaScript months are 0-indexed
+              store.createdAt.day,
+              store.createdAt.hour || 0,
+              store.createdAt.minute || 0,
+              store.createdAt.second || 0
+            );
+            store.createdAt = date.toISOString();
+          }
+        } catch (error) {
+          console.error('Error formatting createdAt date:', error);
+          store.createdAt = new Date().toISOString(); // Fallback to current date
+        }
+      }
+      
+      // Do the same for updatedAt
+      if (store.updatedAt && typeof store.updatedAt !== 'string') {
+        try {
+          if (store.updatedAt.year && store.updatedAt.month && store.updatedAt.day) {
+            const date = new Date(
+              store.updatedAt.year, 
+              store.updatedAt.month - 1,
+              store.updatedAt.day,
+              store.updatedAt.hour || 0,
+              store.updatedAt.minute || 0,
+              store.updatedAt.second || 0
+            );
+            store.updatedAt = date.toISOString();
+          }
+        } catch (error) {
+          console.error('Error formatting updatedAt date:', error);
+          store.updatedAt = new Date().toISOString(); // Fallback to current date
+        }
+      }
+      
+      return store;
+    }
+    
     return data.storeBySubdomain;
   } catch (error) {
     console.error('getStoreBySubdomain - Error:', error);

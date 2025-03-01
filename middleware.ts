@@ -110,6 +110,36 @@ export async function middleware(request: NextRequest) {
         return response;
       }
       
+      // For other paths like /products, /blog, etc., rewrite to the appropriate store path
+      if (pathname.startsWith('/products') || 
+          pathname.startsWith('/blog') || 
+          pathname.startsWith('/about') || 
+          pathname.startsWith('/contact') ||
+          pathname.startsWith('/cart')) {
+        console.log(`Handling ${pathname} path for subdomain:`, subdomain);
+        
+        // Create a new URL for the rewrite - use absolute URL to avoid issues
+        const rewriteUrl = `https://joelmbaka.site/store/${subdomain}${pathname}`;
+        console.log("Rewriting to:", rewriteUrl);
+        
+        // Create a rewrite response with absolute URL
+        const response = NextResponse.rewrite(rewriteUrl);
+        
+        // Add a cookie to track the subdomain
+        response.cookies.set('subdomain', subdomain, {
+          path: '/',
+          maxAge: 3600,
+          sameSite: 'strict',
+          secure: true
+        });
+        
+        // Add debug headers
+        response.headers.set('x-middleware-subdomain', subdomain);
+        response.headers.set('x-middleware-rewrite', rewriteUrl);
+        
+        return response;
+      }
+      
       // For other paths, let Vercel rewrites handle it
       console.log("Handling subdomain request for:", subdomain);
       console.log("Letting Vercel rewrites handle the request");
