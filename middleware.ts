@@ -53,6 +53,13 @@ export async function middleware(request: NextRequest) {
       }
       
       console.log("Rewriting subdomain request to:", url.pathname);
+      console.log("Full URL object:", {
+        href: url.href,
+        origin: url.origin,
+        protocol: url.protocol,
+        host: url.host,
+        pathname: url.pathname
+      });
       
       try {
         // Add debug header to track the rewrite
@@ -71,9 +78,22 @@ export async function middleware(request: NextRequest) {
         return response;
       } catch (error) {
         console.error("Error in middleware URL rewrite:", error);
-        // Fallback using an absolute URL string constructed from request.nextUrl.origin
-        const absoluteUrl = `${request.nextUrl.origin}/store/${subdomain}${pathname === '/' ? '' : pathname}`;
-        return NextResponse.rewrite(absoluteUrl);
+        // Fallback using a properly constructed URL object
+        try {
+          // Create a new URL object with the full origin
+          const fallbackUrl = new URL(`/store/${subdomain}${pathname === '/' ? '' : pathname}`, request.nextUrl.origin);
+          console.log("Fallback URL:", fallbackUrl.toString());
+          
+          const response = NextResponse.rewrite(fallbackUrl);
+          response.headers.set('x-middleware-rewrite', fallbackUrl.pathname);
+          response.headers.set('x-middleware-subdomain', subdomain);
+          
+          return response;
+        } catch (fallbackError) {
+          console.error("Fallback URL rewrite also failed:", fallbackError);
+          // Last resort - just continue without rewriting
+          return NextResponse.next();
+        }
       }
     }
 
