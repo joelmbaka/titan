@@ -2,6 +2,34 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from './auth';
 
+// Function to check if a store exists in the database
+async function checkStoreExists(subdomain: string): Promise<boolean> {
+  try {
+    // Make a request to your API endpoint that checks store existence
+    const response = await fetch(`https://joelmbaka.site/api/check-subdomain-store?subdomain=${subdomain}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.error(`Failed to check store existence: ${response.status}`);
+      return false;
+    }
+    
+    const data = await response.json();
+    console.log("Store existence check result:", data);
+    
+    // Return true if the store exists
+    return data.exists === true;
+  } catch (error) {
+    console.error("Error checking store existence:", error);
+    // In case of error, we'll assume the store doesn't exist
+    return false;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   try {
     // Get the hostname from the request
@@ -40,6 +68,31 @@ export async function middleware(request: NextRequest) {
           pathname.includes('.svg')) {
         console.log("Skipping middleware for static asset:", pathname);
         return NextResponse.next();
+      }
+      
+      // Check if the store exists in the database
+      console.log("Checking if store exists:", subdomain);
+      const storeExists = await checkStoreExists(subdomain);
+      
+      if (!storeExists) {
+        console.log("Store does not exist:", subdomain);
+        
+        // Extract domain parts to get the main domain
+        const domainParts = hostname.split('.');
+        // Remove the subdomain
+        domainParts.shift();
+        // Get the main domain
+        const mainDomain = domainParts.join('.');
+        
+        // Redirect to a "store not found" page on the main domain
+        const notFoundUrl = new URL('/store-not-found', `https://${mainDomain}`);
+        
+        // Add the subdomain as a query parameter for context
+        notFoundUrl.searchParams.append('subdomain', subdomain);
+        
+        console.log("Redirecting to store not found page:", notFoundUrl.toString());
+        
+        return NextResponse.redirect(notFoundUrl, 307);
       }
       
       // Create the target path on the main domain
@@ -124,6 +177,7 @@ export async function middleware(request: NextRequest) {
         '/api/create-test-store', // Allow creating test stores
         '/api/debug-request', // Allow debug endpoint
         '/api/subdomain-test', // Allow subdomain test endpoint
+        '/store-not-found', // Allow access to the store not found page
       ].some(path => request.nextUrl.pathname.startsWith(path));
 
       // Define protected paths that require authentication
