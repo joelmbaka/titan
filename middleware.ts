@@ -88,12 +88,12 @@ export async function middleware(request: NextRequest) {
       if (pathname === '/') {
         console.log("Handling root path for subdomain:", subdomain);
         
-        // Create a new URL for the rewrite
-        const url = new URL(`/store/${subdomain}`, request.url);
-        console.log("Rewriting to:", url.toString());
+        // Create a new URL for the rewrite - use absolute URL to avoid issues
+        const rewriteUrl = `https://joelmbaka.site/store/${subdomain}`;
+        console.log("Rewriting to:", rewriteUrl);
         
-        // Create a rewrite response
-        const response = NextResponse.rewrite(url);
+        // Create a rewrite response with absolute URL
+        const response = NextResponse.rewrite(rewriteUrl);
         
         // Add a cookie to track the subdomain
         response.cookies.set('subdomain', subdomain, {
@@ -105,7 +105,7 @@ export async function middleware(request: NextRequest) {
         
         // Add debug headers
         response.headers.set('x-middleware-subdomain', subdomain);
-        response.headers.set('x-middleware-rewrite', url.toString());
+        response.headers.set('x-middleware-rewrite', rewriteUrl);
         
         return response;
       }

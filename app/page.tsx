@@ -20,6 +20,16 @@ export default function Home() {
       return;
     }
     
+    // Check if we're on a subdomain by looking at the hostname
+    const isSubdomain = window.location.hostname.split('.').length > 2 && 
+                        !window.location.hostname.startsWith('www.');
+    
+    // Skip redirection if we're on a subdomain - let the middleware handle it
+    if (isSubdomain) {
+      console.log('On subdomain, skipping client-side redirect');
+      return;
+    }
+    
     // Check if we have a subdomain cookie
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
