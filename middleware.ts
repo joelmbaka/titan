@@ -105,6 +105,7 @@ export async function middleware(request: NextRequest) {
       console.log("Rewriting to:", targetPath);
       
       // Create a new URL for the rewrite (internal only, user stays on subdomain)
+      // Use the nextUrl object directly instead of creating a new URL
       const url = request.nextUrl.clone();
       url.pathname = targetPath;
       
@@ -118,7 +119,7 @@ export async function middleware(request: NextRequest) {
       });
       
       // Add debug headers
-      response.headers.set('x-middleware-rewrite', url.pathname);
+      response.headers.set('x-middleware-rewrite', targetPath);
       response.headers.set('x-middleware-subdomain', subdomain);
       
       return response;
