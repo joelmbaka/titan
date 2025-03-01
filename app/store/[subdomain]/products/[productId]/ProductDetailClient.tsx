@@ -46,7 +46,7 @@ export default function ProductDetailClient({ product, subdomain, relatedProduct
     <div className="max-w-6xl mx-auto">
       <div className="mb-4">
         <Link 
-          href={`/store/${subdomain}/products`}
+          href="/products"
           className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
         >
           <span>←</span> Back to Products
@@ -138,7 +138,7 @@ export default function ProductDetailClient({ product, subdomain, relatedProduct
                   <p className="text-blue-600 font-medium mb-2">${relatedProduct.price.toFixed(2)}</p>
                   <div className="flex justify-between">
                     <Link 
-                      href={`/store/${subdomain}/products/${relatedProduct.id}`}
+                      href={`/products/${relatedProduct.id}`}
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
                       View Details

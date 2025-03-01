@@ -60,7 +60,7 @@ export default function ProductsClient({ products, subdomain }: ProductsClientPr
               <p className="text-gray-600 text-sm mb-4">{product.description}</p>
               <div className="flex justify-between">
                 <Link 
-                  href={`/store/${subdomain}/products/${product.id}`}
+                  href={`/products/${product.id}`}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
                   View Details

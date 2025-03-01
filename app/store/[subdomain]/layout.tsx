@@ -23,7 +23,7 @@ export default async function StoreLayout({
   const storeName = store?.name || params.subdomain;
   const industry = store?.industry?.toLowerCase().replace(/_/g, ' ') || '';
 
-  return (
+    return (
     <CartProvider storeId={store?.id || ''} subdomain={params.subdomain}>
       <div className="flex flex-col min-h-screen">
         {/* Header */}
@@ -31,7 +31,7 @@ export default async function StoreLayout({
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <Link href={`/store/${params.subdomain}`} className="font-bold text-xl text-blue-600">
+                <Link href="/" className="font-bold text-xl text-blue-600">
                   {storeName}
                 </Link>
                 {industry && (
@@ -42,28 +42,28 @@ export default async function StoreLayout({
               </div>
               
               <nav className="hidden md:flex space-x-8">
-                <Link href={`/store/${params.subdomain}`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Home
                 </Link>
-                <Link href={`/store/${params.subdomain}/products`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/products" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Products
                 </Link>
-                <Link href={`/store/${params.subdomain}/blog`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Blog
                 </Link>
-                <Link href={`/store/${params.subdomain}/about`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
                   About
                 </Link>
-                <Link href={`/store/${params.subdomain}/contact`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/contact" className="text-gray-700 hover:text-blue-600 transition-colors">
                   Contact
                 </Link>
-                <Link href={`/store/${params.subdomain}/cart`} className="text-gray-700 hover:text-blue-600 transition-colors">
+                <Link href="/cart" className="text-gray-700 hover:text-blue-600 transition-colors">
                   <CartIcon />
                 </Link>
               </nav>
               
               <div className="md:hidden flex items-center">
-                <Link href={`/store/${params.subdomain}/cart`} className="mr-4">
+                <Link href="/cart" className="mr-4">
                   <CartIcon />
                 </Link>
                 {/* Mobile menu button - in a real app, you'd implement a mobile menu */}
@@ -114,27 +114,27 @@ export default async function StoreLayout({
                 <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                 <ul className="space-y-2">
                   <li>
-                    <Link href={`/store/${params.subdomain}`} className="text-gray-300 hover:text-white">
+                    <Link href="/" className="text-gray-300 hover:text-white">
                       Home
                     </Link>
                   </li>
                   <li>
-                    <Link href={`/store/${params.subdomain}/products`} className="text-gray-300 hover:text-white">
+                    <Link href="/products" className="text-gray-300 hover:text-white">
                       Products
                     </Link>
                   </li>
                   <li>
-                    <Link href={`/store/${params.subdomain}/blog`} className="text-gray-300 hover:text-white">
+                    <Link href="/blog" className="text-gray-300 hover:text-white">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href={`/store/${params.subdomain}/about`} className="text-gray-300 hover:text-white">
+                    <Link href="/about" className="text-gray-300 hover:text-white">
                       About Us
                     </Link>
                   </li>
                   <li>
-                    <Link href={`/store/${params.subdomain}/contact`} className="text-gray-300 hover:text-white">
+                    <Link href="/contact" className="text-gray-300 hover:text-white">
                       Contact
                     </Link>
                   </li>
@@ -201,5 +201,5 @@ export default async function StoreLayout({
         </footer>
       </div>
     </CartProvider>
-  );
+    );
 } 
