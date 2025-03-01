@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { AddStoreModal } from "@/components/add-store-modal";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
@@ -11,9 +11,15 @@ import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
+  const pathname = usePathname();
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
 
   useEffect(() => {
+    // Only do the redirect if we're on the root page
+    if (pathname !== '/') {
+      return;
+    }
+    
     // Check if we have a subdomain cookie
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
@@ -31,7 +37,7 @@ export default function Home() {
       // Redirect to the store page
       router.push(`/store/${subdomain}`);
     }
-  }, [router]);
+  }, [router, pathname]);
 
   return (
     <div className="min-h-screen">
