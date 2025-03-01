@@ -75,24 +75,10 @@ export default async function StorePage({
           <section className="mb-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8">
             <div className="max-w-3xl">
               <h1 className="text-3xl font-bold mb-4">{store.name}</h1>
-              <p className="text-lg text-gray-700 mb-6">
+              <p className="text-lg text-gray-700">
                 Your trusted partner in {store.industry.toLowerCase().replace(/_/g, ' ')}.
                 We provide high-quality products and exceptional service.
               </p>
-              <div className="flex space-x-4">
-                <Link 
-                  href="/products" 
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Browse Products
-                </Link>
-                <Link 
-                  href="/contact" 
-                  className="px-6 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-                >
-                  Contact Us
-                </Link>
-              </div>
             </div>
           </section>
         
