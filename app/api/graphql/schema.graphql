@@ -47,8 +47,8 @@ type Store {
   subdomain: String!
   owner: User!
   metrics: StoreMetrics!
-  createdAt: String!
-  updatedAt: String!
+  createdAt: String
+  updatedAt: String
 }
 
 type Industry {

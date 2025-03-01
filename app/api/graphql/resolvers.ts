@@ -498,8 +498,60 @@ export const resolvers = {
           return null; // Return null instead of throwing an error
         }
         
-        const store = result.records[0]?.get("s").properties;
-        console.log(`Resolvers - Found store: ${store.name}`);
+        const storeProps = result.records[0]?.get("s").properties;
+        console.log(`Resolvers - Found store: ${storeProps.name}`);
+        
+        // Format date fields to ensure they're properly serialized
+        const store = { ...storeProps };
+        
+        // Handle createdAt date
+        if (store.createdAt && typeof store.createdAt !== 'string') {
+          try {
+            // If it's a Neo4j DateTime object or complex date object
+            if (store.createdAt.toString) {
+              store.createdAt = store.createdAt.toString();
+            } else if (store.createdAt.year && store.createdAt.month && store.createdAt.day) {
+              // Handle complex date object
+              const date = new Date(
+                store.createdAt.year, 
+                store.createdAt.month - 1, // JavaScript months are 0-indexed
+                store.createdAt.day,
+                store.createdAt.hour || 0,
+                store.createdAt.minute || 0,
+                store.createdAt.second || 0
+              );
+              store.createdAt = date.toISOString();
+            }
+          } catch (error) {
+            console.error('Error formatting createdAt date:', error);
+            store.createdAt = new Date().toISOString(); // Fallback to current date
+          }
+        }
+        
+        // Handle updatedAt date
+        if (store.updatedAt && typeof store.updatedAt !== 'string') {
+          try {
+            // If it's a Neo4j DateTime object or complex date object
+            if (store.updatedAt.toString) {
+              store.updatedAt = store.updatedAt.toString();
+            } else if (store.updatedAt.year && store.updatedAt.month && store.updatedAt.day) {
+              // Handle complex date object
+              const date = new Date(
+                store.updatedAt.year, 
+                store.updatedAt.month - 1,
+                store.updatedAt.day,
+                store.updatedAt.hour || 0,
+                store.updatedAt.minute || 0,
+                store.updatedAt.second || 0
+              );
+              store.updatedAt = date.toISOString();
+            }
+          } catch (error) {
+            console.error('Error formatting updatedAt date:', error);
+            store.updatedAt = new Date().toISOString(); // Fallback to current date
+          }
+        }
+        
         return store;
       } catch (error: unknown) {
         console.error("Error fetching store by subdomain:", error);
