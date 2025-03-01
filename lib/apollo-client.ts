@@ -82,7 +82,10 @@ export function getApolloClient() {
         if (isAuthError) {
           console.log('Retrying GraphQL operation due to authentication error');
           // Refresh the session before retry
-          getSession().catch(e => console.error('Error refreshing session during retry:', e));
+          if (typeof window !== 'undefined') {
+            // Only call getSession in the client context
+            getSession().catch(e => console.error('Error refreshing session:', e));
+          }
           return true;
         }
         
@@ -115,7 +118,10 @@ export function getApolloClient() {
         // If we get an authentication error, try to refresh the session
         if (message.includes('Not authenticated')) {
           console.log('Detected authentication error, refreshing session');
-          getSession().catch(e => console.error('Error refreshing session:', e));
+          if (typeof window !== 'undefined') {
+            // Only call getSession in the client context
+            getSession().catch(e => console.error('Error refreshing session:', e));
+          }
         }
       });
     }
@@ -130,14 +136,16 @@ export function getApolloClient() {
       });
       
       // Try to refresh the session on network errors
-      getSession().then(session => {
-        console.log('Refreshed session after network error:', {
-          hasSession: !!session,
-          userId: session?.user?.id || 'none'
+      if (typeof window !== 'undefined') {
+        getSession().then(session => {
+          console.log('Refreshed session after network error:', {
+            hasSession: !!session,
+            userId: session?.user?.id || 'none'
+          });
+        }).catch(e => {
+          console.error('Error refreshing session:', e);
         });
-      }).catch(e => {
-        console.error('Error refreshing session:', e);
-      });
+      }
       
       // For status code 0 errors (CORS/network issues), try a direct fetch to test connectivity
       if ((networkError as { statusCode?: number }).statusCode === 0) {
