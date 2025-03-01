@@ -15,11 +15,17 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const [isStoreRoute, setIsStoreRoute] = useState(false);
+  const [isSubdomain, setIsSubdomain] = useState(false);
   
   useEffect(() => {
     // Check if this is a store route
     const isStore = pathname?.startsWith('/store/');
     setIsStoreRoute(isStore);
+    
+    // Check if we're on a subdomain
+    const hostname = window.location.hostname;
+    const isOnSubdomain = hostname.split('.').length > 2 && !hostname.startsWith('www.');
+    setIsSubdomain(isOnSubdomain);
     
     // Check if we have a subdomain cookie
     const hasSubdomainCookie = document.cookie.includes('subdomain=');
@@ -34,8 +40,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
         <Providers>
-          {/* Only show the header on non-store routes */}
-          {!isStoreRoute && <Header />}
+          {/* Only show the header on non-store routes and when not on a subdomain */}
+          {!isStoreRoute && !isSubdomain && <Header />}
           <main>{children}</main>
         </Providers>
       </body>
