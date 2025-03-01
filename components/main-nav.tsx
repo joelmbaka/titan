@@ -133,6 +133,13 @@ export function MainNav() {
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+
+        {/* Products */}
+        <NavigationMenuItem>
+          <NavItem title="Products" href="/products">
+            View all products
+          </NavItem>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
