@@ -20,6 +20,7 @@ type Query {
   industries: [Industry!]!
   industry(id: ID!): Industry
   products(storeId: ID!): [Product!]!
+  product(id: ID!): Product
   blogPosts(storeId: ID!): [BlogPost!]!
   blogPost(id: ID!): BlogPost
   storeBySubdomain(subdomain: String!): Store

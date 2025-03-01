@@ -392,11 +392,11 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session },
     ) => {
-      if (!context.session?.user) {
-        throw new Error("Not authenticated");
-      }
+      // Remove authentication check to make this endpoint public
+      // Store product pages need to be accessible without authentication
 
       try {
+        console.log(`Resolvers - Fetching products for store: ${storeId}`);
         const result = await executeQuery(
           `MATCH (p:Product {storeId: $storeId})
            RETURN p ORDER BY p.createdAt DESC`,
@@ -423,11 +423,11 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session },
     ) => {
-      if (!context.session?.user) {
-        throw new Error("Not authenticated");
-      }
+      // Remove authentication check to make this endpoint public
+      // Store blog pages need to be accessible without authentication
 
       try {
+        console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);
         const result = await executeQuery(
           `MATCH (b:BlogPost {storeId: $storeId})
            RETURN b ORDER BY b.createdAt DESC`,
@@ -454,18 +454,24 @@ export const resolvers = {
       { id }: { id: string },
       context: { session?: Session },
     ) => {
-      if (!context.session?.user) {
-        throw new Error("Not authenticated");
-      }
+      // Remove authentication check to make this endpoint public
+      // Blog post detail pages need to be accessible without authentication
 
       try {
+        console.log(`Resolvers - Fetching blog post with ID: ${id}`);
         const result = await executeQuery(
           `MATCH (b:BlogPost {id: $id})
            RETURN b`,
           { id },
         );
+        
+        if (!result.records.length) {
+          console.log(`Resolvers - No blog post found with ID: ${id}`);
+          return null; // Return null instead of throwing an error
+        }
+        
         const blogPost = result.records[0]?.get("b").properties;
-        if (!blogPost) throw new Error("Blog post not found");
+        
         return {
           ...blogPost,
           createdAt: blogPost.createdAt.toString(),
@@ -557,6 +563,41 @@ export const resolvers = {
         console.error("Error fetching store by subdomain:", error);
         throw new Error(
           `Failed to fetch store by subdomain: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    },
+    product: async (
+      _: unknown,
+      { id }: { id: string },
+      context: { session?: Session },
+    ) => {
+      // No authentication check to make this endpoint public
+      // Product detail pages need to be accessible without authentication
+      
+      try {
+        console.log(`Resolvers - Fetching product with ID: ${id}`);
+        const result = await executeQuery(
+          `MATCH (p:Product {id: $id})
+           RETURN p`,
+          { id },
+        );
+        
+        if (!result.records.length) {
+          console.log(`Resolvers - No product found with ID: ${id}`);
+          return null; // Return null instead of throwing an error
+        }
+        
+        const product = result.records[0]?.get("p").properties;
+        
+        return {
+          ...product,
+          createdAt: product.createdAt.toString(),
+          updatedAt: product.updatedAt.toString(),
+        };
+      } catch (error: unknown) {
+        console.error("Error fetching product by ID:", error);
+        throw new Error(
+          `Failed to fetch product: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     },
