@@ -42,41 +42,29 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
       }
       
-      // Determine the base URL for the main application (not the subdomain)
-      // This is crucial - we need to rewrite to the main app URL, not the subdomain URL
-      const mainAppUrl = new URL(request.url);
-      
-      // Extract the domain parts
-      const domainParts = hostname.split('.');
-      // Remove the subdomain part
-      domainParts.shift();
-      // Reconstruct the main domain
-      const mainDomain = domainParts.join('.');
-      
-      // Set the host to the main domain
-      mainAppUrl.host = mainDomain;
-      
       // Create the target path
       const targetPath = pathname === '/' 
         ? `/store/${subdomain}` 
         : `/store/${subdomain}${pathname}`;
       
-      // Create a new URL with the main app origin and the target path
-      const rewriteUrl = new URL(targetPath, mainAppUrl.origin);
-      
       console.log("Rewriting subdomain request to:", targetPath);
-      console.log("Full rewrite URL:", {
-        href: rewriteUrl.href,
-        origin: rewriteUrl.origin,
-        protocol: rewriteUrl.protocol,
-        host: rewriteUrl.host,
-        pathname: rewriteUrl.pathname
-      });
       
       try {
-        // Add debug header to track the rewrite
-        const response = NextResponse.rewrite(rewriteUrl);
-        response.headers.set('x-middleware-rewrite', rewriteUrl.pathname);
+        // Clone the URL but only modify the pathname
+        const url = request.nextUrl.clone();
+        url.pathname = targetPath;
+        
+        console.log("Rewrite URL with modified pathname:", {
+          pathname: url.pathname,
+          basePath: url.basePath,
+          href: url.href
+        });
+        
+        // Use the modified URL for rewriting
+        const response = NextResponse.rewrite(url);
+        
+        // Add debug headers
+        response.headers.set('x-middleware-rewrite', targetPath);
         response.headers.set('x-middleware-subdomain', subdomain);
         
         // Add a cookie to track the subdomain
@@ -90,19 +78,22 @@ export async function middleware(request: NextRequest) {
         return response;
       } catch (error) {
         console.error("Error in middleware URL rewrite:", error);
-        // Fallback using a different approach
+        
+        // Fallback approach - use NextResponse.rewrite with a path string
         try {
-          // Use a hardcoded domain as a last resort
-          const fallbackUrl = new URL(targetPath, `https://joelmbaka.site`);
-          console.log("Fallback URL:", fallbackUrl.toString());
+          console.log("Trying fallback with path string:", targetPath);
           
-          const response = NextResponse.rewrite(fallbackUrl);
-          response.headers.set('x-middleware-rewrite', fallbackUrl.pathname);
+          // Create a new response with the path string
+          const response = NextResponse.rewrite(targetPath);
+          
+          // Add debug headers
+          response.headers.set('x-middleware-rewrite', targetPath);
           response.headers.set('x-middleware-subdomain', subdomain);
           
           return response;
         } catch (fallbackError) {
-          console.error("Fallback URL rewrite also failed:", fallbackError);
+          console.error("Fallback rewrite also failed:", fallbackError);
+          
           // Last resort - just continue without rewriting
           return NextResponse.next();
         }
