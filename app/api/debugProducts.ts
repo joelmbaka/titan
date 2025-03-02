@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
     
     console.log('Debug Products retrieved:', products);
 
+    // Allow unauthenticated access
+    if (!session) {
+      return NextResponse.json({
+        user: null,
+        products,
+      });
+    }
+
     return NextResponse.json({
       session,
       products,
