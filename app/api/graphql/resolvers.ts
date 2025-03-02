@@ -423,10 +423,32 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session },
     ) => {
-      if (!context.session?.user) {
-        throw new Error("Not authenticated");
+      // Allow unauthenticated access
+      try {
+        console.log(`Fetching blog posts for store: ${storeId}`);
+        const result = await executeQuery(
+          `MATCH (b:BlogPost {storeId: $storeId})
+           RETURN b ORDER BY b.createdAt DESC`,
+          { storeId },
+        );
+
+        // Check if result is empty and return an empty array instead of null
+        if (!result.records.length) {
+          return []; // Return an empty array if no blog posts are found
+        }
+
+        return result.records.map((record: any) => {
+          const blogPost = record.get('b').properties;
+          return {
+            ...blogPost,
+            createdAt: blogPost.createdAt.toString(),
+            updatedAt: blogPost.updatedAt.toString(),
+          };
+        });
+      } catch (error: unknown) {
+        console.error('Error fetching blog posts:', error);
+        throw new Error(`Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`);
       }
-      // Fetch logic...
     },
     blogPost: async (
       _: unknown,
