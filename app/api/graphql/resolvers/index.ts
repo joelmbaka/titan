@@ -1,3 +1,2 @@
-export { storeResolvers } from './storeResolvers';
-export { productResolvers } from './productResolvers';
+export { combinedResolvers } from './combinedResolvers';
 // Add other resolvers as needed 
