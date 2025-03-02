@@ -18,6 +18,8 @@ interface ProductsClientProps {
 }
 
 export default function ProductsClient({ products, subdomain }: ProductsClientProps) {
+  console.log('ProductsClient - Products:', products);
+
   return (
     <div>
       {/* Filters and Search */}

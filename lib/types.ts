@@ -23,6 +23,7 @@ export interface Store {
   createdAt?: string;
   updatedAt?: string;
   category?: string;
+  description?: string;
 }
 
 export interface Industry {

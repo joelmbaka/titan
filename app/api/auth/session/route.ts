@@ -15,6 +15,16 @@ export async function GET(request: NextRequest) {
     // Get the session
     const session = await auth();
     
+    console.log('Session retrieved:', session);
+    // Log the session expiration time
+    console.log('Session expires at:', session.expires);
+    // Log user information if available
+    if (session.user) {
+      console.log('Authenticated user:', session.user);
+    } else {
+      console.log('No authenticated user found.');
+    }
+    
     // For subdomain requests, return a minimal session
     if (isSubdomainRequest) {
       return NextResponse.json({
