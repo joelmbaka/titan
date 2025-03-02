@@ -30,6 +30,9 @@ export const {
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
+      console.log('JWT Callback called. Account:', account);
+      console.log('JWT Callback called. Profile:', profile);
+
       if (account) {
         token.accessToken = account.access_token;
         token.id = token.sub;
