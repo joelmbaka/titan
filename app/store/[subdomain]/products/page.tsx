@@ -34,4 +34,4 @@ export default async function StoreProductsPage({ params }: PageProps) {
     console.error('Error fetching products:', error);
     return <div>Error loading products.</div>;
   }
-} 
+}
