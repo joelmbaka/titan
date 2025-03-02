@@ -473,16 +473,13 @@ export const resolvers = {
            RETURN b`,
           { id },
         );
-
+        
         if (!result.records.length) {
           console.log(`Resolvers - No blog post found with ID: ${id}`);
           return null; // Return null instead of throwing an error
         }
-
+        
         const blogPost = result.records[0]?.get("b").properties;
-
-        // Log the retrieved blog post
-        console.log(`Retrieved blog post with ID ${id}:`, blogPost);
         
         return {
           ...blogPost,
