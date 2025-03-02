@@ -4,12 +4,17 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { BlogPostModal } from "@/components/blog-post-modal"
 import { useParams } from "next/navigation"
+import { getBlogPostsByStoreId } from '@/lib/storeFunctions'
+import Link from 'next/link'
 
-export default function BlogPage() {
+export default async function BlogPage() {
   const params = useParams()
   if (!params) throw new Error("Params is null")
   const storeId = params.storeId as string
   const [showBlogModal, setShowBlogModal] = useState(false)
+
+  // Fetch blog posts for the store
+  const blogPosts = await getBlogPostsByStoreId(storeId)
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -50,6 +55,19 @@ export default function BlogPage() {
           Create New Blog Post
         </Button>
       </div>
+
+      {/* Display Blog Posts */}
+      {blogPosts.map((post) => (
+        <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold">{post.title}</h2>
+            <p className="text-gray-600">{post.metaDescription}</p>
+            <Link href={`/dashboard/stores/${storeId}/blog/${post.id}`} className="text-blue-600 hover:text-blue-800">
+              Read more
+            </Link>
+          </div>
+        </div>
+      ))}
 
       <BlogPostModal
         open={showBlogModal}

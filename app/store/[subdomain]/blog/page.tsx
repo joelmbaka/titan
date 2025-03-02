@@ -1,3 +1,4 @@
+// app/store/[subdomain]/blog/page.tsx
 import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
 import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
@@ -9,22 +10,16 @@ interface PageProps {
 
 export default async function StoreBlogPage({ params }: PageProps) {
   try {
-    // Await the params promise
     const { subdomain } = await params;
-    console.log('StoreBlogPage - Subdomain:', subdomain);
-
     const store = await getStoreBySubdomain(subdomain);
-    console.log('StoreBlogPage - Store data:', store);
 
     if (!store) {
-      console.log('StoreBlogPage - Store not found');
       return notFound();
     }
 
     // Fetch blog posts from the database
     const blogPosts = await getBlogPostsByStoreId(store.id);
     
-    // If no blog posts are found, use mock data for demonstration
     const displayBlogPosts = blogPosts.length > 0 ? blogPosts : [];
 
     return (
@@ -70,4 +65,4 @@ export default async function StoreBlogPage({ params }: PageProps) {
     console.error('StoreBlogPage - Error:', error);
     throw error;
   }
-} 
+}
