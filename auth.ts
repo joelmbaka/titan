@@ -50,6 +50,8 @@ export const {
         tokenPrefix: session.accessToken ? session.accessToken.substring(0, 5) + '...' : 'none'
       });
       
+      console.log('Auth function called. Session:', { session, token });
+      
       return session;
     },
     async redirect({ url, baseUrl }) {
