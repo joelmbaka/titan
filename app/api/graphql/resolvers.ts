@@ -435,10 +435,10 @@ export const resolvers = {
         // Log the number of records found
         console.log(`Number of blog posts found for store ${storeId}: ${result.records.length}`);
 
-        // Check if result is empty and return an empty array instead of null
+        // Check if result is empty and return a message instead of an empty array
         if (!result.records.length) {
           console.log(`No blog posts found for store: ${storeId}`);
-          return []; // Return an empty array if no blog posts are found
+          return { message: "No posts available." }; // Return a message if no blog posts are found
         }
 
         const blogPosts = result.records.map((record: any) => {
