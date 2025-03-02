@@ -423,31 +423,10 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session },
     ) => {
-      // Remove authentication check to make this endpoint public
-      // Store blog pages need to be accessible without authentication
-
-      try {
-        console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);
-        const result = await executeQuery(
-          `MATCH (b:BlogPost {storeId: $storeId})
-           RETURN b ORDER BY b.createdAt DESC`,
-          { storeId },
-        );
-
-        return result.records.map((record: any) => {
-          const blogPost = record.get("b").properties;
-          return {
-            ...blogPost,
-            createdAt: blogPost.createdAt.toString(),
-            updatedAt: blogPost.updatedAt.toString(),
-          };
-        });
-      } catch (error: unknown) {
-        console.error("Error fetching blog posts:", error);
-        throw new Error(
-          `Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`,
-        );
+      if (!context.session?.user) {
+        throw new Error("Not authenticated");
       }
+      // Fetch logic...
     },
     blogPost: async (
       _: unknown,

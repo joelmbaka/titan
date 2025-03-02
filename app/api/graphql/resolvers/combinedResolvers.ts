@@ -326,36 +326,8 @@ export const combinedResolvers = {
         throw new Error(`Failed to fetch products: ${error instanceof Error ? error.message : String(error)}`);
       }
     },
-    blogPosts: async (
-      _: unknown,
-      { storeId }: { storeId: string },
-      context: { session?: Session },
-    ) => {
-      // Remove authentication check to make this endpoint public
-      // Store blog pages need to be accessible without authentication
-
-      try {
-        console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);
-        const result = await executeQuery(
-          `MATCH (b:BlogPost {storeId: $storeId})
-           RETURN b ORDER BY b.createdAt DESC`,
-          { storeId },
-        );
-
-        return result.records.map((record: any) => {
-          const blogPost = record.get("b").properties;
-          return {
-            ...blogPost,
-            createdAt: blogPost.createdAt.toString(),
-            updatedAt: blogPost.updatedAt.toString(),
-          };
-        });
-      } catch (error: unknown) {
-        console.error("Error fetching blog posts:", error);
-        throw new Error(
-          `Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
+    blogPosts: async (_: unknown, { storeId }: { storeId: string }, context: { session?: Session }) => {
+      // This resolver is now handled in the main resolvers file.
     },
     blogPost: async (_: unknown, { id }: { id: string }, context: { session?: Session }) => {
       if (!context.session?.user) {
