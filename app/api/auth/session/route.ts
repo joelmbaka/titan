@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No active session' }, { status: 401 });
     }
     
-    // For subdomain requests, return a minimal session
+    // Allow unauthenticated access for products page
     if (isSubdomainRequest) {
       return NextResponse.json({
         user: null,
