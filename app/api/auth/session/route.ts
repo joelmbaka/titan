@@ -17,12 +17,16 @@ export async function GET(request: NextRequest) {
     
     console.log('Session retrieved:', session);
     // Log the session expiration time
-    console.log('Session expires at:', session.expires);
+    console.log('Session expires at:', session?.expires);
     // Log user information if available
-    if (session.user) {
+    if (session?.user) {
       console.log('Authenticated user:', session.user);
     } else {
       console.log('No authenticated user found.');
+    }
+    
+    if (!session) {
+      return NextResponse.json({ error: 'No active session' }, { status: 401 });
     }
     
     // For subdomain requests, return a minimal session
