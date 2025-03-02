@@ -1,37 +1,61 @@
-'use client';
+// app/store/[subdomain]/products/page.tsx
+'use client'; // Ensure this is a client component
 
-import { getStoreBySubdomain } from '@/lib/storeFunctions';
-import { getProductsByStoreId } from '@/lib/storeFunctions';
+import React, { useEffect, useState } from 'react';
+import { getStoreBySubdomain, getProductsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
-import ProductsClient from './ProductsClient';
 
 interface PageProps {
   params: Promise<{ subdomain: string }>; 
 }
 
-export default async function StoreProductsPage({ params }: PageProps) {
-  try {
-    const { subdomain } = await params;
-    const store = await getStoreBySubdomain(subdomain);
+const StoreProductsPage = ({ params }: PageProps) => {
+  const [products, setProducts] = useState([]);
+  const [store, setStore] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { subdomain } = await params;
+        const fetchedStore = await getStoreBySubdomain(subdomain);
 
-    if (!store) {
-      return notFound();
-    }
+        if (!fetchedStore) {
+          notFound(); // Handle store not found
+          return;
+        }
 
-    const products = await getProductsByStoreId(store.id);
+        setStore(fetchedStore);
+        const fetchedProducts = await getProductsByStoreId(fetchedStore.id);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!products || products.length === 0) {
-      return <div>No products available.</div>;
-    }
+    fetchProducts();
+  }, [params]);
 
-    return (
-      <div>
-        <h1 className="text-3xl font-bold mb-4">Products</h1>
-        <ProductsClient products={products} subdomain={subdomain} />
-      </div>
-    );
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return <div>Error loading products.</div>;
+  if (loading) {
+    return <div>Loading...</div>; // Show loading state
   }
-}
+
+  if (!products || products.length === 0) {
+    return <div>No products available.</div>;
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-4">Products for {store?.name}</h1>
+      <ul>
+        {products.map(product => (
+          <li key={product.id}>{product.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default StoreProductsPage;
