@@ -1,24 +1,25 @@
-"use client"
+// app/dashboard/stores/[storeId]/blog/page.tsx
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { BlogPostModal } from "@/components/blog-post-modal"
-import { useParams } from "next/navigation"
-import { getBlogPostsByStoreId } from '@/lib/storeFunctions'
-import Link from 'next/link'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { BlogPostModal } from "@/components/blog-post-modal";
+import { useParams } from "next/navigation";
+import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
+import Link from 'next/link';
 
 export default async function BlogPage() {
-  const params = useParams()
-  if (!params) throw new Error("Params is null")
-  const storeId = params.storeId as string
-  const [showBlogModal, setShowBlogModal] = useState(false)
+  const params = useParams();
+  if (!params) throw new Error("Params is null");
+  const storeId = params.storeId as string;
+  const [showBlogModal, setShowBlogModal] = useState(false);
 
   // Fetch blog posts for the store
-  const blogPosts = await getBlogPostsByStoreId(storeId)
+  const blogPosts = await getBlogPostsByStoreId(storeId);
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
-      console.log("Sending blog generation request with prompt:", prompt)
+      console.log("Sending blog generation request with prompt:", prompt);
       const response = await fetch("https://titan2-o.onrender.com/generate-blog-post", {
         method: "POST",
         headers: {
@@ -28,24 +29,24 @@ export default async function BlogPage() {
           prompt,
           store_id: storeId
         }),
-      })
+      });
 
-      console.log("Received response status:", response.status)
+      console.log("Received response status:", response.status);
       
       if (!response.ok) {
-        const errorResponse = await response.json()
-        console.error("Error response from server:", errorResponse)
-        throw new Error(`Failed to generate blog post: ${response.statusText}`)
+        const errorResponse = await response.json();
+        console.error("Error response from server:", errorResponse);
+        throw new Error(`Failed to generate blog post: ${response.statusText}`);
       }
 
-      const data = await response.json()
-      console.log("Successfully generated blog post:", data)
-      return data
+      const data = await response.json();
+      console.log("Successfully generated blog post:", data);
+      return data;
     } catch (err) {
-      console.error("Error in handleGenerateBlog:", err)
-      throw err
+      console.error("Error in handleGenerateBlog:", err);
+      throw err;
     }
-  }
+  };
 
   return (
     <div className="p-6">
@@ -76,5 +77,5 @@ export default async function BlogPage() {
         storeId={storeId}
       />
     </div>
-  )
-} 
+  );
+}

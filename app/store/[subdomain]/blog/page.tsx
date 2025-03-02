@@ -1,4 +1,6 @@
 // app/store/[subdomain]/blog/page.tsx
+'use client';
+
 import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
 import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
