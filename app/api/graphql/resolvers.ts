@@ -435,7 +435,7 @@ export const resolvers = {
         // Log the number of records found
         console.log(`Number of blog posts found for store ${storeId}: ${result.records.length}`);
 
-        // Check if result is empty and return a message instead of an empty array
+        // Check if result is empty and return an empty array instead of null
         if (!result.records.length) {
           console.log(`No blog posts found for store: ${storeId}`);
           return { message: "No posts available." }; // Return a message if no blog posts are found
@@ -452,7 +452,7 @@ export const resolvers = {
 
         // Log the retrieved blog posts
         console.log(`Retrieved blog posts for store ${storeId}:`, blogPosts);
-        return blogPosts;
+        return blogPosts; // Ensure this returns an array
       } catch (error: unknown) {
         console.error('Error fetching blog posts:', error);
         throw new Error(`Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`);
