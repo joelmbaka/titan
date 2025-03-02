@@ -1,0 +1,88 @@
+[33mcommit f34ae55c637e832aa9432f6e4842fd309839cf2a[m
+Author: joelmbaka <dev@joelmbaka.site>
+Date:   Sun Mar 2 13:18:51 2025 +0300
+
+    Remove duplicate blogPosts resolver and allow unauthenticated access
+
+[1mdiff --git a/app/api/graphql/resolvers.ts b/app/api/graphql/resolvers.ts[m
+[1mindex c57b7f49..bb97516e 100644[m
+[1m--- a/app/api/graphql/resolvers.ts[m
+[1m+++ b/app/api/graphql/resolvers.ts[m
+[36m@@ -423,31 +423,10 @@[m [mexport const resolvers = {[m
+       { storeId }: { storeId: string },[m
+       context: { session?: Session },[m
+     ) => {[m
+[31m-      // Remove authentication check to make this endpoint public[m
+[31m-      // Store blog pages need to be accessible without authentication[m
+[31m-[m
+[31m-      try {[m
+[31m-        console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);[m
+[31m-        const result = await executeQuery([m
+[31m-          `MATCH (b:BlogPost {storeId: $storeId})[m
+[31m-           RETURN b ORDER BY b.createdAt DESC`,[m
+[31m-          { storeId },[m
+[31m-        );[m
+[31m-[m
+[31m-        return result.records.map((record: any) => {[m
+[31m-          const blogPost = record.get("b").properties;[m
+[31m-          return {[m
+[31m-            ...blogPost,[m
+[31m-            createdAt: blogPost.createdAt.toString(),[m
+[31m-            updatedAt: blogPost.updatedAt.toString(),[m
+[31m-          };[m
+[31m-        });[m
+[31m-      } catch (error: unknown) {[m
+[31m-        console.error("Error fetching blog posts:", error);[m
+[31m-        throw new Error([m
+[31m-          `Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`,[m
+[31m-        );[m
+[32m+[m[32m      if (!context.session?.user) {[m
+[32m+[m[32m        throw new Error("Not authenticated");[m
+       }[m
+[32m+[m[32m      // Fetch logic...[m
+     },[m
+     blogPost: async ([m
+       _: unknown,[m
+[1mdiff --git a/app/api/graphql/resolvers/combinedResolvers.ts b/app/api/graphql/resolvers/combinedResolvers.ts[m
+[1mindex ca37139c..bfca13dc 100644[m
+[1m--- a/app/api/graphql/resolvers/combinedResolvers.ts[m
+[1m+++ b/app/api/graphql/resolvers/combinedResolvers.ts[m
+[36m@@ -326,36 +326,8 @@[m [mexport const combinedResolvers = {[m
+         throw new Error(`Failed to fetch products: ${error instanceof Error ? error.message : String(error)}`);[m
+       }[m
+     },[m
+[31m-    blogPosts: async ([m
+[31m-      _: unknown,[m
+[31m-      { storeId }: { storeId: string },[m
+[31m-      context: { session?: Session },[m
+[31m-    ) => {[m
+[31m-      // Remove authentication check to make this endpoint public[m
+[31m-      // Store blog pages need to be accessible without authentication[m
+[31m-[m
+[31m-      try {[m
+[31m-        console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);[m
+[31m-        const result = await executeQuery([m
+[31m-          `MATCH (b:BlogPost {storeId: $storeId})[m
+[31m-           RETURN b ORDER BY b.createdAt DESC`,[m
+[31m-          { storeId },[m
+[31m-        );[m
+[31m-[m
+[31m-        return result.records.map((record: any) => {[m
+[31m-          const blogPost = record.get("b").properties;[m
+[31m-          return {[m
+[31m-            ...blogPost,[m
+[31m-            createdAt: blogPost.createdAt.toString(),[m
+[31m-            updatedAt: blogPost.updatedAt.toString(),[m
+[31m-          };[m
+[31m-        });[m
+[31m-      } catch (error: unknown) {[m
+[31m-        console.error("Error fetching blog posts:", error);[m
+[31m-        throw new Error([m
+[31m-          `Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`,[m
+[31m-        );[m
+[31m-      }[m
+[32m+[m[32m    blogPosts: async (_: unknown, { storeId }: { storeId: string }, context: { session?: Session }) => {[m
+[32m+[m[32m      // This resolver is now handled in the main resolvers file.[m
+     },[m
+     blogPost: async (_: unknown, { id }: { id: string }, context: { session?: Session }) => {[m
+       if (!context.session?.user) {[m
