@@ -50,6 +50,11 @@ export const {
         tokenPrefix: session.accessToken ? session.accessToken.substring(0, 5) + '...' : 'none'
       });
       
+      console.log('Auth function called. Environment Variables:', {
+        GITHUB_ID: process.env.GITHUB_ID,
+        GITHUB_SECRET: process.env.GITHUB_SECRET,
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+      });
       console.log('Auth function called. Session:', { session, token });
       
       return session;
