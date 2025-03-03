@@ -1,21 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { OperationVariables } from "@apollo/client"
 
 interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
-  onBlogPostAdded: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
 }
 
-export interface BlogPostData {
+interface BlogPostData {
   id: string
   title: string
   content: string
@@ -24,41 +22,26 @@ export interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
-  console.log(`BlogPostModal opened: ${open}`);
-
+export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState("")
   const [generatedPost, setGeneratedPost] = useState<BlogPostData | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  useEffect(() => {
-    console.log(`Modal state changed: showSuccess = ${showSuccess}`);
-  }, [showSuccess]);
-
   const handleGenerate = async () => {
     if (prompt.length < 20) {
-      setError("Please provide at least 20 characters for better results.");
-      return;
+      setError("Please provide at least 20 characters for better results")
+      return
     }
 
-    const payload = {
-      prompt,
-      store_id: storeId,
-      category: "Wellness"
-    };
-    console.log(`Sending payload to API:`, JSON.stringify(payload));
-
-    console.log(`Generating blog post with prompt: ${prompt}`);
-    setLoading(true);
-    setError("");
-    setGeneratedPost(null);
+    setLoading(true)
+    setError("")
+    setGeneratedPost(null)
 
     try {
-      const result = await onGenerate(prompt);
-      console.log(`Blog post generated successfully:`, result);
+      const result = await onGenerate(prompt)
       
       const saveResponse = await fetch('/api/graphql', {
         method: 'POST',
@@ -110,17 +93,14 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   }
 
   const handleClose = () => {
-    console.log(`BlogPostModal closed`);
-    setPrompt("");
-    setGeneratedPost(null);
-    setShowSuccess(false);
-    onClose();
+    setPrompt("")
+    setGeneratedPost(null)
+    onClose()
   }
 
   const handlePublish = async () => {
-    if (!generatedPost || isPublishing) return;
+    if (!generatedPost) return;
 
-    console.log(`Publishing blog post:`, generatedPost);
     setIsPublishing(true);
     try {
       const response = await fetch('/api/graphql', {
@@ -145,25 +125,18 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               tags: generatedPost.tags,
               category: generatedPost.category,
               storeId: storeId,
-              status: 'PUBLISHED',
+              status: 'PUBLISHED'
             }
           }
         })
       });
 
       const data = await response.json();
-      console.log(`API Response:`, data);
       if (data.errors) {
-        console.error(`API Errors:`, data.errors);
         throw new Error(data.errors[0].message);
       }
 
-      console.log(`Setting success modal to true`);
       setShowSuccess(true);
-      console.log(`Modal state after publishing:`, { showSuccess });
-      setPrompt("");
-      setGeneratedPost(null);
-      onBlogPostAdded();
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");
@@ -174,15 +147,12 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto" aria-describedby="dialog-description">
+      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
-        <p id="dialog-description" className="text-sm text-gray-500">
-          {showSuccess ? "Your blog post has been successfully published!" : "Enter your prompt below to generate a blog post."}
-        </p>
         
         {showSuccess ? (
           <div className="text-center space-y-4">
@@ -192,15 +162,6 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               className="w-full"
             >
               Close
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowSuccess(false);
-                setPrompt("");
-              }}
-              className="w-full"
-            >
-              Create New Post
             </Button>
           </div>
         ) : generatedPost ? (
@@ -221,7 +182,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               ))}
             </div>
             <Button 
-              onClick={handlePublish}
+              onClick={handlePublish} 
               className="w-full"
               disabled={isPublishing}
             >
@@ -231,13 +192,14 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="prompt">Enter your prompt:</Label>
+              <Label htmlFor="prompt">What should the blog post be about?</Label>
               <Textarea
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Write your prompt here..."
-                rows={4}
+                placeholder="e.g. A blog post about the benefits of organic skincare products..."
+                required
+                rows={5}
               />
               <p className="text-sm text-muted-foreground">
                 Minimum 20 characters required
