@@ -4,12 +4,17 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { BlogPostModal } from "@/components/blog-post-modal"
 import { useParams } from "next/navigation"
+import { gql } from "@apollo/client"
+import { useApolloClient } from "@apollo/client"
+import { BlogPostData } from '@/components/blog-post-modal'
 
 export default function BlogPage() {
   const params = useParams()
   if (!params) throw new Error("Params is null")
   const storeId = params.storeId as string
   const [showBlogModal, setShowBlogModal] = useState(false)
+  const client = useApolloClient()
+  const [blogPosts, setBlogPosts] = useState<BlogPostData[]>([])
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -41,6 +46,32 @@ export default function BlogPage() {
       throw err
     }
   }
+
+  const fetchBlogPosts = async () => {
+    try {
+      const { data } = await client.query({
+        query: gql`
+          query BlogPosts($storeId: ID!) {
+            blogPosts(storeId: $storeId) {
+              id
+              title
+              content
+              metaDescription
+              tags
+              category
+              status
+              createdAt
+              updatedAt
+            }
+          }
+        `,
+        variables: { storeId },
+      });
+      setBlogPosts(data.blogPosts);
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+    }
+  };
 
   return (
     <div className="p-6">

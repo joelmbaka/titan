@@ -13,7 +13,7 @@ interface BlogPostModalProps {
   storeId: string
 }
 
-interface BlogPostData {
+export interface BlogPostData {
   id: string
   title: string
   content: string
