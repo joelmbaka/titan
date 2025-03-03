@@ -37,7 +37,7 @@
          },
          body: JSON.stringify({
            prompt,
-           storeId,
+           store_id: storeId,
            category: "Wellness"
          }),
        });
