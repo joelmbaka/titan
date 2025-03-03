@@ -118,7 +118,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   }
 
   const handlePublish = async () => {
-    if (!generatedPost) return;
+    if (!generatedPost || isPublishing) return;
 
     console.log(`Publishing blog post:`, generatedPost);
     setIsPublishing(true);
@@ -221,10 +221,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               ))}
             </div>
             <Button 
-              onClick={async () => {
-                console.log(`Publish button clicked`);
-                await handlePublish();
-              }}
+              onClick={handlePublish}
               className="w-full"
               disabled={isPublishing}
             >
