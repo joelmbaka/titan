@@ -146,6 +146,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       }
 
       setShowSuccess(true);
+      onBlogPostAdded();
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");
