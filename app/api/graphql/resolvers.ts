@@ -423,11 +423,8 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session }
     ) => {
-      // Allow unauthenticated access
-      if (!context.session?.user) {
-        console.warn("Unauthenticated access to blog posts");
-        return []; // Return an empty array instead of null
-      }
+      // Remove authentication check to make this endpoint public
+      // Store blog pages need to be accessible without authentication
 
       try {
         console.log(`Fetching blog posts for store: ${storeId}`);
