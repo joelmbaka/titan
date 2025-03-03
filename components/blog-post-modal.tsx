@@ -100,9 +100,10 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
   const handleClose = () => {
     console.log(`BlogPostModal closed`);
-    setPrompt("")
-    setGeneratedPost(null)
-    onClose()
+    setPrompt("");
+    setGeneratedPost(null);
+    setShowSuccess(false);
+    onClose();
   }
 
   const handlePublish = async () => {
@@ -172,6 +173,15 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               className="w-full"
             >
               Close
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowSuccess(false);
+                setPrompt("");
+              }}
+              className="w-full"
+            >
+              Create New Post
             </Button>
           </div>
         ) : generatedPost ? (
