@@ -156,6 +156,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
       console.log(`Setting success modal to true`);
       setShowSuccess(true);
+      console.log(`Modal state after publishing:`, { showSuccess });
       setPrompt("");
       setGeneratedPost(null);
       onBlogPostAdded();
