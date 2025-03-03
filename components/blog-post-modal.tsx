@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -33,6 +33,10 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   const [generatedPost, setGeneratedPost] = useState<BlogPostData | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+
+  useEffect(() => {
+    console.log(`Modal state changed: showSuccess = ${showSuccess}`);
+  }, [showSuccess]);
 
   const handleGenerate = async () => {
     if (prompt.length < 20) {
