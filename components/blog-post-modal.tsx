@@ -5,18 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { OperationVariables } from "@apollo/client"
 
 interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
-  onBlogPostAdded: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
-  blogPost?: BlogPostData
 }
 
-export interface BlogPostData {
+interface BlogPostData {
   id: string
   title: string
   content: string
@@ -25,7 +22,7 @@ export interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId, blogPost }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -35,39 +32,65 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
   const handleGenerate = async () => {
     if (prompt.length < 20) {
-      setError("Please provide at least 20 characters for better results");
-      return;
+      setError("Please provide at least 20 characters for better results")
+      return
     }
 
-    setLoading(true);
-    setError("");
-    setGeneratedPost(null);
+    setLoading(true)
+    setError("")
+    setGeneratedPost(null)
 
     try {
-      console.log("Sending request to AI with prompt:", prompt);
-      const saveResponse = await fetch('https://titan2-o.onrender.com/generate-blog-post', {
+      const result = await onGenerate(prompt)
+      
+      const saveResponse = await fetch('/api/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({
+          query: `
+            mutation CreateBlogPost($input: CreateBlogPostInput!) {
+              createBlogPost(input: $input) {
+                id
+                title
+                content
+                metaDescription
+                tags
+                category
+                status
+                createdAt
+              }
+            }
+          `,
+          variables: {
+            input: {
+              title: result.title,
+              content: result.content,
+              metaDescription: result.meta_description,
+              tags: result.tags,
+              category: result.category,
+              storeId: storeId,
+              status: 'DRAFT'
+            }
+          }
+        })
       });
 
-      const result = await saveResponse.json();
-      console.log("AI response:", result);
-
-      if (saveResponse.ok) {
-        setGeneratedPost(result);
-      } else {
-        throw new Error(result.detail || "Failed to generate blog post.");
+      const saveData = await saveResponse.json();
+      
+      if (saveData.errors) {
+        throw new Error(saveData.errors[0].message);
       }
+
+      setGeneratedPost(result)
     } catch (err) {
-      console.error("Error generating blog post:", err);
-      setError("Failed to generate blog post. Please try again.");
+      console.error("Error generating blog post:", err)
+      setError("Failed to generate blog post. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleClose = () => {
     setPrompt("")
@@ -127,7 +150,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {showSuccess ? "Blog Post Published!" : blogPost ? blogPost.title : "Generate Blog Post with AI"}
+            {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
         
@@ -141,16 +164,23 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               Close
             </Button>
           </div>
-        ) : blogPost ? (
-          <div>
-            <div dangerouslySetInnerHTML={{ __html: blogPost.content }} />
-            <p>{blogPost.meta_description}</p>
-            <div>
-              {blogPost.tags.map(tag => (
-                <span key={tag}>{tag}</span>
+        ) : generatedPost ? (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">{generatedPost.title}</h2>
+            <div className="prose max-w-full">
+              {generatedPost.content.split('\n').map((paragraph, index) => (
+                <p key={index} className="mb-4">
+                  {paragraph}
+                </p>
               ))}
             </div>
-            <p>Category: {blogPost.category}</p>
+            <div className="flex gap-2">
+              {generatedPost.tags.map(tag => (
+                <span key={tag} className="bg-gray-100 px-2 py-1 rounded text-sm">
+                  {tag}
+                </span>
+              ))}
+            </div>
             <Button 
               onClick={handlePublish} 
               className="w-full"
@@ -167,7 +197,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your blog post prompt here..."
+                placeholder="e.g. A blog post about the benefits of organic skincare products..."
                 required
                 rows={5}
               />
