@@ -48,6 +48,7 @@ export default function BlogPage() {
   }
 
   const fetchBlogPosts = async () => {
+    console.log('Fetching blog posts...');
     try {
       const { data } = await client.query({
         query: gql`
@@ -67,6 +68,7 @@ export default function BlogPage() {
         `,
         variables: { storeId },
       });
+      console.log('Fetched blog posts:', data.blogPosts);
       setBlogPosts(data.blogPosts);
     } catch (error) {
       console.error('Error fetching blog posts:', error);
