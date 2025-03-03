@@ -2,19 +2,20 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { OperationVariables } from "@apollo/client"
 
 interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
+  onBlogPostAdded: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
 }
 
-interface BlogPostData {
+export interface BlogPostData {
   id: string
   title: string
   content: string
@@ -23,7 +24,7 @@ interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -33,65 +34,39 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
 
   const handleGenerate = async () => {
     if (prompt.length < 20) {
-      setError("Please provide at least 20 characters for better results")
-      return
+      setError("Please provide at least 20 characters for better results");
+      return;
     }
 
-    setLoading(true)
-    setError("")
-    setGeneratedPost(null)
+    setLoading(true);
+    setError("");
+    setGeneratedPost(null);
 
     try {
-      const result = await onGenerate(prompt)
-
+      console.log("Sending request to AI with prompt:", prompt);
       const saveResponse = await fetch('https://titan2-o.onrender.com/generate-blog-post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          query: `
-            mutation CreateBlogPost($input: CreateBlogPostInput!) {
-              createBlogPost(input: $input) {
-                id
-                title
-                content
-                metaDescription
-                tags
-                category
-                status
-                createdAt
-              }
-            }
-          `,
-          variables: {
-            input: {
-              title: result.title,
-              content: result.content,
-              metaDescription: result.meta_description,
-              tags: result.tags,
-              category: result.category,
-              storeId: storeId,
-              status: 'DRAFT'
-            }
-          }
-        })
+        body: JSON.stringify({ prompt }),
       });
 
-      const saveData = await saveResponse.json();
+      const result = await saveResponse.json();
+      console.log("AI response:", result);
 
-      if (saveData.errors) {
-        throw new Error(saveData.errors[0].message);
+      if (saveResponse.ok) {
+        setGeneratedPost(result);
+      } else {
+        throw new Error(result.detail || "Failed to generate blog post.");
       }
-
-      setGeneratedPost(result)
     } catch (err) {
-      console.error("Error generating blog post:", err)
-      setError("Failed to generate blog post. Please try again.")
+      console.error("Error generating blog post:", err);
+      setError("Failed to generate blog post. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleClose = () => {
     setPrompt("")
@@ -154,7 +129,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
             {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
-
+        
         {showSuccess ? (
           <div className="text-center space-y-4">
             <p className="text-lg font-semibold">🎉 Blog Post Published Successfully!</p>
@@ -221,4 +196,4 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
       </DialogContent>
     </Dialog>
   )
-}
+} 
