@@ -192,14 +192,13 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="prompt">What should the blog post be about?</Label>
+              <Label htmlFor="prompt">Enter your prompt:</Label>
               <Textarea
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g. A blog post about the benefits of organic skincare products..."
-                required
-                rows={5}
+                placeholder="Write your prompt here..."
+                rows={4}
               />
               <p className="text-sm text-muted-foreground">
                 Minimum 20 characters required

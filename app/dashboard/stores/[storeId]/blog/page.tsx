@@ -26,7 +26,6 @@
        variables: { storeId },
        fetchPolicy: "cache-and-network",
      });
-     console.log("BlogPage - Query Variables:", { storeId, loading, error }); // Log query variables
 
      const blogPosts: BlogPostType[] = data?.blogPosts || [];
 
@@ -62,15 +61,8 @@
        await refetch(variables); // Ensure this matches the expected type
      };
 
-     if (loading) {
-       console.log("BlogPage - Loading blog posts...");
-       return <LoadingSpinner />;
-     }
-     if (error) {
-       console.error("BlogPage - Error loading blog posts:", error.message);
-       return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>;
-     }
-     console.log("BlogPage - Fetched Data:", data); // Log the fetched data
+     if (loading) return <LoadingSpinner />;
+     if (error) return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>;
 
      return (
        <div className="p-6">
@@ -79,6 +71,7 @@
            <Button onClick={() => {
              handleGenerateBlog(prompt)
                .then(blogPost => {
+                 console.log("Blog post generated successfully:", blogPost);
                  setBlogPost(blogPost);
                  setShowBlogModal(true);
                })
