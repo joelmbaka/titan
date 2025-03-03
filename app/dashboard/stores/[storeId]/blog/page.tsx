@@ -4,6 +4,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { BlogPostData, BlogPostModal } from "@/components/blog-post-modal"
 import { useParams } from "next/navigation"
+import client from '@/lib/apollo-client';
+import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries';
+
 
 export default function BlogPage() {
   const params = useParams()
@@ -14,20 +17,19 @@ export default function BlogPage() {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch(`https://titan2-o.onrender.com/blog-posts?store_id=${storeId}`)
-      if (!response.ok) {
-        throw new Error("Failed to fetch blog posts")
-      }
-      const data = await response.json()
-      setBlogPosts(data)
+      const { data } = await client.query({
+        query: GET_BLOG_POSTS_QUERY,
+        variables: { storeId },
+      });
+      setBlogPosts(data.blogPosts);
     } catch (error) {
-      console.error("Error fetching blog posts:", error)
+      console.error('Error fetching blog posts:', error);
     }
   }
 
   useEffect(() => {
-    fetchBlogPosts()
-  }, [storeId])
+    fetchBlogPosts();
+  }, [storeId]);
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -91,13 +93,21 @@ export default function BlogPage() {
       </div>
 
       <div>
-        {blogPosts.map((post) => (
-          <div key={post.id} className="mb-4">
-            <h2 className="text-xl font-semibold">{post.title}</h2>
-            <p>{post.content}</p>
-            <Button onClick={() => handlePublish(post)}>Publish</Button>
+        {blogPosts.length === 0 ? (
+          <p>No blog posts available.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogPosts.map((post) => (
+              <div key={post.id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-200">
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">{post.title}</h3>
+                  <p className="text-gray-600 text-sm mb-4">{post.content}</p>
+                  <Button onClick={() => handlePublish(post)}>Publish</Button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       <BlogPostModal
