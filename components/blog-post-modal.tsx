@@ -5,15 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { OperationVariables } from "@apollo/client"
 
 interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
+  onBlogPostAdded: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
 }
 
-interface BlogPostData {
+export interface BlogPostData {
   id: string
   title: string
   content: string
@@ -22,7 +24,9 @@ interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
+  console.log(`BlogPostModal opened: ${open}`);
+
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -31,6 +35,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
   const [showSuccess, setShowSuccess] = useState(false)
 
   const handleGenerate = async () => {
+    console.log(`Generating blog post with prompt: ${prompt}`);
     if (prompt.length < 20) {
       setError("Please provide at least 20 characters for better results")
       return
@@ -42,6 +47,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
 
     try {
       const result = await onGenerate(prompt)
+      console.log(`Blog post generated successfully:`, result);
       
       const saveResponse = await fetch('/api/graphql', {
         method: 'POST',
@@ -93,6 +99,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
   }
 
   const handleClose = () => {
+    console.log(`BlogPostModal closed`);
     setPrompt("")
     setGeneratedPost(null)
     onClose()
@@ -101,6 +108,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
   const handlePublish = async () => {
     if (!generatedPost) return;
 
+    console.log(`Publishing blog post:`, generatedPost);
     setIsPublishing(true);
     try {
       const response = await fetch('/api/graphql', {
@@ -132,6 +140,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
       });
 
       const data = await response.json();
+      
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }

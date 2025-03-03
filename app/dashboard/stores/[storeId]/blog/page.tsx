@@ -69,7 +69,8 @@
          <div className="flex justify-between items-center mb-6">
            <h1 className="text-2xl font-bold">Blog Posts</h1>
            <Button onClick={() => {
-             handleGenerateBlog(prompt)
+             const promptValue = blogPost ? blogPost.content : ''; // Ensure prompt is a string
+             handleGenerateBlog(promptValue)
                .then(blogPost => {
                  console.log("Blog post generated successfully:", blogPost);
                  setBlogPost(blogPost);
