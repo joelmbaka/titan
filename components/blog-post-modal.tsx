@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,11 +11,10 @@ interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
-  onBlogPostAdded: () => void
   storeId: string
 }
 
-export interface BlogPostData {
+interface BlogPostData {
   id: string
   title: string
   content: string
@@ -23,7 +23,7 @@ export interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -42,24 +42,49 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
     setGeneratedPost(null)
 
     try {
+      const result = await onGenerate(prompt)
+
       const saveResponse = await fetch('https://titan2-o.onrender.com/generate-blog-post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: prompt,
-        }),
-      })
+          query: `
+            mutation CreateBlogPost($input: CreateBlogPostInput!) {
+              createBlogPost(input: $input) {
+                id
+                title
+                content
+                metaDescription
+                tags
+                category
+                status
+                createdAt
+              }
+            }
+          `,
+          variables: {
+            input: {
+              title: result.title,
+              content: result.content,
+              metaDescription: result.meta_description,
+              tags: result.tags,
+              category: result.category,
+              storeId: storeId,
+              status: 'DRAFT'
+            }
+          }
+        })
+      });
 
-      const result = await saveResponse.json()
+      const saveData = await saveResponse.json();
 
-      if (saveResponse.ok) {
-        setGeneratedPost(result)
-        onBlogPostAdded()
-      } else {
-        throw new Error(result.detail || "Failed to generate blog post.")
+      if (saveData.errors) {
+        throw new Error(saveData.errors[0].message);
       }
+
+      setGeneratedPost(result)
     } catch (err) {
       console.error("Error generating blog post:", err)
       setError("Failed to generate blog post. Please try again.")
@@ -113,7 +138,6 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       }
 
       setShowSuccess(true);
-      onBlogPostAdded()
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");
@@ -130,7 +154,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
             {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
-        
+
         {showSuccess ? (
           <div className="text-center space-y-4">
             <p className="text-lg font-semibold">🎉 Blog Post Published Successfully!</p>
@@ -197,4 +221,4 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       </DialogContent>
     </Dialog>
   )
-} 
+}
