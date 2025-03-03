@@ -1,9 +1,8 @@
 // app/store/[subdomain]/blog/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
-import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
+import React, { useEffect, useState } from 'react';
+import { getStoreBySubdomain, getBlogPostsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -15,20 +14,25 @@ const StoreBlogPage = ({ params }: PageProps) => {
   const [blogPosts, setBlogPosts] = useState([]);
   const [store, setStore] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBlogPosts = async () => {
+      console.log('Fetching blog posts...');
       try {
         const { subdomain } = await params;
+        console.log('Subdomain:', subdomain);
         const fetchedStore = await getStoreBySubdomain(subdomain);
 
         if (!fetchedStore) {
+          console.warn('Store not found for subdomain:', subdomain);
           notFound(); // Handle store not found
           return;
         }
 
+        console.log('Fetched Store:', fetchedStore);
         setStore(fetchedStore);
         const fetchedBlogPosts = await getBlogPostsByStoreId(fetchedStore.id);
+        console.log('Fetched Blog Posts:', fetchedBlogPosts);
         setBlogPosts(fetchedBlogPosts);
       } catch (error) {
         console.error('Error fetching blog posts:', error);
@@ -37,14 +41,16 @@ const StoreBlogPage = ({ params }: PageProps) => {
       }
     };
 
-    fetchData();
+    fetchBlogPosts();
   }, [params]);
 
   if (loading) {
+    console.log('Loading blog posts...');
     return <div>Loading...</div>; // Show loading state
   }
 
   if (!blogPosts || blogPosts.length === 0) {
+    console.log('No blog posts available.');
     return <div>No blog posts available.</div>;
   }
 
