@@ -174,12 +174,15 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto" aria-describedby="dialog-description">
         <DialogHeader>
           <DialogTitle>
             {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
+        <p id="dialog-description" className="text-sm text-gray-500">
+          {showSuccess ? "Your blog post has been successfully published!" : "Enter your prompt below to generate a blog post."}
+        </p>
         
         {showSuccess ? (
           <div className="text-center space-y-4">
