@@ -55,8 +55,8 @@ export default function BlogPage() {
     }
   }
 
-  const handleBlogPostAdded = async (variables?: Partial<OperationVariables>): Promise<void> => {
-    await refetch(variables); // Refetch the blog posts after a new post is added
+  const handleBlogPostAdded = async () => {
+    await refetch(); // This should refetch the blog posts
   };
 
   if (loading) return <LoadingSpinner />

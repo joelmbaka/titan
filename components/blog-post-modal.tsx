@@ -101,9 +101,10 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   }
 
   const handlePublish = async () => {
-    if (!generatedPost) return;
+    if (!generatedPost || isPublishing) return;
 
     setIsPublishing(true);
+
     try {
       const response = await fetch('/api/graphql', {
         method: 'POST',
@@ -136,6 +137,11 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       const data = await response.json();
       if (data.errors) {
         throw new Error(data.errors[0].message);
+      }
+
+      // Call onBlogPostAdded to refetch posts
+      if (onBlogPostAdded) {
+        await onBlogPostAdded(); // Ensure this function is correctly set to refetch posts
       }
 
       setShowSuccess(true);
