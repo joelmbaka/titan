@@ -148,6 +148,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       });
 
       const data = await response.json();
+      console.log(`API Response:`, data);
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
