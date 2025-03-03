@@ -30,6 +30,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }:
   const [generatedPost, setGeneratedPost] = useState<BlogPostData | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
 
   const handleGenerate = async () => {
     if (prompt.length < 20) {
@@ -106,6 +107,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }:
     try {
       await onPublish(generatedPost);
       setShowSuccess(true);
+      setIsPublished(true);
     } catch (error) {
       console.error('Error publishing blog post:', error);
       setError('Failed to publish blog post.');
@@ -153,9 +155,9 @@ export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }:
             <Button 
               onClick={handlePublish} 
               className="w-full"
-              disabled={isPublishing}
+              disabled={isPublishing || isPublished}
             >
-              {isPublishing ? "Publishing..." : "Publish"}
+              {isPublishing ? 'Publishing...' : isPublished ? 'Published' : 'Publish'}
             </Button>
           </div>
         ) : (
