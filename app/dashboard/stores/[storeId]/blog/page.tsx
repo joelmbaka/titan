@@ -43,6 +43,8 @@
        });
 
        if (!response.ok) {
+         const errorData = await response.json(); // Capture the error response
+         console.error("Error response from API:", errorData);
          throw new Error("Failed to generate blog post");
        }
 
