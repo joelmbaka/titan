@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { OperationVariables } from "@apollo/client"
 
 interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
+  onBlogPostAdded?: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
 }
 
@@ -22,7 +24,7 @@ interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")

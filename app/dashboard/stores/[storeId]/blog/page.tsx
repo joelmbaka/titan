@@ -9,6 +9,7 @@ import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries'
 import { BlogPostType } from "@/lib/types"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import Link from 'next/link'
+import { OperationVariables } from "@apollo/client"
 
 export default function BlogPage() {
   const params = useParams()
@@ -22,9 +23,6 @@ export default function BlogPage() {
   })
 
   const blogPosts: BlogPostType[] = data?.blogPosts || []
-
-  if (loading) return <LoadingSpinner />
-  if (error) return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -50,13 +48,19 @@ export default function BlogPage() {
 
       const data = await response.json()
       console.log("Successfully generated blog post:", data)
-      refetch()
       return data
     } catch (err) {
       console.error("Error in handleGenerateBlog:", err)
       throw err
     }
   }
+
+  const handleBlogPostAdded = async (variables?: Partial<OperationVariables>): Promise<void> => {
+    await refetch(variables); // Refetch the blog posts after a new post is added
+  };
+
+  if (loading) return <LoadingSpinner />
+  if (error) return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>
 
   return (
     <div className="p-6">
@@ -83,6 +87,7 @@ export default function BlogPage() {
         open={showBlogModal}
         onClose={() => setShowBlogModal(false)}
         onGenerate={handleGenerateBlog}
+        onBlogPostAdded={handleBlogPostAdded}
         storeId={storeId}
       />
     </div>
