@@ -134,20 +134,20 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               tags: generatedPost.tags,
               category: generatedPost.category,
               storeId: storeId,
-              status: 'PUBLISHED'
+              status: 'PUBLISHED',
             }
           }
         })
       });
 
       const data = await response.json();
-      
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
 
       setShowSuccess(true);
-      onBlogPostAdded();
+      setPrompt("");
+      setGeneratedPost(null);
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");
