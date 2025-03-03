@@ -423,17 +423,14 @@ export const resolvers = {
       { storeId }: { storeId: string },
       context: { session?: Session }
     ) => {
-      // Remove authentication check to make this endpoint public
-      // Store blog pages need to be accessible without authentication
-
+      console.log(`Resolvers - Fetching blog posts for store: ${storeId}`);
       try {
-        console.log(`Fetching blog posts for store: ${storeId}`);
         const result = await executeQuery(
           `MATCH (b:BlogPost {storeId: $storeId})
            RETURN b ORDER BY b.createdAt DESC`,
           { storeId }
         );
-
+        console.log("Resolvers - Blog posts fetched:", result.records);
         return result.records.map((record: any) => {
           const blogPost = record.get('b').properties;
           return {
@@ -443,7 +440,7 @@ export const resolvers = {
           };
         });
       } catch (error: unknown) {
-        console.error('Error fetching blog posts:', error);
+        console.error("Resolvers - Error fetching blog posts:", error);
         throw new Error(`Failed to fetch blog posts: ${error instanceof Error ? error.message : String(error)}`);
       }
     },

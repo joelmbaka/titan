@@ -13,7 +13,7 @@ interface BlogPostModalProps {
   storeId: string
 }
 
-export interface BlogPostData {
+interface BlogPostData {
   id: string
   title: string
   content: string
@@ -31,7 +31,6 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
   const [showSuccess, setShowSuccess] = useState(false)
 
   const handleGenerate = async () => {
-    console.log('Generating blog post with prompt:', prompt);
     if (prompt.length < 20) {
       setError("Please provide at least 20 characters for better results")
       return
@@ -43,7 +42,6 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
 
     try {
       const result = await onGenerate(prompt)
-      console.log('Successfully generated blog post:', result);
       
       const saveResponse = await fetch('/api/graphql', {
         method: 'POST',

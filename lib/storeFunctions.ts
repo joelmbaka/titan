@@ -341,7 +341,6 @@ export async function getBlogPostsByStoreId(storeId: string) {
       query: GET_BLOG_POSTS_BY_STORE_ID,
       variables: { storeId: storeId.toString() },
     });
-
     console.log('getBlogPostsByStoreId - Blog posts received:', data.blogPosts);
     return data.blogPosts;
   } catch (error) {
