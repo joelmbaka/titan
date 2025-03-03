@@ -1,62 +1,98 @@
-"use client"
+// app/store/[subdomain]/blog/page.tsx
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { BlogPostModal } from "@/components/blog-post-modal"
-import { useParams } from "next/navigation"
+import React, { useEffect, useState } from 'react';
+import { getStoreBySubdomain, getBlogPostsByStoreId } from '@/lib/storeFunctions';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
-export default function BlogPage() {
-  const params = useParams()
-  if (!params) throw new Error("Params is null")
-  const storeId = params.storeId as string
-  const [showBlogModal, setShowBlogModal] = useState(false)
+interface PageProps {
+  params: Promise<{ subdomain: string }>; 
+}
 
-  const handleGenerateBlog = async (prompt: string) => {
-    try {
-      console.log("Sending blog generation request with prompt:", prompt)
-      const response = await fetch("https://titan2-o.onrender.com/generate-blog-post", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          prompt,
-          store_id: storeId
-        }),
-      })
+const StoreBlogPage = ({ params }: PageProps) => {
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [store, setStore] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      console.log('Fetching blog posts...');
+      try {
+        const { subdomain } = await params;
+        console.log('Subdomain:', subdomain);
+        const fetchedStore = await getStoreBySubdomain(subdomain);
 
-      console.log("Received response status:", response.status)
-      
-      if (!response.ok) {
-        const errorResponse = await response.json()
-        console.error("Error response from server:", errorResponse)
-        throw new Error(`Failed to generate blog post: ${response.statusText}`)
+        if (!fetchedStore) {
+          console.warn('Store not found for subdomain:', subdomain);
+          notFound(); // Handle store not found
+          return;
+        }
+
+        console.log('Fetched Store:', fetchedStore);
+        setStore(fetchedStore);
+        const fetchedBlogPosts = await getBlogPostsByStoreId(fetchedStore.id);
+        console.log('Fetched Blog Posts:', fetchedBlogPosts);
+        setBlogPosts(fetchedBlogPosts);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json()
-      console.log("Successfully generated blog post:", data)
-      return data
-    } catch (err) {
-      console.error("Error in handleGenerateBlog:", err)
-      throw err
-    }
+    fetchBlogPosts();
+  }, [params]);
+
+  if (loading) {
+    console.log('Loading blog posts...');
+    return <div>Loading...</div>; // Show loading state
+  }
+
+  if (!blogPosts || blogPosts.length === 0) {
+    console.log('No blog posts available.');
+    return <div>No blog posts available.</div>;
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Blog Posts</h1>
-        <Button onClick={() => setShowBlogModal(true)}>
-          Create New Blog Post
-        </Button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Blog</h1>
+        <p className="text-gray-600">Latest news, guides, and insights</p>
       </div>
 
-      <BlogPostModal
-        open={showBlogModal}
-        onClose={() => setShowBlogModal(false)}
-        onGenerate={handleGenerateBlog}
-        storeId={storeId}
-      />
+      {/* Blog Posts Grid */}
+      {blogPosts.map((post) => (
+        <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+          <div className="p-6">
+            <div className="uppercase tracking-wide text-xs text-blue-600 font-semibold">
+              {post.category}
+            </div>
+            <Link 
+              href={`/store/${store?.subdomain}/blog/${post.id}`}
+              className="block mt-1 text-lg font-semibold text-gray-900 hover:text-blue-600"
+            >
+              {post.title}
+            </Link>
+            <p className="mt-2 text-gray-600 text-sm">
+              {post.metaDescription}
+            </p>
+            <div className="mt-4 flex items-center justify-between">
+              <Link 
+                href={`/store/${store?.subdomain}/blog/${post.id}`}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                Read more
+              </Link>
+              <span className="text-gray-500 text-xs">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
-  )
-} 
+  );
+};
+
+export default StoreBlogPage;
