@@ -1,9 +1,8 @@
 // app/store/[subdomain]/blog/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getStoreBySubdomain } from '@/lib/storeFunctions';
-import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
+import React, { useEffect, useState } from 'react';
+import { getStoreBySubdomain, getBlogPostsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
