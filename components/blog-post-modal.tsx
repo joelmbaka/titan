@@ -212,7 +212,10 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               ))}
             </div>
             <Button 
-              onClick={handlePublish} 
+              onClick={async () => {
+                console.log(`Publish button clicked`);
+                await handlePublish();
+              }}
               className="w-full"
               disabled={isPublishing}
             >
