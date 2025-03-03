@@ -11,7 +11,6 @@ import { gql } from "@apollo/client"
 import { ProductType } from "@/lib/types"
 import { AIProductModal } from "@/components/ai-product-modal"
 import { CheckCircle } from "lucide-react"
-import { SuccessModal } from "@/components/success-modal"
 
 interface AddProductModalProps {
   open: boolean
@@ -270,15 +269,6 @@ export function AddProductModal({
         onClose={() => setShowAIModal(false)}
         onGenerate={handleAIGenerate}
       />
-
-      {showSuccess && (
-        <SuccessModal 
-          onClose={() => {
-            setShowSuccess(false);
-            resetForm();
-          }} 
-        />
-      )}
     </>
   )
 } 
