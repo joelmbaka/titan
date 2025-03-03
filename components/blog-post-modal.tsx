@@ -40,6 +40,13 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       return;
     }
 
+    const payload = {
+      prompt,
+      store_id: storeId,
+      category: "Wellness"
+    };
+    console.log(`Sending payload to API:`, JSON.stringify(payload));
+
     console.log(`Generating blog post with prompt: ${prompt}`);
     setLoading(true);
     setError("");
