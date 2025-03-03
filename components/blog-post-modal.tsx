@@ -35,8 +35,8 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   const [showSuccess, setShowSuccess] = useState(false)
 
   const handleGenerate = async () => {
-    if (prompt.length < 200) {
-      setError("Please provide at least 200 characters for better results.");
+    if (prompt.length < 20) {
+      setError("Please provide at least 20 characters for better results.");
       return;
     }
 
@@ -146,9 +146,9 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       }
 
       setShowSuccess(true);
-      onBlogPostAdded();
       setPrompt("");
       setGeneratedPost(null);
+      onBlogPostAdded();
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");
@@ -222,7 +222,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
                 rows={4}
               />
               <p className="text-sm text-muted-foreground">
-                Minimum 200 characters required
+                Minimum 20 characters required
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
             <Button 
               onClick={handleGenerate} 
-              disabled={loading || prompt.length < 200}
+              disabled={loading || prompt.length < 20}
               className="w-full"
             >
               {loading ? "Generating..." : "Generate Blog Post"}
