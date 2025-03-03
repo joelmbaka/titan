@@ -146,6 +146,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       }
 
       setShowSuccess(true);
+      onBlogPostAdded();
       setPrompt("");
       setGeneratedPost(null);
     } catch (err) {
