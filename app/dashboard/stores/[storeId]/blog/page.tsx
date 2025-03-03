@@ -101,8 +101,7 @@ export default function BlogPage() {
               <div key={post.id} className="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition duration-200">
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-1">{post.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{post.content}</p>
-                  <Button onClick={() => handlePublish(post)}>Publish</Button>
+                  <p className="text-gray-600 text-sm mb-4">{post.content.substring(0, 100)}...</p>
                 </div>
               </div>
             ))}
@@ -114,7 +113,10 @@ export default function BlogPage() {
         open={showBlogModal}
         onClose={() => setShowBlogModal(false)}
         onGenerate={handleGenerateBlog}
-        onPublish={handlePublish}
+        onPublish={async (newPost) => {
+          await handlePublish(newPost);
+          fetchBlogPosts();
+        }}
         storeId={storeId}
       />
     </div>
