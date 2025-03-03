@@ -97,6 +97,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   const handleClose = () => {
     setPrompt("")
     setGeneratedPost(null)
+    setShowSuccess(false)
     onClose()
   }
 
