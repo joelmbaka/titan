@@ -35,18 +35,18 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
   const [showSuccess, setShowSuccess] = useState(false)
 
   const handleGenerate = async () => {
-    console.log(`Generating blog post with prompt: ${prompt}`);
-    if (prompt.length < 20) {
-      setError("Please provide at least 20 characters for better results")
-      return
+    if (prompt.length < 200) {
+      setError("Please provide at least 200 characters for better results.");
+      return;
     }
 
-    setLoading(true)
-    setError("")
-    setGeneratedPost(null)
+    console.log(`Generating blog post with prompt: ${prompt}`);
+    setLoading(true);
+    setError("");
+    setGeneratedPost(null);
 
     try {
-      const result = await onGenerate(prompt)
+      const result = await onGenerate(prompt);
       console.log(`Blog post generated successfully:`, result);
       
       const saveResponse = await fetch('/api/graphql', {
@@ -221,7 +221,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
                 rows={4}
               />
               <p className="text-sm text-muted-foreground">
-                Minimum 20 characters required
+                Minimum 200 characters required
               </p>
             </div>
 
@@ -229,7 +229,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
             <Button 
               onClick={handleGenerate} 
-              disabled={loading || prompt.length < 20}
+              disabled={loading || prompt.length < 200}
               className="w-full"
             >
               {loading ? "Generating..." : "Generate Blog Post"}
