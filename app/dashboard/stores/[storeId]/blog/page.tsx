@@ -4,24 +4,12 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { BlogPostModal } from "@/components/blog-post-modal"
 import { useParams } from "next/navigation"
-import { useQuery } from "@apollo/client"
-import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries'
-import { BlogPostType } from "@/lib/types"
-import { LoadingSpinner } from "@/components/loading-spinner"
-import Link from 'next/link'
 
 export default function BlogPage() {
   const params = useParams()
   if (!params) throw new Error("Params is null")
   const storeId = params.storeId as string
   const [showBlogModal, setShowBlogModal] = useState(false)
-
-  const { loading, error, data, refetch } = useQuery(GET_BLOG_POSTS_QUERY, {
-    variables: { storeId },
-    fetchPolicy: "cache-and-network",
-  })
-
-  const blogPosts: BlogPostType[] = data?.blogPosts || []
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -54,14 +42,6 @@ export default function BlogPage() {
     }
   }
 
-  const handleBlogPostAdded = async () => {
-    await refetch(); // This should refetch the blog posts
-    
-  };
-
-  if (loading) return <LoadingSpinner />
-  if (error) return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -71,23 +51,10 @@ export default function BlogPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {blogPosts.map((post) => (
-          <div key={post.id} className="border p-4">
-            <h2 className="font-bold">{post.title}</h2>
-            <p>{post.metaDescription}</p>
-            <Link href={`/dashboard/stores/${storeId}/blog/${post.id}`} className="text-blue-600 hover:text-blue-800">
-              Read more
-            </Link>
-          </div>
-        ))}
-      </div>
-
       <BlogPostModal
         open={showBlogModal}
         onClose={() => setShowBlogModal(false)}
         onGenerate={handleGenerateBlog}
-        onBlogPostAdded={handleBlogPostAdded}
         storeId={storeId}
       />
     </div>
