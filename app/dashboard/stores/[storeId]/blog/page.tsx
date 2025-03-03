@@ -46,6 +46,7 @@ export default function BlogPage() {
 
       const data = await response.json()
       console.log("Successfully generated blog post:", data)
+      refetch()
       return data
     } catch (err) {
       console.error("Error in handleGenerateBlog:", err)
