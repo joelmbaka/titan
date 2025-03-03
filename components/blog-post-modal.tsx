@@ -29,7 +29,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
 
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const [generatedPost, setGeneratedPost] = useState<BlogPostData | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
