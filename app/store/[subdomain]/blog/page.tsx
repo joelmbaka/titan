@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getStoreBySubdomain } from '@/lib/storeFunctions.server';
+import { getStoreBySubdomain } from '@/lib/storeFunctions';
 import { getBlogPostsByStoreId } from '@/lib/storeFunctions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ const StoreBlogPage = ({ params }: PageProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchBlogPosts = async () => {
       try {
         const { subdomain } = await params;
         const fetchedStore = await getStoreBySubdomain(subdomain);
@@ -37,7 +37,7 @@ const StoreBlogPage = ({ params }: PageProps) => {
       }
     };
 
-    fetchData();
+    fetchBlogPosts();
   }, [params]);
 
   if (loading) {
