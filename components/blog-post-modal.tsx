@@ -10,10 +10,11 @@ interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
+  onBlogPostAdded: () => void
   storeId: string
 }
 
-interface BlogPostData {
+export interface BlogPostData {
   id: string
   title: string
   content: string
@@ -22,7 +23,7 @@ interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -84,6 +85,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
       }
 
       setGeneratedPost(result)
+      onBlogPostAdded()
     } catch (err) {
       console.error("Error generating blog post:", err)
       setError("Failed to generate blog post. Please try again.")
@@ -137,6 +139,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
       }
 
       setShowSuccess(true);
+      onBlogPostAdded()
     } catch (err) {
       console.error("Error publishing article:", err);
       setError("Failed to publish article. Please try again.");

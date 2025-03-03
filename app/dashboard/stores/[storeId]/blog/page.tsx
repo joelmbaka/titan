@@ -4,7 +4,7 @@
    import { Button } from "@/components/ui/button";
    import { Plus } from "lucide-react";
    import { useState } from "react";
-   import { AddProductModal } from "@/components/add-product-modal"; // Ensure this is the correct modal
+   import { BlogPostModal } from "@/components/blog-post-modal"; // Ensure this is the correct modal
    import { useParams } from "next/navigation";
    import { BlogPostType } from "@/lib/types"; // Ensure this type is defined correctly
    import { useQuery } from "@apollo/client";
@@ -12,6 +12,7 @@
    import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
    import { LoadingSpinner } from "@/components/loading-spinner";
    import Link from 'next/link';
+   import { BlogPostData } from '@/components/blog-post-modal';
 
    export default function BlogPage() {
      const [showBlogModal, setShowBlogModal] = useState(false);
@@ -25,6 +26,13 @@
      });
 
      const blogPosts: BlogPostType[] = data?.blogPosts || [];
+
+     const handleGenerateBlog = async (prompt: string): Promise<BlogPostData> => {
+       // Logic to generate a blog post using the provided prompt
+       // This could involve calling an API or some other function
+       // Example return statement (replace with actual logic):
+       return { id: '1', title: 'Sample Title', content: 'Sample Content', meta_description: 'Sample Description', tags: [], category: 'General' };
+     };
 
      if (loading) return <LoadingSpinner />;
      if (error) return <div className="p-6 text-red-500">Error loading blog posts: {error.message}</div>;
@@ -57,10 +65,11 @@
            ))}
          </div>
 
-         <AddProductModal
+         <BlogPostModal
            open={showBlogModal}
            onClose={() => setShowBlogModal(false)}
-           onProductAdded={refetch} // Ensure this prop is correct
+           onGenerate={handleGenerateBlog}
+           onBlogPostAdded={refetch} // Ensure this prop is correct
            storeId={storeId}
          />
        </div>
