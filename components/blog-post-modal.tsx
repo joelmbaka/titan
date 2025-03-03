@@ -10,10 +10,11 @@ interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
+  onPublish: (blogPost: BlogPostData) => Promise<void>
   storeId: string
 }
 
-interface BlogPostData {
+export interface BlogPostData {
   id: string
   title: string
   content: string
@@ -22,7 +23,7 @@ interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -99,47 +100,15 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
   }
 
   const handlePublish = async () => {
-    if (!generatedPost) return;
-
     setIsPublishing(true);
+    setError("");
+
     try {
-      const response = await fetch('/api/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation CreateBlogPost($input: CreateBlogPostInput!) {
-              createBlogPost(input: $input) {
-                id
-                status
-              }
-            }
-          `,
-          variables: {
-            input: {
-              title: generatedPost.title,
-              content: generatedPost.content,
-              metaDescription: generatedPost.meta_description,
-              tags: generatedPost.tags,
-              category: generatedPost.category,
-              storeId: storeId,
-              status: 'PUBLISHED'
-            }
-          }
-        })
-      });
-
-      const data = await response.json();
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
+      await onPublish(generatedPost);
       setShowSuccess(true);
-    } catch (err) {
-      console.error("Error publishing article:", err);
-      setError("Failed to publish article. Please try again.");
+    } catch (error) {
+      console.error('Error publishing blog post:', error);
+      setError('Failed to publish blog post.');
     } finally {
       setIsPublishing(false);
     }
@@ -186,7 +155,7 @@ export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostMo
               className="w-full"
               disabled={isPublishing}
             >
-              {isPublishing ? "Publishing..." : "Publish Article"}
+              {isPublishing ? "Publishing..." : "Publish"}
             </Button>
           </div>
         ) : (
