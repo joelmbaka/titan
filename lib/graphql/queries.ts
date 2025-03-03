@@ -56,3 +56,19 @@ export const GET_BLOG_POSTS_QUERY = gql`
     }
   }
 `;
+
+export const GET_BLOG_POST_QUERY = gql`
+  query BlogPost($id: ID!) {
+    blogPost(id: $id) {
+      id
+      title
+      content
+      metaDescription
+      tags
+      category
+      status
+      createdAt
+      updatedAt
+    }
+  }
+`;

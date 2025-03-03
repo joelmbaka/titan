@@ -7,6 +7,7 @@ import { useParams } from "next/navigation"
 import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries';
 import { useQuery } from '@apollo/client';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import Link from "next/link"
 
 export default function BlogPage() {
   const params = useParams()
@@ -74,8 +75,10 @@ export default function BlogPage() {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {blogPosts.map((post) => (
           <div key={post.id} className='border p-4 rounded-lg'>
-            <h2 className='text-xl font-semibold'>{post.title}</h2>
-            <p className='text-gray-700'>{post.content}</p>
+            <h2 className='text-xl font-semibold'>
+              <Link href={`/blog/${post.id}`}>{post.title}</Link>
+            </h2>
+            <p className='text-gray-700'>{post.content.substring(0, 100)}...</p>
           </div>
         ))}
       </div>
