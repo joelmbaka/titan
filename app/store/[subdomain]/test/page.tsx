@@ -1,4 +1,4 @@
-import { getStoreBySubdomain } from "@/lib/storeFunctions.server";
+import { getStoreBySubdomain } from "@/lib/storeFunctions";
 import { headers } from "next/headers";
 
 export default async function TestPage({ 
@@ -9,7 +9,7 @@ export default async function TestPage({
   console.log('TestPage - Rendering test page for subdomain:', params.subdomain);
   
   const store = await getStoreBySubdomain(params.subdomain);
-  const headersList = headers();
+  const headersList = await headers();
   
   // Get all headers for debugging
   const allHeaders: Record<string, string> = {};
