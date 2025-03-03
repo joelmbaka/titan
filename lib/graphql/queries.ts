@@ -40,3 +40,19 @@ export const GET_PRODUCTS_QUERY = gql`
     }
   }
 `; 
+
+export const GET_BLOG_POSTS_QUERY = gql`
+  query BlogPosts($storeId: ID!) {
+    blogPosts(storeId: $storeId) {
+      id
+      title
+      content
+      metaDescription
+      tags
+      category
+      status
+      createdAt
+      updatedAt
+    }
+  }
+`;

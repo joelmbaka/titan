@@ -169,3 +169,16 @@ export interface Cart {
   subdomain: string;
   total: number;
 }
+
+export interface BlogPostType {
+  id: string;
+  title: string;
+  content: string;
+  metaDescription: string;
+  tags: string[];
+  category: string;
+  storeId: string;
+  status: string; // Adjust based on your status enum
+  createdAt: string;
+  updatedAt: string;
+}
