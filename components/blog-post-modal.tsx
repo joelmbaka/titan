@@ -10,11 +10,10 @@ interface BlogPostModalProps {
   open: boolean
   onClose: () => void
   onGenerate: (prompt: string) => Promise<BlogPostData>
-  onPublish: (blogPost: BlogPostData) => Promise<void>
   storeId: string
 }
 
-export interface BlogPostData {
+interface BlogPostData {
   id: string
   title: string
   content: string
@@ -23,14 +22,13 @@ export interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, storeId }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [generatedPost, setGeneratedPost] = useState<BlogPostData | null>(null)
   const [isPublishing, setIsPublishing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [isPublished, setIsPublished] = useState(false)
 
   const handleGenerate = async () => {
     if (prompt.length < 20) {
@@ -101,16 +99,47 @@ export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }:
   }
 
   const handlePublish = async () => {
-    setIsPublishing(true);
-    setError("");
+    if (!generatedPost) return;
 
+    setIsPublishing(true);
     try {
-      await onPublish(generatedPost);
+      const response = await fetch('/api/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            mutation CreateBlogPost($input: CreateBlogPostInput!) {
+              createBlogPost(input: $input) {
+                id
+                status
+              }
+            }
+          `,
+          variables: {
+            input: {
+              title: generatedPost.title,
+              content: generatedPost.content,
+              metaDescription: generatedPost.meta_description,
+              tags: generatedPost.tags,
+              category: generatedPost.category,
+              storeId: storeId,
+              status: 'PUBLISHED'
+            }
+          }
+        })
+      });
+
+      const data = await response.json();
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+
       setShowSuccess(true);
-      setIsPublished(true);
-    } catch (error) {
-      console.error('Error publishing blog post:', error);
-      setError('Failed to publish blog post.');
+    } catch (err) {
+      console.error("Error publishing article:", err);
+      setError("Failed to publish article. Please try again.");
     } finally {
       setIsPublishing(false);
     }
@@ -155,9 +184,9 @@ export function BlogPostModal({ open, onClose, onGenerate, onPublish, storeId }:
             <Button 
               onClick={handlePublish} 
               className="w-full"
-              disabled={isPublishing || isPublished}
+              disabled={isPublishing}
             >
-              {isPublishing ? 'Publishing...' : isPublished ? 'Published' : 'Publish'}
+              {isPublishing ? "Publishing..." : "Publish Article"}
             </Button>
           </div>
         ) : (
