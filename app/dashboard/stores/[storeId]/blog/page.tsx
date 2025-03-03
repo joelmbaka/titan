@@ -13,9 +13,11 @@
    import { LoadingSpinner } from "@/components/loading-spinner";
    import Link from 'next/link';
    import { BlogPostData } from '@/components/blog-post-modal';
+   import { OperationVariables } from "@apollo/client";
 
    export default function BlogPage() {
      const [showBlogModal, setShowBlogModal] = useState(false);
+     const [blogPost, setBlogPost] = useState<BlogPostData | null>(null);
      const params = useParams();
      if (!params) throw new Error("Params is null");
      const storeId = params.storeId as string;
@@ -28,10 +30,35 @@
      const blogPosts: BlogPostType[] = data?.blogPosts || [];
 
      const handleGenerateBlog = async (prompt: string): Promise<BlogPostData> => {
-       // Logic to generate a blog post using the provided prompt
-       // This could involve calling an API or some other function
-       // Example return statement (replace with actual logic):
-       return { id: '1', title: 'Sample Title', content: 'Sample Content', meta_description: 'Sample Description', tags: [], category: 'General' };
+       const response = await fetch('https://titan2-o.onrender.com/generate-blog-post', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+           prompt,
+           storeId,
+           category: "Wellness"
+         }),
+       });
+
+       if (!response.ok) {
+         throw new Error("Failed to generate blog post");
+       }
+
+       const data = await response.json();
+       return {
+         id: data.id || '1',
+         title: data.title,
+         content: data.content,
+         meta_description: data.meta_description,
+         tags: data.tags,
+         category: data.category,
+       };
+     };
+
+     const handleBlogPostAdded = async (variables?: Partial<OperationVariables>): Promise<void> => {
+       await refetch(variables); // Ensure this matches the expected type
      };
 
      if (loading) return <LoadingSpinner />;
@@ -41,8 +68,17 @@
        <div className="p-6">
          <div className="flex justify-between items-center mb-6">
            <h1 className="text-2xl font-bold">Blog Posts</h1>
-           <Button onClick={() => setShowBlogModal(true)}>
-             <Plus className="mr-2 h-4 w-4" /> Add Blog Post
+           <Button onClick={() => {
+             handleGenerateBlog(prompt)
+               .then(blogPost => {
+                 setBlogPost(blogPost);
+                 setShowBlogModal(true);
+               })
+               .catch(err => {
+                 console.error("Error generating blog post:", typeof err === 'string' ? err : (err.message || 'Unknown error'));
+               });
+           }}>
+             <Plus className="mr-2 h-4 w-4" /> Generate Blog Post
            </Button>
          </div>
 
@@ -69,8 +105,9 @@
            open={showBlogModal}
            onClose={() => setShowBlogModal(false)}
            onGenerate={handleGenerateBlog}
-           onBlogPostAdded={refetch} // Ensure this prop is correct
+           onBlogPostAdded={handleBlogPostAdded}
            storeId={storeId}
+           blogPost={blogPost}
          />
        </div>
      );

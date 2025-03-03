@@ -13,6 +13,7 @@ interface BlogPostModalProps {
   onGenerate: (prompt: string) => Promise<BlogPostData>
   onBlogPostAdded: (variables?: Partial<OperationVariables>) => Promise<void>
   storeId: string
+  blogPost?: BlogPostData
 }
 
 export interface BlogPostData {
@@ -24,7 +25,7 @@ export interface BlogPostData {
   category: string
 }
 
-export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId }: BlogPostModalProps) {
+export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, storeId, blogPost }: BlogPostModalProps) {
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -126,7 +127,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
       <DialogContent className="max-w-4xl h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {showSuccess ? "Blog Post Published!" : "Generate Blog Post with AI"}
+            {showSuccess ? "Blog Post Published!" : blogPost ? blogPost.title : "Generate Blog Post with AI"}
           </DialogTitle>
         </DialogHeader>
         
@@ -140,23 +141,16 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
               Close
             </Button>
           </div>
-        ) : generatedPost ? (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">{generatedPost.title}</h2>
-            <div className="prose max-w-full">
-              {generatedPost.content.split('\n').map((paragraph, index) => (
-                <p key={index} className="mb-4">
-                  {paragraph}
-                </p>
+        ) : blogPost ? (
+          <div>
+            <div dangerouslySetInnerHTML={{ __html: blogPost.content }} />
+            <p>{blogPost.meta_description}</p>
+            <div>
+              {blogPost.tags.map(tag => (
+                <span key={tag}>{tag}</span>
               ))}
             </div>
-            <div className="flex gap-2">
-              {generatedPost.tags.map(tag => (
-                <span key={tag} className="bg-gray-100 px-2 py-1 rounded text-sm">
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <p>Category: {blogPost.category}</p>
             <Button 
               onClick={handlePublish} 
               className="w-full"
@@ -173,7 +167,7 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
                 id="prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g. A blog post about the benefits of organic skincare products..."
+                placeholder="Enter your blog post prompt here..."
                 required
                 rows={5}
               />
