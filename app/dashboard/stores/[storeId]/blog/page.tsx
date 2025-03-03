@@ -69,16 +69,7 @@
          <div className="flex justify-between items-center mb-6">
            <h1 className="text-2xl font-bold">Blog Posts</h1>
            <Button onClick={() => {
-             const promptValue = blogPost ? blogPost.content : ''; // Ensure prompt is a string
-             handleGenerateBlog(promptValue)
-               .then(blogPost => {
-                 console.log("Blog post generated successfully:", blogPost);
-                 setBlogPost(blogPost);
-                 setShowBlogModal(true);
-               })
-               .catch(err => {
-                 console.error("Error generating blog post:", typeof err === 'string' ? err : (err.message || 'Unknown error'));
-               });
+             setShowBlogModal(true); // Open the modal without making an API request
            }}>
              <Plus className="mr-2 h-4 w-4" /> Generate Blog Post
            </Button>
@@ -109,7 +100,6 @@
            onGenerate={handleGenerateBlog}
            onBlogPostAdded={handleBlogPostAdded}
            storeId={storeId}
-           blogPost={blogPost}
          />
        </div>
      );
