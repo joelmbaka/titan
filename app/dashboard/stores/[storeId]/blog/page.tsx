@@ -4,12 +4,22 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { BlogPostModal } from "@/components/blog-post-modal"
 import { useParams } from "next/navigation"
+import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries';
+import { useQuery } from '@apollo/client';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 export default function BlogPage() {
   const params = useParams()
   if (!params) throw new Error("Params is null")
   const storeId = params.storeId as string
   const [showBlogModal, setShowBlogModal] = useState(false)
+
+  const { loading, error, data, refetch } = useQuery(GET_BLOG_POSTS_QUERY, {
+    variables: { storeId },
+    fetchPolicy: 'cache-and-network'
+  });
+
+  const blogPosts = data?.blogPosts || [];
 
   const handleGenerateBlog = async (prompt: string) => {
     try {
@@ -42,6 +52,9 @@ export default function BlogPage() {
     }
   }
 
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div className='p-6 text-red-500'>Error loading blog posts: {error.message}</div>;
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -57,6 +70,15 @@ export default function BlogPage() {
         onGenerate={handleGenerateBlog}
         storeId={storeId}
       />
+
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+        {blogPosts.map((post) => (
+          <div key={post.id} className='border p-4 rounded-lg'>
+            <h2 className='text-xl font-semibold'>{post.title}</h2>
+            <p className='text-gray-700'>{post.content}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 } 
