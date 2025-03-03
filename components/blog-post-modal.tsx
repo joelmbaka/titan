@@ -42,50 +42,24 @@ export function BlogPostModal({ open, onClose, onGenerate, onBlogPostAdded, stor
     setGeneratedPost(null)
 
     try {
-      const result = await onGenerate(prompt)
-      
-      const saveResponse = await fetch('/api/graphql', {
+      const saveResponse = await fetch('https://titan2-o.onrender.com/generate-blog-post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `
-            mutation CreateBlogPost($input: CreateBlogPostInput!) {
-              createBlogPost(input: $input) {
-                id
-                title
-                content
-                metaDescription
-                tags
-                category
-                status
-                createdAt
-              }
-            }
-          `,
-          variables: {
-            input: {
-              title: result.title,
-              content: result.content,
-              metaDescription: result.meta_description,
-              tags: result.tags,
-              category: result.category,
-              storeId: storeId,
-              status: 'DRAFT'
-            }
-          }
-        })
-      });
+          prompt: prompt,
+        }),
+      })
 
-      const saveData = await saveResponse.json();
-      
-      if (saveData.errors) {
-        throw new Error(saveData.errors[0].message);
+      const result = await saveResponse.json()
+
+      if (saveResponse.ok) {
+        setGeneratedPost(result)
+        onBlogPostAdded()
+      } else {
+        throw new Error(result.detail || "Failed to generate blog post.")
       }
-
-      setGeneratedPost(result)
-      onBlogPostAdded()
     } catch (err) {
       console.error("Error generating blog post:", err)
       setError("Failed to generate blog post. Please try again.")
