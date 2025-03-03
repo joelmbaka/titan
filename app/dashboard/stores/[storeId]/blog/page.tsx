@@ -9,7 +9,6 @@ import { GET_BLOG_POSTS_QUERY } from '@/lib/graphql/queries'
 import { BlogPostType } from "@/lib/types"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import Link from 'next/link'
-import { OperationVariables } from "@apollo/client"
 
 export default function BlogPage() {
   const params = useParams()
@@ -57,6 +56,7 @@ export default function BlogPage() {
 
   const handleBlogPostAdded = async () => {
     await refetch(); // This should refetch the blog posts
+    
   };
 
   if (loading) return <LoadingSpinner />
