@@ -179,9 +179,6 @@ export async function middleware(request: NextRequest) {
         '/error',
         '/api/graphql', // Allow GraphQL API to handle its own auth
         '/api/check-subdomain-store', // Allow checking store existence
-        '/api/create-test-store', // Allow creating test stores
-        '/api/debug-request', // Allow debug endpoint
-        '/api/subdomain-test', // Allow subdomain test endpoint
         '/store-not-found', // Allow access to the store not found page
       ].some(path => request.nextUrl.pathname.startsWith(path));
 
