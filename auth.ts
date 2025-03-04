@@ -29,21 +29,18 @@ export const {
     }),
   ],
   callbacks: {
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account }) {
       if (account) {
         console.log(`User signed in with ${account.provider}`);
         token.accessToken = account.access_token;
-        token.id = token.sub;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.sub as string;
+      if (token) {
+        console.log('Session created:', session);
         session.accessToken = token.accessToken as string;
-        session.user.accessToken = token.accessToken as string;
       }
-      console.log('Session created:', session);
       return session;
     },
   },
