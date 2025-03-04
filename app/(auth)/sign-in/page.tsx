@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
-import { signIn } from "@/auth";
+import { signIn } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function SignIn(props: any) {
+export default async function SignInPage(props: any) {
     const session = await auth();
     
     // Get the callback URL safely
@@ -30,21 +30,25 @@ export default async function SignIn(props: any) {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-            <h1 className="text-2xl font-bold">Sign In</h1>
-            <form
-                action={async () => {
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 gap-4">
+            <h1 className="text-4xl font-bold mb-6">Sign In</h1>
+            <div className="space-y-4">
+                <button onClick={() => signIn('google')} className="w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    Sign in with Google
+                </button>
+                <button onClick={() => signIn('twitter')} className="w-full py-2 px-4 bg-blue-400 text-white rounded hover:bg-blue-500 transition">
+                    Sign in with X
+                </button>
+                <form action={async () => {
                     "use server";
                     await signIn("github", { 
                         redirectTo: callbackUrl,
-                        // Request additional scopes if needed
-                        // These will be merged with those from auth.ts
                         scope: "user:email repo" 
                     });
-                }}
-            >
-                <Button type="submit">Sign In with GitHub</Button>
-            </form>
+                }}>
+                    <Button type="submit">Sign In with GitHub</Button>
+                </form>
+            </div>
         </div>
     );
 }
