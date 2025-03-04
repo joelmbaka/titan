@@ -150,14 +150,6 @@ export function getApolloClient() {
       // For status code 0 errors (CORS/network issues), try a direct fetch to test connectivity
       if ((networkError as { statusCode?: number }).statusCode === 0) {
         console.log('Detected status code 0 error, testing direct fetch to API');
-        fetch('/api/debug-graphql')
-          .then(response => response.json())
-          .then(data => {
-            console.log('Debug API response:', data);
-          })
-          .catch(e => {
-            console.error('Error testing API connectivity:', e);
-          });
       }
     }
   });
