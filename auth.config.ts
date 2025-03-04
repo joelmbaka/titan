@@ -13,16 +13,15 @@ export const authConfig: NextAuthConfig = {
 
       // Allow sign-in page when not logged in
       if (isOnSignIn) {
-        if (isLoggedIn) return Response.redirect(new URL('/dashboard', nextUrl));
-        return true;
+        return true; // Allow access to sign-in page without requiring a session
       }
 
       // Protect dashboard routes
       if (isOnDashboard) {
-        return isLoggedIn;
+        return isLoggedIn; // Require login for dashboard
       }
 
-      return true;
+      return true; // Allow other routes
     },
   },
   providers: [], // Auth providers are configured in auth.ts

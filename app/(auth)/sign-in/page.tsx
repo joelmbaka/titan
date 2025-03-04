@@ -23,10 +23,14 @@ export default async function SignInPage(props: any) {
                 </button>
                 <form action={async () => {
                     "use server";
-                    await signIn("github", { 
-                        redirectTo: callbackUrl,
-                        scope: "user:email repo" 
-                    });
+                    try {
+                        await signIn("github", { 
+                            redirectTo: callbackUrl,
+                            scope: "user:email repo" 
+                        });
+                    } catch (error) {
+                        console.error('Error during sign-in:', error);
+                    }
                 }}>
                     <Button type="submit">Sign In with GitHub</Button>
                 </form>

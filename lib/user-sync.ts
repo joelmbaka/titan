@@ -175,4 +175,16 @@ export async function createTestStoreForUser(userId: string): Promise<boolean> {
     console.error("Error creating test store:", typedError?.message || String(error));
     return false;
   }
+}
+
+// This function can be called from different places to sync user data
+export async function syncUser(session: Session): Promise<boolean> {
+  if (!session?.user?.id) {
+    console.error("Cannot sync user - missing user ID in session");
+    return false;
+  }
+
+  // Logic to check if user exists, update or create user
+  const userExists = await ensureUserInNeo4j(session);
+  return userExists;
 } 
