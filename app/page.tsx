@@ -54,11 +54,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto text-center py-32">
         <h1 className="text-6xl font-bold mb-8">
-          Automate Your Entire Business with AI Agents
+          Get 1000x More Viewers with AI Agents
         </h1>
         <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto">
-          Deploy specialized AI team members to handle content creation, marketing, sales, 
-          and operations while you focus on growth.
+          Leverage AI to build and grow your audience effortlessly.
         </p>
 
         <div className="flex gap-6 justify-center mb-24">
