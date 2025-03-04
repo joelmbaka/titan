@@ -1,8 +1,14 @@
 import { useContext } from 'react';
 import { StoreContext } from '@/context/store-context';
+import { useSession } from 'next-auth/react';
 
 export default async function StoreDashboardPage() {
+  const { data: session } = useSession();
   const { currentStore } = useContext(StoreContext);
+
+  if (!session || !session.user) {
+    return <div>Please log in to access your store dashboard.</div>;
+  }
 
   if (!currentStore) {
     return <div>Store not found</div>;
