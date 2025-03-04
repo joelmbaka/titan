@@ -40,6 +40,8 @@ export const {
       if (token) {
         console.log('Session created:', session);
         session.accessToken = token.accessToken as string;
+      } else {
+        console.log('No token found, session not created.');
       }
       return session;
     },

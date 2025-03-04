@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Other authentication checks for protected routes
+  // Redirect to sign-in if trying to access protected route without auth
   if (!session) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
