@@ -31,6 +31,7 @@ export const {
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account) {
+        console.log(`User signed in with ${account.provider}`);
         token.accessToken = account.access_token;
         token.id = token.sub;
       }
@@ -42,6 +43,7 @@ export const {
         session.accessToken = token.accessToken as string;
         session.user.accessToken = token.accessToken as string;
       }
+      console.log('Session created:', session);
       return session;
     },
   },
